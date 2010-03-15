@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package loci.common;
+package loci.common.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -55,20 +55,22 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import loci.common.RandomAccessInputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.w3c.dom.Document;
-import org.xml.sax.Attributes;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * A utility class for working with XML.
  *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="https://skyking.microscopy.wisc.edu/trac/java/browser/trunk/components/common/src/loci/common/XMLTools.java">Trac</a>,
- * <a href="https://skyking.microscopy.wisc.edu/svn/java/trunk/components/common/src/loci/common/XMLTools.java">SVN</a></dd></dl>
+ * <dd><a href="https://skyking.microscopy.wisc.edu/trac/java/browser/trunk/components/common/src/loci/common/xml/XMLTools.java">Trac</a>,
+ * <a href="https://skyking.microscopy.wisc.edu/svn/java/trunk/components/common/src/loci/common/xml/XMLTools.java">SVN</a></dd></dl>
  *
  * @author Curtis Rueden ctrueden at wisc.edu
  * @author Chris Allan callan at blackcat.ca
@@ -78,17 +80,7 @@ public final class XMLTools {
 
   // -- Constants --
 
-  /** Factory for generating document builders. */
-  public static final DocumentBuilderFactory DOC_FACTORY =
-    DocumentBuilderFactory.newInstance();
-
-  /** Factory for generating SAX parsers. */
-  public static final SAXParserFactory SAX_FACTORY =
-    SAXParserFactory.newInstance();
-
-  /** Factory for generating XSLT transformers. */
-  public static final TransformerFactory TRANSFORM_FACTORY =
-    TransformerFactory.newInstance();
+  static final Logger LOGGER = LoggerFactory.getLogger(XMLTools.class);
 
   // -- Constructor --
 
@@ -101,9 +93,12 @@ public final class XMLTools {
     throws ParserConfigurationException, SAXException, IOException
   {
     InputStream is = new FileInputStream(file);
-    Document doc = parseDOM(is);
-    is.close();
-    return doc;
+    try {
+      Document doc = parseDOM(is);
+      return doc;
+    } finally {
+      is.close();
+    }
   }
 
   /** Parses a DOM from the given XML string. */
@@ -112,16 +107,21 @@ public final class XMLTools {
   {
     byte[] bytes = xml.getBytes();
     InputStream is = new ByteArrayInputStream(bytes);
-    Document doc = parseDOM(is);
-    is.close();
-    return doc;
+    try {
+      Document doc = parseDOM(is);
+      return doc;
+    } finally {
+      is.close();
+    }
   }
 
   /** Parses a DOM from the given XML input stream. */
   public static Document parseDOM(InputStream is)
     throws ParserConfigurationException, SAXException, IOException
   {
-    DocumentBuilder db = DOC_FACTORY.newDocumentBuilder();
+    // Java XML factories are not declared to be thread safe
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); 
+    DocumentBuilder db = factory.newDocumentBuilder();
     return db.parse(is);
   }
 
@@ -132,7 +132,9 @@ public final class XMLTools {
     Source source = new DOMSource(doc);
     StringWriter stringWriter = new StringWriter();
     Result result = new StreamResult(stringWriter);
-    Transformer transformer = TRANSFORM_FACTORY.newTransformer();
+    // Java XML factories are not declared to be thread safe
+    TransformerFactory factory = TransformerFactory.newInstance();
+    Transformer transformer = factory.newTransformer();
     transformer.transform(source, result);
     return stringWriter.getBuffer().toString();
   }
@@ -259,9 +261,24 @@ public final class XMLTools {
   public static void parseXML(RandomAccessInputStream stream,
     DefaultHandler handler) throws IOException
   {
+    byte[] b = new byte[(int) (stream.length() - stream.getFilePointer())];
+    stream.readFully(b);
+    parseXML(b, handler);
+    b = null;
+  }
+
+  /**
+   * Parses the XML string from the given byte array into
+   * a list of key/value pairs using the specified XML handler.
+   */
+  public static void parseXML(byte[] xml, DefaultHandler handler)
+    throws IOException
+  {
     try {
-      SAXParser parser = SAX_FACTORY.newSAXParser();
-      parser.parse(stream, handler);
+      // Java XML factories are not declared to be thread safe
+      SAXParserFactory factory = SAXParserFactory.newInstance(); 
+      SAXParser parser = factory.newSAXParser();
+      parser.parse(new ByteArrayInputStream(xml), handler);
     }
     catch (ParserConfigurationException exc) {
       IOException e = new IOException();
@@ -273,16 +290,6 @@ public final class XMLTools {
       e.initCause(exc);
       throw e;
     }
-  }
-
-  /**
-   * Parses the XML string from the given byte array into
-   * a list of key/value pairs using the specified XML handler.
-   */
-  public static void parseXML(byte[] xml, DefaultHandler handler)
-    throws IOException
-  {
-    parseXML(new RandomAccessInputStream(xml), handler);
   }
 
   // -- XSLT --
@@ -297,20 +304,30 @@ public final class XMLTools {
         xsltStream = new FileInputStream(resourcePath);
       }
       catch (IOException exc) {
-        LogTools.traceDebug(exc);
+        LOGGER.debug("Could not open file", exc);
         return null;
       }
     }
     else {
       xsltStream = sourceClass.getResourceAsStream(resourcePath);
     }
-    StreamSource xsltSource = new StreamSource(xsltStream);
-    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
     try {
+      StreamSource xsltSource = new StreamSource(xsltStream);
+      // Java XML factories are not declared to be thread safe
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
       return transformerFactory.newTemplates(xsltSource);
     }
     catch (TransformerConfigurationException exc) {
-      LogTools.traceDebug(exc);
+      LOGGER.debug("Could not construct template", exc);
+    }
+    finally {
+      try {
+        if (xsltStream != null) xsltStream.close();
+      }
+      catch (IOException e) {
+        LOGGER.debug("Could not close file", e);
+      }
     }
     return null;
   }
@@ -372,10 +389,12 @@ public final class XMLTools {
     Exception exception = null;
 
     // get path to schema from root element using SAX
-    LogTools.println("Parsing schema path");
+    LOGGER.info("Parsing schema path");
     ValidationSAXHandler saxHandler = new ValidationSAXHandler();
     try {
-      SAXParser saxParser = SAX_FACTORY.newSAXParser();
+      // Java XML factories are not declared to be thread safe
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser saxParser = factory.newSAXParser();
       InputStream is = new ByteArrayInputStream(xml.getBytes());
       saxParser.parse(is, saxHandler);
     }
@@ -383,21 +402,21 @@ public final class XMLTools {
     catch (SAXException exc) { exception = exc; }
     catch (IOException exc) { exception = exc; }
     if (exception != null) {
-      LogTools.println("Error parsing schema path from " + label + ":");
-      LogTools.trace(exception);
+      LOGGER.warn("Error parsing schema path from {}", label, exception);
       return false;
     }
     String schemaPath = saxHandler.getSchemaPath();
     if (schemaPath == null) {
-      LogTools.println("No schema path found. Validation cannot continue.");
+      LOGGER.error("No schema path found. Validation cannot continue.");
       return false;
     }
-    else LogTools.println(schemaPath);
+    else LOGGER.info(schemaPath);
 
-    LogTools.println("Validating " + label);
+    LOGGER.info("Validating {}", label);
 
     // look up a factory for the W3C XML Schema language
     String xmlSchemaPath = "http://www.w3.org/2001/XMLSchema";
+    // Java XML factories are not declared to be thread safe
     SchemaFactory factory = SchemaFactory.newInstance(xmlSchemaPath);
 
     // compile the schema
@@ -406,8 +425,7 @@ public final class XMLTools {
       schemaLocation = new URL(schemaPath);
     }
     catch (MalformedURLException exc) {
-      LogTools.println("Error accessing schema at " + schemaPath + ":");
-      LogTools.trace(exc);
+      LOGGER.info("Error accessing schema at {}", schemaPath, exc);
       return false;
     }
     Schema schema = null;
@@ -415,8 +433,7 @@ public final class XMLTools {
       schema = factory.newSchema(schemaLocation);
     }
     catch (SAXException exc) {
-      LogTools.println("Error parsing schema at " + schemaPath + ":");
-      LogTools.trace(exc);
+      LOGGER.info("Error parsing schema at {}", schemaPath, exc);
       return false;
     }
 
@@ -437,102 +454,11 @@ public final class XMLTools {
     catch (IOException exc) { exception = exc; }
     catch (SAXException exc) { exception = exc; }
     if (exception != null) {
-      LogTools.println("Error validating document:");
-      LogTools.trace(exception);
+      LOGGER.info("Error validating document", exception);
       return false;
     }
-    if (errorHandler.ok()) LogTools.println("No validation errors found.");
+    if (errorHandler.ok()) LOGGER.info("No validation errors found.");
     return errorHandler.ok();
-  }
-
-  // -- Helper classes --
-
-  /** Used by validateXML to parse the XML block's schema path using SAX. */
-  private static class ValidationSAXHandler extends DefaultHandler {
-    private String schemaPath;
-    private boolean first;
-    public String getSchemaPath() { return schemaPath; }
-    public void startDocument() {
-      schemaPath = null;
-      first = true;
-    }
-    public void startElement(String uri,
-      String localName, String qName, Attributes attributes)
-    {
-      if (!first) return;
-      first = false;
-
-      int len = attributes.getLength();
-      String xmlns = null, xsiSchemaLocation = null;
-      for (int i=0; i<len; i++) {
-        String name = attributes.getQName(i);
-        if (name.equals("xmlns")) xmlns = attributes.getValue(i);
-        else if (name.equals("schemaLocation") ||
-          name.endsWith(":schemaLocation"))
-        {
-          xsiSchemaLocation = attributes.getValue(i);
-        }
-      }
-      if (xmlns == null || xsiSchemaLocation == null) return; // not found
-
-      StringTokenizer st = new StringTokenizer(xsiSchemaLocation);
-      while (st.hasMoreTokens()) {
-        String token = st.nextToken();
-        if (xmlns.equals(token)) {
-          // next token is the actual schema path
-          if (st.hasMoreTokens()) schemaPath = st.nextToken();
-          break;
-        }
-      }
-    }
-  }
-
-  /** Used by validateXML to handle XML validation errors. */
-  private static class ValidationErrorHandler implements ErrorHandler {
-    private boolean ok = true;
-    public boolean ok() { return ok; }
-    public void error(SAXParseException e) {
-      LogTools.println("error: " + e.getMessage());
-      ok = false;
-    }
-    public void fatalError(SAXParseException e) {
-      LogTools.println("fatal error: " + e.getMessage());
-      ok = false;
-    }
-    public void warning(SAXParseException e) {
-      LogTools.println("warning: " + e.getMessage());
-      ok = false;
-    }
-  }
-
-  /** Used to retrieve key/value pairs from XML. */
-  private static class MetadataHandler extends DefaultHandler {
-    private String currentQName;
-    private Hashtable<String, String> metadata =
-      new Hashtable<String, String>();
-
-    // -- MetadataHandler API methods --
-
-    public Hashtable<String, String> getMetadata() {
-      return metadata;
-    }
-
-    // -- DefaultHandler API methods --
-
-    public void characters(char[] data, int start, int len) {
-      metadata.put(currentQName, new String(data, start, len));
-    }
-
-    public void startElement(String uri, String localName, String qName,
-      Attributes attributes)
-    {
-      if (attributes.getLength() == 0) currentQName += " - " + qName;
-      else currentQName = qName;
-      for (int i=0; i<attributes.getLength(); i++) {
-        metadata.put(qName + " - " + attributes.getQName(i),
-          attributes.getValue(i));
-      }
-    }
   }
 
 }
