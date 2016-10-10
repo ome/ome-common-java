@@ -100,7 +100,329 @@
     <sourceDirectory>src/main/java</sourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
 
+    <!-- We use wagon-webdav-jackrabbit 1.0 for deploys, since it is
+         compatible with both Maven 2.2.x and Maven 3.0.x cross-platform. -->
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>1.0</version>
+      </extension>
+    </extensions>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+          <!-- Require the Java 7 platform. -->
+          <configuration>
+            <source>1.7</source>
+            <target>1.7</target>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.8</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.1</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.4</version>
+          <!-- Always add classpath to JAR manifests. -->
+          <configuration>
+            <skipIfEmpty>true</skipIfEmpty>
+            <archive>
+              <manifest>
+                <addClasspath>true</addClasspath>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              </manifest>
+              <manifestEntries>
+                <!-- Add SCM revision from buildnumber plugin, if available. -->
+                <Implementation-Build>${buildNumber}</Implementation-Build>
+                <!-- Add a formatted timestamp for the build. -->
+                <Implementation-Date>${maven.build.timestamp}</Implementation-Date>
+              </manifestEntries>
+            </archive>
+            <excludes>
+              <exclude>**/*.cpp</exclude>
+              <exclude>**/*.h</exclude>
+            </excludes>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <!-- NB: The same version declaration and configuration block also
+               appears in the <reporting> section, and must be kept in sync. -->
+          <version>2.9.1</version>
+          <configuration>
+            <javadocDirectory>${project.basedir}/src</javadocDirectory>
+            <maxmemory>1024m</maxmemory>
+            <!-- Workaround for javadoc bug when classes in the default
+                 package access classes from non-default packages. See:
+                 http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5101868 -->
+            <use>false</use>
+            <links>
+              <!-- Java 7 -->
+              <link>http://docs.oracle.com/javase/7/docs/api/</link>
+
+              <!-- ImageJ1 -->
+              <link>http://jenkins.imagej.net/job/ImageJ1-javadoc/javadoc/</link>
+            </links>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>3.2</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.4.2</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.maven.scm</groupId>
+              <artifactId>maven-scm-provider-gitexe</artifactId>
+              <version>1.9</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.6</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.3</version>
+        </plugin>
+
+      <!-- Create -sources.jar when building. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.0.1</version>
+          <!-- Build source artifact in addition to main artifact. -->
+          <executions>
+            <execution>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.19.1</version>
+        </plugin>
+
+        <!-- Build Number Maven plugin -
+             http://mojo.codehaus.org/buildnumber-maven-plugin/
+             This plugin embeds a build number in the JAR manifest. -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>1.2</version>
+          <!-- Record SCM revision in manifest. -->
+          <executions>
+            <execution>
+              <phase>validate</phase>
+              <goals>
+                <goal>create</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+            <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+          </configuration>
+        </plugin>
+
+        <!-- Exec Maven plugin -
+        http://mojo.codehaus.org/exec-maven-plugin/
+        This plugin launches a Java class using Maven. -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+        </plugin>
+
+        <!-- License Maven plugin -
+             http://mojo.codehaus.org/license-maven-plugin/
+             This plugin manages project licenses and source file headers. -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>1.6</version>
+          <configuration>
+            <projectName>${project.description}</projectName>
+            <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+            <canUpdateDescription>true</canUpdateDescription>
+            <canUpdateCopyright>true</canUpdateCopyright>
+            <extraExtensions>
+              <bsh>java</bsh>
+              <config>properties</config>
+              <ijm>java</ijm>
+            </extraExtensions>
+          </configuration>
+        </plugin>
+
+        <!-- Versions Maven plugin -
+             http://mojo.codehaus.org/versions-maven-plugin/
+             Check for new plugin versions using
+             "mvn versions:display-plugin-updates" -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.1</version>
+        </plugin>
+
+        <!-- Eclipse-specific configuration
+
+             With a recent version of m2e, Eclipse's Maven binding, it is no
+             longer enough to configure plugins; they will be ignored by
+             default. But we really want the buildnumber and the jar plugin to
+             do their job. So now we have to add lifecycle mappings in addition
+             to configuring the plugins.
+
+             Let's hope that m2e remains the only IDE Maven binding that
+             requires such a lot of additional work just to get the same result
+             as plain Maven would produce out of the box. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <versionRange>[1.4,)</versionRange>
+                    <goals>
+                      <goal>execute</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>create</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnIncremental>true</runOnIncremental>
+                      <runOnConfiguration>true</runOnConfiguration>
+                    </execute>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <versionRange>[2.0,)</versionRange>
+                    <goals>
+                      <goal>jar</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnIncremental>true</runOnIncremental>
+                      <runOnConfiguration>true</runOnConfiguration>
+                    </execute>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>net.imagej</groupId>
+                    <artifactId>imagej-maven-plugin</artifactId>
+                    <versionRange>[0.1.0,)</versionRange>
+                    <goals>
+                      <goal>set-rootdir</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
+      <!-- Add Implementation-Build entry to JAR manifest. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+      </plugin>
+
+      <!-- Enable 'license:' goals. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <licenseName>gpl_v2</licenseName>
+          <organizationName>Open Microscopy Environment:
+  - Board of Regents of the University of Wisconsin-Madison
+  - Glencoe Software, Inc.
+  - University of Dundee</organizationName>
+            <!-- NB: Avoid stomping on variant copyright holders. -->
+            <canUpdateCopyright>false</canUpdateCopyright>
+          <roots>
+            <root>src</root>
+            <root>target/generated-sources</root>
+            <root>target/processed-sources</root>
+            <root>test</root>
+            <root>utils</root>
+            <root>doc</root>
+          </roots>
+        </configuration>
+      </plugin>
+
       <!-- Create -sources.jar when building. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
