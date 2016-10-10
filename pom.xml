@@ -100,175 +100,6 @@
     <sourceDirectory>src/main/java</sourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.6</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>3.0.0</version>
-        </plugin>
-
-
-        <plugin>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.10</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>3.0.2</version>
-          <!-- Always add classpath to JAR manifests. -->
-          <configuration>
-            <skipIfEmpty>true</skipIfEmpty>
-            <archive>
-              <manifest>
-                <addClasspath>true</addClasspath>
-                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-              </manifest>
-              <manifestEntries>
-                <!-- Add SCM revision from buildnumber plugin, if available. -->
-                <Implementation-Build>${buildNumber}</Implementation-Build>
-                <!-- Add a formatted timestamp for the build. -->
-                <Implementation-Date>${maven.build.timestamp}</Implementation-Date>
-              </manifestEntries>
-            </archive>
-            <excludes>
-              <exclude>**/*.cpp</exclude>
-              <exclude>**/*.h</exclude>
-            </excludes>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>test-jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <!-- NB: The same version declaration and configuration block also
-               appears in the <reporting> section, and must be kept in sync. -->
-          <version>2.10.4</version>
-          <configuration>
-            <!-- Workaround for javadoc bug when classes in the default
-                 package access classes from non-default packages. See:
-                 http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5101868 -->
-            <use>false</use>
-            <links>
-              <!-- Java 7 -->
-              <link>http://docs.oracle.com/javase/7/docs/api/</link>
-            </links>
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.5</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>2.5.3</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.maven.scm</groupId>
-              <artifactId>maven-scm-provider-gitexe</artifactId>
-              <version>1.9</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.1</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>3.5.1</version>
-        </plugin>
-
-      <!-- Create -sources.jar when building. -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>3.0.1</version>
-          <!-- Build source artifact in addition to main artifact. -->
-          <executions>
-            <execution>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.19.1</version>
-        </plugin>
-
-        <!-- Build Number Maven plugin -
-             http://mojo.codehaus.org/buildnumber-maven-plugin/
-             This plugin embeds a build number in the JAR manifest. -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>buildnumber-maven-plugin</artifactId>
-          <version>1.4</version>
-          <!-- Record SCM revision in manifest. -->
-          <executions>
-            <execution>
-              <phase>validate</phase>
-              <goals>
-                <goal>create</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-            <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-          </configuration>
-        </plugin>
-
-        <!-- Exec Maven plugin -
-        http://mojo.codehaus.org/exec-maven-plugin/
-        This plugin launches a Java class using Maven. -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>1.5.0</version>
-        </plugin>
-
-        <!-- Versions Maven plugin -
-             http://mojo.codehaus.org/versions-maven-plugin/
-             Check for new plugin versions using
-             "mvn versions:display-plugin-updates" -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>versions-maven-plugin</artifactId>
-          <version>2.3</version>
-        </plugin>
-
-      </plugins>
-    </pluginManagement>
-
     <plugins>
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
@@ -279,12 +110,6 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
-      </plugin>
-
-        <!-- Add Implementation-Build entry to JAR manifest. -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
 
       <!-- Enable 'license:' goals. -->
@@ -317,12 +142,6 @@
         </configuration>
       </plugin>
 
-      <!-- Create -sources.jar when building. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -333,6 +152,166 @@
           </suiteXmlFiles>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin>
+
+
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.2</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5.2</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.2</version>
+        <!-- Always add classpath to JAR manifests. -->
+        <configuration>
+          <skipIfEmpty>true</skipIfEmpty>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+            </manifest>
+            <manifestEntries>
+              <!-- Add SCM revision from buildnumber plugin, if available. -->
+              <Implementation-Build>${buildNumber}</Implementation-Build>
+              <!-- Add a formatted timestamp for the build. -->
+              <Implementation-Date>${maven.build.timestamp}</Implementation-Date>
+            </manifestEntries>
+          </archive>
+          <excludes>
+            <exclude>**/*.cpp</exclude>
+            <exclude>**/*.h</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <!-- NB: The same version declaration and configuration block also
+             appears in the <reporting> section, and must be kept in sync. -->
+        <version>2.10.4</version>
+        <configuration>
+          <!-- Workaround for javadoc bug when classes in the default
+               package access classes from non-default packages. See:
+               http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5101868 -->
+          <use>false</use>
+          <links>
+            <!-- Java 7 -->
+            <link>http://docs.oracle.com/javase/7/docs/api/</link>
+          </links>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>3.5</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>1.9</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.1</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.5.1</version>
+      </plugin>
+
+      <!-- Create -sources.jar when building. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <!-- Build source artifact in addition to main artifact. -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Build Number Maven plugin -
+           http://mojo.codehaus.org/buildnumber-maven-plugin/
+           This plugin embeds a build number in the JAR manifest. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.4</version>
+        <!-- Record SCM revision in manifest. -->
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+          <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+        </configuration>
+      </plugin>
+
+      <!-- Exec Maven plugin -
+           http://mojo.codehaus.org/exec-maven-plugin/
+           This plugin launches a Java class using Maven. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.5.0</version>
+      </plugin>
+
+      <!-- Versions Maven plugin -
+           http://mojo.codehaus.org/versions-maven-plugin/
+           Check for new plugin versions using
+           "mvn versions:display-plugin-updates" -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.3</version>
+      </plugin>
+
     </plugins>
   </build>
 
