@@ -405,7 +405,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <configuration>
-          <licenseName>gpl_v2</licenseName>
+          <licenseName>bsd_2</licenseName>
           <organizationName>Open Microscopy Environment:
   - Board of Regents of the University of Wisconsin-Madison
   - Glencoe Software, Inc.
@@ -414,11 +414,6 @@
             <canUpdateCopyright>false</canUpdateCopyright>
           <roots>
             <root>src</root>
-            <root>target/generated-sources</root>
-            <root>target/processed-sources</root>
-            <root>test</root>
-            <root>utils</root>
-            <root>doc</root>
           </roots>
         </configuration>
       </plugin>
@@ -450,6 +445,83 @@
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <!-- Generate javadocs as part of site generation. -->
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <!-- NB: The following version declaration and configuration block
+             are fully replicated from the pluginManagement section. This
+             is necessary because many versions of maven-site-plugin
+             (including 3.3) do not respect the pluginManagement values.
+             See: http://jira.codehaus.org/browse/MSITE-443
+             While the maven-site-plugin documentation states that it
+             "search[es] the same groupId/artifactId in the
+             build.pluginManagement.plugins section", this claim
+             unfortunately does not seem to reflect reality. -->
+        <version>2.9.1</version>
+        <configuration>
+          <javadocDirectory>src/main/java</javadocDirectory>
+          <maxmemory>1024m</maxmemory>
+          <!-- Workaround for javadoc bug when classes in the default
+               package access classes from non-default packages. See:
+               http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5101868 -->
+          <use>false</use>
+          <links>
+            <!-- Java 7 -->
+            <link>http://docs.oracle.com/javase/7/docs/api/</link>
+
+            <!-- ImageJ1 -->
+            <link>http://jenkins.imagej.net/job/ImageJ1-javadoc/javadoc/</link>
+          </links>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <prerequisites>
+    <maven>2.2.1</maven>
+  </prerequisites>
+
+  <organization>
+    <name>Open Microscopy Environment</name>
+    <url>http://www.openmicroscopy.org/</url>
+  </organization>
+
+  <issueManagement>
+    <system>Trac</system>
+    <url>https://trac.openmicroscopy.org/ome</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://ci.openmicroscopy.org/</url>
+  </ciManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>OME-users</name>
+      <subscribe>http://lists.openmicroscopy.org.uk/mailman/listinfo/ome-users/</subscribe>
+      <unsubscribe>http://lists.openmicroscopy.org.uk/mailman/listinfo/ome-users/</unsubscribe>
+      <post>ome-users@lists.openmicroscopy.org.uk</post>
+      <archive>http://lists.openmicroscopy.org.uk/pipermail/ome-users/</archive>
+    </mailingList>
+    <mailingList>
+      <name>OME-devel</name>
+      <subscribe>http://lists.openmicroscopy.org.uk/mailman/listinfo/ome-devel/</subscribe>
+      <unsubscribe>http://lists.openmicroscopy.org.uk/mailman/listinfo/ome-devel/</unsubscribe>
+      <post>ome-devel@lists.openmicroscopy.org.uk</post>
+      <archive>http://lists.openmicroscopy.org.uk/pipermail/ome-devel/</archive>
+    </mailingList>
+  </mailingLists>
+
+  <scm>
+    <connection>scm:git:https://github.com/ome/ome-common-java</connection>
+    <developerConnection>scm:git:git@github.com:ome/ome-common-java</developerConnection>
+    <tag>HEAD</tag>
+    <url>http://github.com/ome/ome-common-java</url>
+  </scm>
 
   <developers>
     <developer>
