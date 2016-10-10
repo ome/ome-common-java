@@ -15,17 +15,21 @@ jdk:
   - openjdk7
 
 env:
-  - BUILD=maven_findbugs
-  - BUILD=maven
+  - BUILD=build
+  - BUILD=findbugs
+  - BUILD=javadoc
 
 matrix:
   fast_finish: true
 
 install:
-  - if [[ $BUILD == 'maven' ]]; then mvn install; fi
-  - if [[ $BUILD == 'maven_findbugs' ]]; then mvn findbugs:findbugs -Dfindbugs.threshold=medium; fi
+  - if [[ $BUILD == 'build' ]]; then mvn install; fi
+  - if [[ $BUILD == 'findbugs' ]]; then mvn findbugs:findbugs -Dfindbugs.threshold=medium; fi
+  - if [[ $BUILD == 'javadoc' ]]; then mvn javadoc:jar; fi
 
 matrix:
   exclude:
     - jdk: openjdk7
-      env: BUILD=maven_findbugs
+      env: BUILD=findbugs
+    - jdk: openjdk7
+      env: BUILD=javadoc
