@@ -97,9 +97,6 @@
     <!-- It is nice for "mvn" with no arguments to do something reasonable. -->
     <defaultGoal>install</defaultGoal>
 
-    <sourceDirectory>src/main/java</sourceDirectory>
-    <testSourceDirectory>src/test/java</testSourceDirectory>
-
     <plugins>
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
@@ -163,7 +160,6 @@
         <version>3.0.0</version>
       </plugin>
 
-
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.10</version>
@@ -198,10 +194,6 @@
               <Implementation-Date>${maven.build.timestamp}</Implementation-Date>
             </manifestEntries>
           </archive>
-          <excludes>
-            <exclude>**/*.cpp</exclude>
-            <exclude>**/*.h</exclude>
-          </excludes>
         </configuration>
         <executions>
           <execution>
@@ -293,15 +285,6 @@
         </configuration>
       </plugin>
 
-      <!-- Exec Maven plugin -
-           http://mojo.codehaus.org/exec-maven-plugin/
-           This plugin launches a Java class using Maven. -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.5.0</version>
-      </plugin>
-
       <!-- Versions Maven plugin -
            http://mojo.codehaus.org/versions-maven-plugin/
            Check for new plugin versions using
@@ -320,19 +303,9 @@
       <!-- Generate javadocs as part of site generation. -->
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <!-- NB: The following version declaration and configuration block
-             are fully replicated from the pluginManagement section. This
-             is necessary because many versions of maven-site-plugin
-             (including 3.3) do not respect the pluginManagement values.
-             See: http://jira.codehaus.org/browse/MSITE-443
-             While the maven-site-plugin documentation states that it
-             "search[es] the same groupId/artifactId in the
-             build.pluginManagement.plugins section", this claim
-             unfortunately does not seem to reflect reality. -->
         <version>2.9.1</version>
         <configuration>
           <javadocDirectory>src/main/java</javadocDirectory>
-          <maxmemory>1024m</maxmemory>
           <!-- Workaround for javadoc bug when classes in the default
                package access classes from non-default packages. See:
                http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5101868 -->
@@ -340,9 +313,6 @@
           <links>
             <!-- Java 7 -->
             <link>http://docs.oracle.com/javase/7/docs/api/</link>
-
-            <!-- ImageJ1 -->
-            <link>http://jenkins.imagej.net/job/ImageJ1-javadoc/javadoc/</link>
           </links>
         </configuration>
       </plugin>
@@ -391,6 +361,70 @@
     <tag>HEAD</tag>
     <url>http://github.com/ome/ome-common-java</url>
   </scm>
+
+  <repositories>
+    <repository>
+        <id>ome.experimental</id>
+        <url>http://artifacts.openmicroscopy.org/artifactory/ome.experimental</url>
+    </repository>
+    <repository>
+      <id>ome.external</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.external</url>
+    </repository>
+    <repository>
+      <id>ome.releases</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.releases</url>
+    </repository>
+    <repository>
+      <id>ome.snapshots</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.snapshots</url>
+    </repository>
+    <repository>
+      <id>unidata.releases</id>
+      <url>http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>http://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+    </pluginRepository>
+    <pluginRepository>
+      <id>ome.releases</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.releases</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>ome.snapshots</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>ome.external</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.external</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>ome.experimental</id>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.experimental</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <distributionManagement>
+    <repository>
+      <id>ome.staging</id>
+      <name>OME Staging Repository</name>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.staging</url>
+    </repository>
+    <snapshotRepository>
+      <id>ome.snapshots</id>
+      <name>OME Snapshots Repository</name>
+      <url>http://artifacts.openmicroscopy.org/artifactory/ome.snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <developers>
     <developer>
