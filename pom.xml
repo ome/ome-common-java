@@ -5,16 +5,12 @@
     http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>ome</groupId>
-    <artifactId>pom-bio-formats</artifactId>
-    <version>5.2.4-SNAPSHOT</version>
-    <relativePath>../..</relativePath>
-  </parent>
+  <groupId>org.openmicroscopy</groupId>
+  <artifactId>ome-common</artifactId>
+  <version>6.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-  <artifactId>formats-common</artifactId>
-
-  <name>Common</name>
+  <name>OME Common Java</name>
   <description>Contains common I/O, date parsing, and XML processing classes.</description>
   <url>http://www.openmicroscopy.org/site/products/bio-formats</url>
   <inceptionYear>2005</inceptionYear>
@@ -31,7 +27,7 @@
     <dependency>
      <groupId>com.esotericsoftware.kryo</groupId>
      <artifactId>kryo</artifactId>
-     <version>${kryo.version}</version>
+     <version>2.24.0</version>
     </dependency>
     <dependency>
       <groupId>joda-time</groupId>
@@ -41,12 +37,12 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
+      <version>17.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
+      <version>1.7.6</version>
     </dependency>
 
     <!-- NB: dependency:analyze has false warning about xml-apis:xml-apis. -->
@@ -54,13 +50,13 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
-      <version>${logback.version}</version>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <!-- NB: We want this, despite warning from dependency:analyze. -->
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <!-- NB: We want this, despite warning from dependency:analyze. -->
@@ -80,31 +76,51 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>${testng.version}</version>
+      <version>6.8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <properties>
-    <project.rootdir>${basedir}/../..</project.rootdir>
+    <!-- NB: Avoid platform encoding warning when copying resources. -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- NB: Specify formatting of the maven.build.timestamp property. -->
+    <maven.build.timestamp.format>d MMMMM yyyy</maven.build.timestamp.format>
+
+    <!-- NB: Override argLine property for extra maven-surefire-plugin args. -->
+    <argLine/>
   </properties>
 
   <build>
+    <!-- It is nice for "mvn" with no arguments to do something reasonable. -->
+    <defaultGoal>install</defaultGoal>
+
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+
     <plugins>
+      <!-- Create -sources.jar when building. -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.19.1</version>
         <configuration>
           <suiteXmlFiles>
-            <suiteXmlFile>test/loci/common/utests/testng-template.xml</suiteXmlFile>
+            <suiteXmlFile>src/test/java/loci/common/utests/testng-template.xml</suiteXmlFile>
           </suiteXmlFiles>
-          <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/../../ant/</additionalClasspathElement>
-          </additionalClasspathElements>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
+        <version>1.9</version>
         <configuration>
           <licenseName>bsd_2</licenseName>
           <projectName>Common package for I/O and related utilities</projectName>
@@ -164,21 +180,4 @@
     </developer>
   </developers>
 
-  <!-- NB: for project parent, in case of partial checkout -->
-  <repositories>
-    <repository>
-      <id>central</id>
-      <name>Central Repository</name>
-      <url>http://repo.maven.apache.org/maven2</url>
-      <layout>default</layout>
-    </repository>
-    <repository>
-      <id>ome.releases</id>
-      <url>http://artifacts.openmicroscopy.org/artifactory/ome.releases</url>
-    </repository>
-    <repository>
-      <id>ome.snapshots</id>
-      <url>http://artifacts.openmicroscopy.org/artifactory/ome.snapshots</url>
-    </repository>
-  </repositories>
 </project>
