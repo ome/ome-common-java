@@ -1,8 +1,5 @@
 language: java
 
-# This (sudo: false) is needed to "run on container-based infrastructure" on
-# which cache: is available
-# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
 sudo: false
 
 # http://docs.travis-ci.com/user/caching/#Arbitrary-directories
@@ -16,20 +13,9 @@ jdk:
 
 env:
   - BUILD=build
-  - BUILD=findbugs
-  - BUILD=javadoc
 
 matrix:
   fast_finish: true
 
 install:
   - if [[ $BUILD == 'build' ]]; then mvn install; fi
-  - if [[ $BUILD == 'findbugs' ]]; then mvn findbugs:findbugs -Dfindbugs.threshold=medium; fi
-  - if [[ $BUILD == 'javadoc' ]]; then mvn javadoc:jar; fi
-
-matrix:
-  exclude:
-    - jdk: openjdk7
-      env: BUILD=findbugs
-    - jdk: openjdk7
-      env: BUILD=javadoc
