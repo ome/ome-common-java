@@ -11,11 +11,5 @@ jdk:
   - oraclejdk8
   - openjdk7
 
-env:
-  - BUILD=build
-
 matrix:
   fast_finish: true
-
-install:
-  - if [[ $BUILD == 'build' ]]; then mvn install; fi
