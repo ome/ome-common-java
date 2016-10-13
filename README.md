@@ -1,6 +1,8 @@
 # OME Common Java
 
 [![Build Status](https://travis-ci.org/ome/ome-common-java.png)](http://travis-ci.org/ome/ome-common-java)
+[![Maven Central](https://img.shields.io/maven-central/v/org.openmicroscopy/ome-common.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.openmicroscopy%22%20AND%20a%3A%22ome-common%22)
+[![Javadocs](http://javadoc.io/badge/org.openmicroscopy/ome-common.svg)](http://javadoc.io/doc/org.openmicroscopy/ome-common)
 
 Common I/O, date parsing, and XML processing classes for OME Java components.
 
