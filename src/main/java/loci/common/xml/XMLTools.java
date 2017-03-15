@@ -113,7 +113,7 @@ public final class XMLTools {
   private static final TransformerFactory transformFactory = createTransformFactory();
 
   private static TransformerFactory createTransformFactory() {
-    TransformerFactory factory = TransformerFactory.newInstance();
+    TransformerFactory factory = TransformerFactory.newInstance("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null);
     factory.setErrorListener(new XMLListener());
     return factory;
   };
