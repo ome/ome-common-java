@@ -175,6 +175,12 @@ public class LocationTest {
         file.getParentFile().getAbsolutePath());
     }
   }
+  
+  @Test
+  public void testParentNull() {
+    Location nullParent = new Location("nullParentFile", null);
+    assertEquals(nullParent.getName(), null, nullParent.getParentFile());
+  }
 
   @Test
   public void testIsDirectory() {
