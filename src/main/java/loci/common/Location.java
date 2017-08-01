@@ -870,7 +870,9 @@ public class Location {
    * @see java.io.File#getParentFile()
    */
   public Location getParentFile() {
-    return new Location(getParent());
+    String parent = this.getParent();
+    if (parent == null) return null;
+    return new Location(parent);
   }
 
   /**
