@@ -271,6 +271,12 @@ public class LocationTest {
       assertEquals(file.getName(), null, file.getParent());
     }
   }
+  
+  @Test
+  public void testParentNull() {
+    Location nullParent = new Location("nullParentFile", null);
+    assertEquals(nullParent.getName(), null, nullParent.getParentFile());
+  }
 
   @Test
   public void testIsDirectory() {
