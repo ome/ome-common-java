@@ -89,14 +89,14 @@ public class LocationTest {
       new Location(validFile.getAbsolutePath()),
       new Location(invalidPath),
       new Location(tmpDirectory),
-      new Location("http://www.openmicroscopy.org/site/foo/products/bio-formats"),
-      new Location("https://www.openmicroscopy.org/site/products/images"),
-      new Location("https://www.openmicroscopy.org/site/products/images/foo"),
+      new Location("http://www.openmicroscopy.org/"),
+      new Location("https://www.openmicroscopy.org/"),
+      new Location("https://www.openmicroscopy.org/nonexisting"),
       new Location(hiddenFile)
     };
 
     exists = new boolean[] {
-      true, false, true, false, true, false, true
+      true, false, true, true, true, false, true
     };
 
     isDirectory = new boolean[] {
@@ -108,7 +108,7 @@ public class LocationTest {
     };
 
     mode = new String[] {
-      "rw", "", "rw", "", "r", "","rw"
+      "rw", "", "rw", "r", "r", "","rw"
     };
 
     isRemote = new boolean[] {
