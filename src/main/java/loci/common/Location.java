@@ -246,7 +246,7 @@ public class Location {
    * @see #Location(String, String)
    */
   public Location(Location parent, String child) {
-    this(parent.getAbsolutePath(), child);
+    this(parent == null ? (String) null : parent.getAbsolutePath(), child);
   }
 
   // -- Location API methods --
