@@ -179,9 +179,9 @@ public class LocationTest {
   @Test
   public void testParentNull() {
     Location nullParent = new Location((String) null, "nullParentFile");
-    assertEquals(nullParent.getName(), null, nullParent.getParentFile());
+    assertEquals(nullParent.getName(), String.valueOf("null"), nullParent.getParentFile());
     nullParent = new Location((Location) null, "nullParentFile");
-    assertEquals(nullParent.getName(), null, nullParent.getParentFile());
+    assertEquals(nullParent.getName(), String.valueOf("null"), nullParent.getParentFile());
   }
 
   @Test
