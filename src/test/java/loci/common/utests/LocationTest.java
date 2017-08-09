@@ -33,6 +33,7 @@
 package loci.common.utests;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -275,9 +276,9 @@ public class LocationTest {
   @Test
   public void testParentNull() {
     Location nullParent = new Location((String) null, "nullParentFile");
-    assertEquals(nullParent.getName(), String.valueOf("null"), nullParent.getParentFile());
+    assertNull(nullParent.getParentFile());
     nullParent = new Location((Location) null, "nullParentFile");
-    assertEquals(nullParent.getName(), String.valueOf("null"), nullParent.getParentFile());
+    assertNull(nullParent.getParentFile());
   }
 
   @Test
