@@ -52,8 +52,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.MapMaker;
 
 /**
- * Pseudo-extension of java.io.File that supports reading over HTTP (among
- * other things).
+ * Pseudo-extension of {@link java.io.File} that supports reading over HTTP
+ * (among  other things).
  * It is strongly recommended to use this instead of java.io.File.
  */
 public class Location {
@@ -602,9 +602,13 @@ public class Location {
   }
 
   /**
-   * Returns the name of this file's parent directory, i.e. the path name prefix
-   * and every name in the path name sequence except for the last.
-   * If this file does not have a parent directory, then null is returned.
+   * Returns the pathname string of this abstract pathname's parent, or null if
+   * this pathname does not have a parent directory.
+   *
+   * The parent of an abstract pathname consists of the pathname's prefix, if
+   * any, and each name in the pathname's name sequence except for the last.
+   * If the name sequence is empty then the pathname does not name a parent
+   * directory.
    *
    * @see java.io.File#getParent()
    */
@@ -618,7 +622,17 @@ public class Location {
     return file.getParent();
   }
 
-  /* @see java.io.File#getParentFile() */
+  /**
+   * Returns the abstract pathname of this abstract pathname's parent, or null
+   * if this pathname does not name a parent directory.
+   *
+   * The parent of an abstract pathname consists of the pathname's prefix, if
+   * any, and each name in the pathname's name sequence except for the last.
+   * If the name sequence is empty then the pathname does not name a parent
+   * directory.
+   *
+   * @see java.io.File#getParentFile()
+   */
   public Location getParentFile() {
     String parent = this.getParent();
     if (parent == null) return null;
