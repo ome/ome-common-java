@@ -125,11 +125,11 @@ public class Location {
   }
 
   public Location(String parent, String child) {
-    this(parent + File.separator + child);
+    this(parent == null ? child : parent + File.separator + child);
   }
 
   public Location(Location parent, String child) {
-    this(parent.getAbsolutePath(), child);
+    this(parent == null ? (String) null : parent.getAbsolutePath(), child);
   }
 
   // -- Location API methods --
@@ -620,7 +620,9 @@ public class Location {
 
   /* @see java.io.File#getParentFile() */
   public Location getParentFile() {
-    return new Location(getParent());
+    String parent = this.getParent();
+    if (parent == null) return null;
+    return new Location(parent);
   }
 
   /* @see java.io.File#getPath() */
