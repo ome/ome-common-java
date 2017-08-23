@@ -214,7 +214,7 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /* @see IRandomAccess.close() */
   @Override
   public void close() throws IOException {
-    if (raf.length() != length()) {
+    if (isReadWrite && channel.isOpen() && raf.length() != length()) {
       raf.setLength(length());
     }
     raf.close();
