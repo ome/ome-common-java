@@ -105,6 +105,8 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /** The original length of the file. */
   private Long defaultLength;
 
+  private long effectiveLength;
+
   // -- Constructors --
 
   /**
@@ -121,6 +123,7 @@ public class NIOFileHandle extends AbstractNIOHandle {
       mapMode = FileChannel.MapMode.READ_WRITE;
     }
     raf = new RandomAccessFile(file, mode);
+    effectiveLength = raf.length();
     channel = raf.getChannel();
     byteBufferProvider = new NIOByteBufferProvider(channel, mapMode);
     buffer(position, 0);
@@ -199,8 +202,9 @@ public class NIOFileHandle extends AbstractNIOHandle {
   @Override
   public void setLength(long length) throws IOException {
     if (raf.length() < length) {
-      raf.setLength(length);
+      raf.setLength(length + getBufferSize());
     }
+    effectiveLength = length;
     raf.seek(length - 1);
     buffer = null;
   }
@@ -210,6 +214,9 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /* @see IRandomAccess.close() */
   @Override
   public void close() throws IOException {
+    if (isReadWrite && channel.isOpen() && raf.length() != length()) {
+      raf.setLength(length());
+    }
     raf.close();
   }
 
@@ -225,7 +232,7 @@ public class NIOFileHandle extends AbstractNIOHandle {
     if (defaultLength != null) {
       return defaultLength;
     }
-    return raf.length();
+    return effectiveLength;
   }
 
   /* @see IRandomAccess.getOrder() */
