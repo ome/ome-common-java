@@ -11,7 +11,7 @@ More information
 ----------------
 
 For more information, see the [Bio-Formats web
-site](http://www.openmicroscopy.org/site/products/bio-formats).
+site](https://www.openmicroscopy.org/bio-formats/).
 
 
 Pull request testing
