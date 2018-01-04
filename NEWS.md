@@ -1,3 +1,8 @@
+5.3.4 (2018-01-04)
+------------------
+
+- Revert 5.3.3 changes to RandomAccessFile.setLength in NIOFileHandle ([#21](https://github.com/ome/ome-common-java/pull/21))
+
 5.3.3 (2017-10-20)
 ------------------
 
