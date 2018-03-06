@@ -6,11 +6,21 @@ sudo: false
 cache:
   directories:
   - $HOME/.m2
+  - $HOME/Downloads
 
 jdk:
   - oraclejdk9
   - oraclejdk8
   - openjdk7
 
-matrix:
-  fast_finish: true
+env:
+  - BUILD="maven" PATH="$HOME/gradle-4.6/bin:$PATH"
+  - BUILD="gradle" PATH="$HOME/gradle-4.6/bin:$PATH"
+
+before_install:
+  - mkdir -p "$HOME/Downloads"
+  - if [ ! -f "$HOME/gradle-4.6-bin.zip" ]; then wget -O "$HOME/Downloads/gradle-bin.zip" "https://services.gradle.org/distributions/gradle-4.6-bin.zip"; fi
+  - if [ ! -d "$HOME/gradle-4.6" ]; then (cd "$HOME" && unzip "Downloads/gradle-bin.zip"); fi
+
+script:
+  - if [ "$BUILD" = "gradle" ]; then gradle -i test publishToMavenLocal; else mvn install; fi
