@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @see IRandomAccess
  * @see java.io.RandomAccessFile
  *
- * @author Chris Allan <callan at blackcat dot ca>
+ * @author Chris Allan callan at blackcat dot ca
  */
 public class NIOFileHandle extends AbstractNIOHandle {
 

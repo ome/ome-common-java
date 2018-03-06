@@ -6,12 +6,20 @@ environment:
 # Note that only Oracle JDK is provided.
   matrix:
     - java: 9
+      build: gradle
+    - java: 9
+      build: maven
     - java: 1.8
+      build: gradle
+    - java: 1.8
+      build: maven
     - java: 1.7
+      build: gradle
+    - java: 1.7
+      build: maven
 
 cache:
   - '%AV_OME_M2% -> appveyor.yml'
-  - '%AV_OME_PYTHON% -> appveyor.yml'
 
 os: 'Visual Studio 2015'
 clone_folder: '%AV_OME_SOURCE%'
@@ -20,6 +28,9 @@ platform: x64
 
 init:
   - git config --global core.autocrlf input
+  - 'mkdir %HOMEDRIVE%\%HOMEPATH%\.gradle'
+  - 'echo org.gradle.daemon=false > %HOMEDRIVE%\%HOMEPATH%\.gradle\gradle.properties'
+  - 'if [%build%] == [gradle] choco install gradle'
   - refreshenv
   - 'if [%java%] == [1.7] set "JAVA_HOME=C:\Program Files\Java\jdk1.7.0"'
   - 'if [%java%] == [1.8] set "JAVA_HOME=C:\Program Files\Java\jdk1.8.0"'
@@ -28,4 +39,5 @@ init:
   - 'set "MAVEN_OPTS=-Dmaven.repo.local=%AV_OME_M2%"'
 
 build_script:
-  - mvn install
+  - if [%build%] == [gradle] gradle -i test publishToMavenLocal
+  - if [%build%] == [maven] mvn install

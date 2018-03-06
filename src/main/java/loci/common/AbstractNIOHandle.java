@@ -40,7 +40,7 @@ import java.io.IOException;
  * @see IRandomAccess
  * @see java.io.RandomAccessFile
  *
- * @author Chris Allan <callan at blackcat dot ca>
+ * @author Chris Allan callan at blackcat dot ca
  */
 public abstract class AbstractNIOHandle implements IRandomAccess {
 
