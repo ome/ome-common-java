@@ -76,8 +76,11 @@ public final class DataTools {
       throw new IOException("File too large");
     }
     int len = (int) idLen;
-    String data = in.readString(len);
+    byte[] b = new byte[len];
+    in.readFully(b);
     in.close();
+    String data = new String(b, Constants.ENCODING);
+    b = null;
     return data;
   }
 
