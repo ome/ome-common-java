@@ -237,6 +237,8 @@ public class CBZip2InputStream extends InputStream {
    * to skip the first two bytes. Otherwise this constructor will
    * throw an exception. </p>
    *
+   * @param in stream from which to read BZip2 data; expected to be
+   *   set to the first byte past the 2 byte magic marker
    * @throws IOException
    *   if the stream content is malformed or an I/O error occurs.
    * @throws NullPointerException

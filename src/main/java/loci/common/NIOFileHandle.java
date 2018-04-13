@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @see IRandomAccess
  * @see java.io.RandomAccessFile
  *
- * @author Chris Allan <callan at blackcat dot ca>
+ * @author Chris Allan (callan at blackcat dot ca)
  */
 public class NIOFileHandle extends AbstractNIOHandle {
 
@@ -110,6 +110,13 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /**
    * Creates a random access file stream to read from, and
    * optionally to write to, the file specified by the File argument.
+   *
+   * @param file a {@link File} representing a file on disk
+   * @param mode the access mode; <code>r</code> (read only) and
+   *             <code>rw</code> (read/write) are supported
+   * @param bufferSize the size of the buffer used to speed up reading
+   *                   and writing
+   * @throws IOException if there is an error accessing the file
    */
   public NIOFileHandle(File file, String mode, int bufferSize)
     throws IOException
@@ -134,6 +141,11 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /**
    * Creates a random access file stream to read from, and
    * optionally to write to, the file specified by the File argument.
+   *
+   * @param file a {@link File} representing a file on disk
+   * @param mode the access mode; <code>r</code> (read only) and
+   *             <code>rw</code> (read/write) are supported
+   * @throws IOException if there is an error accessing the file
    */
   public NIOFileHandle(File file, String mode) throws IOException {
     this(file, mode,
@@ -143,6 +155,11 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /**
    * Creates a random access file stream to read from, and
    * optionally to write to, a file with the specified name.
+   *
+   * @param name the path to a file on disk
+   * @param mode the access mode; <code>r</code> (read only) and
+   *             <code>rw</code> (read/write) are supported
+   * @throws IOException if there is an error accessing the file
    */
   public NIOFileHandle(String name, String mode) throws IOException {
     this(new File(name), mode);
@@ -155,6 +172,8 @@ public class NIOFileHandle extends AbstractNIOHandle {
    *
    * Subsequent uses of the NIOFileHandle(String, String) and
    * NIOFileHandle(File, String) constructors will use this buffer size.
+   *
+   * @param size the new default buffer size
    */
   public static void setDefaultBufferSize(int size) {
     defaultBufferSize = size;
@@ -165,6 +184,8 @@ public class NIOFileHandle extends AbstractNIOHandle {
    *
    * Subsequent uses of the NIOFileHandle(String, String) and
    * NIOFileHandle(File, String) constructors will use this buffer size.
+   *
+   * @param size the new default buffer size
    */
   public static void setDefaultReadWriteBufferSize(int size) {
     defaultRWBufferSize = size;
@@ -172,12 +193,16 @@ public class NIOFileHandle extends AbstractNIOHandle {
 
   // -- FileHandle and Channel API methods --
 
-  /** Gets the random access file object backing this FileHandle. */
+  /**
+   * @return the random access file object backing this FileHandle.
+   */
   public RandomAccessFile getRandomAccessFile() {
     return raf;
   }
 
-  /** Gets the FileChannel from this FileHandle. */
+  /**
+   * @return the FileChannel from this FileHandle.
+   */
   public FileChannel getFileChannel() {
     try {
       channel.position(position);
@@ -188,7 +213,9 @@ public class NIOFileHandle extends AbstractNIOHandle {
     return channel;
   }
 
-  /** Gets the current buffer size. */
+  /**
+   * @return the current buffer size.
+   */
   public int getBufferSize() {
     return bufferSize;
   }

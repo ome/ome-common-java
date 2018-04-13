@@ -99,7 +99,11 @@ public class ZipHandle extends StreamHandle {
    * Constructs a new ZipHandle corresponding to the given entry of the
    * specified Zip file.
    *
+   * @param file a name that can be passed to
+   *        {@link Location#getHandle(String, boolean, boolean)}
+   * @param entry the specific entry in the Zip file to be opened
    * @throws HandleException if the given file is not a Zip file.
+   * @see ZipEntry
    */
   public ZipHandle(String file, ZipEntry entry) throws IOException {
     super();
@@ -120,7 +124,12 @@ public class ZipHandle extends StreamHandle {
 
   // -- ZipHandle API methods --
 
-  /** Returns true if the given filename is a Zip file. */
+  /**
+   * @param file a name that can be passed to
+   *        {@link Location#getHandle(String, boolean, boolean)}
+   * @return true if the given filename is a Zip file.
+   * @throws IOException if the file cannot be read
+   */
   public static boolean isZipFile(String file) throws IOException {
     if (!file.toLowerCase().endsWith(".zip")) return false;
 
@@ -133,17 +142,23 @@ public class ZipHandle extends StreamHandle {
     return new String(b, Constants.ENCODING).equals("PK");
   }
 
-  /** Get the name of the backing Zip entry. */
+  /**
+   * @return the name of the backing Zip entry.
+   */
   public String getEntryName() {
     return entryName;
   }
 
-  /** Returns the DataInputStream corresponding to the backing Zip entry. */
+  /**
+   * @return the DataInputStream corresponding to the backing Zip entry.
+   */
   public DataInputStream getInputStream() {
     return stream;
   }
 
-  /** Returns the number of entries. */
+  /**
+   * @return the number of entries.
+   */
   public int getEntryCount() {
     return entryCount;
   }

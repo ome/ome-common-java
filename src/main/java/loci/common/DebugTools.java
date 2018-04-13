@@ -58,7 +58,12 @@ public final class DebugTools {
 
   // -- DebugTools methods --
 
-  /** Extracts the given exception's corresponding stack trace to a string. */
+  /**
+   * Extracts the given exception's corresponding stack trace to a string.
+   *
+   * @param t the Throwable from which to extract a stack trace
+   * @return the complete stack trace as a String
+   */
   public static String getStackTrace(Throwable t) {
     try {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -179,6 +184,11 @@ public final class DebugTools {
   /**
    * This method uses reflection to scan the values of the given class's
    * static fields, returning the first matching field's name.
+   *
+   * @param c the class to scan
+   * @param value the int value of the field to find
+   * @return the name of the field, or the string representation of
+   *         <code>value</code> if a matching field is not found
    */
   public static String getFieldName(Class<?> c, int value) {
     Field[] fields = c.getDeclaredFields();

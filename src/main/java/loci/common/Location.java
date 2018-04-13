@@ -99,6 +99,13 @@ public class Location {
 
   // -- Constructors --
 
+  /**
+   * Construct a Location using the given path.
+   *
+   * @param pathname a URL, a file on disk, or a mapped name
+   * @see #getMappedId(String)
+   * @see #getMappedFile(String)
+   */
   public Location(String pathname) {
     LOGGER.trace("Location({})", pathname);
     if (pathname.contains("://")) {
@@ -118,16 +125,36 @@ public class Location {
     if (!isURL) file = new File(getMappedId(pathname));
   }
 
+  /**
+   * Construct a Location using the given file on disk.
+   *
+   * @param file a file on disk
+   */
   public Location(File file) {
     LOGGER.trace("Location({})", file);
     isURL = false;
     this.file = file;
   }
 
+  /**
+   * Construct a Location using the given directory and relative path.
+   * The two parameters are joined with a file separator and passed to
+   * #Location(String)
+   *
+   * @param parent the directory path name
+   * @param child the relative path name
+   */
   public Location(String parent, String child) {
     this(parent + File.separator + child);
   }
 
+  /**
+   * Construct a Location using the given directory and relative path.
+   *
+   * @param parent a Location representing the directory name
+   * @param child the relative path name
+   * @see #Location(String, String)
+   */
   public Location(Location parent, String child) {
     this(parent.getAbsolutePath(), child);
   }
@@ -206,6 +233,10 @@ public class Location {
    * using the original filename as the id assists format handlers with type
    * identification and pattern matching, and the id can be mapped to the
    * actual filename for reading the file's contents.
+   *
+   * @param id the mapped name
+   * @param filename the actual filename on disk.
+   *        If null, any existing mapping for <code>id</code> will be cleared.
    * @see #getMappedId(String)
    */
   public static void mapId(String id, String filename) {
@@ -215,7 +246,15 @@ public class Location {
     LOGGER.debug("Location.mapId: {} -> {}", id, filename);
   }
 
-  /** Maps the given id to the given IRandomAccess object. */
+  /**
+   * Maps the given id to the given IRandomAccess object.
+   *
+   * @param id the mapped name
+   * @param ira the IRandomAccess object that will be referenced by
+   *        <code>id</code>.  If null, any existing mapping for
+   *        <code>id</code> will be cleared.
+   * @see #getMappedFile(String)
+   */
   public static void mapFile(String id, IRandomAccess ira) {
     if (id == null) return;
     if (ira == null) getIdMap().remove(id);
@@ -230,6 +269,9 @@ public class Location {
    * the original filename is useful for checking the file extension and doing
    * pattern matching, but the renamed filename is required to read its
    * contents.
+   *
+   * @param id the mapped name
+   * @return the corresponding file name on disk, or null if there is no mapping
    * @see #mapId(String, String)
    */
   public static String getMappedId(String id) {
@@ -241,7 +283,13 @@ public class Location {
     return filename == null ? id : filename;
   }
 
-  /** Gets the random access handle for the given id. */
+  /**
+   * Gets the random access handle for the given id.
+   *
+   * @param id the mapped name
+   * @return the corresponding IRandomAccess, or null if there is no mapping
+   * @see #mapFile(String, IRandomAccess)
+   */
   public static IRandomAccess getMappedFile(String id) {
     if (getIdMap() == null) return null;
     IRandomAccess ira = null;
@@ -251,7 +299,13 @@ public class Location {
     return ira;
   }
 
-  /** Return the id mapping. */
+  /**
+   * Return the id mapping.
+   *
+   * @return the map from names to filesystem paths and IRandomAccess objects
+   * @see #mapId(String, String)
+   * @see #mapFile(String, IRandomAccess)
+   */
   public static HashMap<String, Object> getIdMap() {
     return idMap.get();
   }
@@ -259,6 +313,8 @@ public class Location {
   /**
    * Set the id mapping using the given HashMap.
    *
+   * @param map the new mapping from names to filesystem paths
+   *        and IRandomAccess objects
    * @throws IllegalArgumentException if the given HashMap is null.
    */
   public static void setIdMap(HashMap<String, Object> map) {
@@ -268,6 +324,12 @@ public class Location {
 
   /**
    * Gets an IRandomAccess object that can read from the given file.
+   *
+   * @param id the name for which to locate an IRandomAccess
+   * @return a previously mapped IRandomAccess, or a new IRandomAccess
+   *         according to the name's type (URL, filesystem path, etc.)
+   * @throws IOException if a valid IRandomAccess cannot be created
+   * @see #getHandle(String, boolean, boolean, int)
    * @see IRandomAccess
    */
   public static IRandomAccess getHandle(String id) throws IOException {
@@ -276,6 +338,13 @@ public class Location {
 
   /**
    * Gets an IRandomAccess object that can read from or write to the given file.
+   *
+   * @param id the name for which to locate an IRandomAccess
+   * @param writable true if the returned IRandomAccess should have write permission
+   * @return a previously mapped IRandomAccess, or a new IRandomAccess
+   *         according to the name's type (URL, filesystem path, etc.)
+   * @throws IOException if a valid IRandomAccess cannot be created
+   * @see #getHandle(String, boolean, boolean, int)
    * @see IRandomAccess
    */
   public static IRandomAccess getHandle(String id, boolean writable)
@@ -286,6 +355,15 @@ public class Location {
 
   /**
    * Gets an IRandomAccess object that can read from or write to the given file.
+   *
+   * @param id the name for which to locate an IRandomAccess
+   * @param writable true if the returned IRandomAccess should have write permission
+   * @param allowArchiveHandles true if checks for compressed/archive file types
+   *        (e.g. Zip, GZip, BZip2) should be enabled
+   * @return a previously mapped IRandomAccess, or a new IRandomAccess
+   *         according to the name's type (URL, filesystem path, etc.)
+   * @throws IOException if a valid IRandomAccess cannot be created
+   * @see #getHandle(String, boolean, boolean, int)
    * @see IRandomAccess
    */
   public static IRandomAccess getHandle(String id, boolean writable,
@@ -294,6 +372,20 @@ public class Location {
     return getHandle(id, writable, allowArchiveHandles, 0);
   }
 
+  /**
+   * Gets an IRandomAccess object that can read from or write to the given file.
+   *
+   * @param id the name for which to locate an IRandomAccess
+   * @param writable true if the returned IRandomAccess should have write permission
+   * @param allowArchiveHandles true if checks for compressed/archive file types
+   *        (e.g. Zip, GZip, BZip2) should be enabled
+   * @param bufferSize the buffer size to use when constructing a NIOFileHandle.
+   *        Ignored when non-positive.
+   * @return a previously mapped IRandomAccess, or a new IRandomAccess
+   *         according to the name's type (URL, filesystem path, etc.)
+   * @throws IOException if a valid IRandomAccess cannot be created
+   * @see IRandomAccess
+   */
   public static IRandomAccess getHandle(String id, boolean writable,
     boolean allowArchiveHandles, int bufferSize) throws IOException
   {
@@ -353,6 +445,9 @@ public class Location {
    * Return a list of all of the files in this directory.  If 'noHiddenFiles' is
    * set to true, then hidden files are omitted.
    *
+   * @param noHiddenFiles true if hidden files should be omitted
+   * @return an unsorted list of all relative files in the directory represented
+   *         by this Location
    * @see java.io.File#list()
    */
   public String[] list(boolean noHiddenFiles) {
@@ -439,6 +534,7 @@ public class Location {
    * the URL exists.
    * Otherwise, it will return true iff the file exists and is readable.
    *
+   * @return see above
    * @see java.io.File#canRead()
    */
   public boolean canRead() {
@@ -450,6 +546,7 @@ public class Location {
    * If the underlying location is a URL, this method will always return false.
    * Otherwise, it will return true iff the file exists and is writable.
    *
+   * @return see above
    * @see java.io.File#canWrite()
    */
   public boolean canWrite() {
@@ -538,6 +635,7 @@ public class Location {
    * If the pathname is a URL, then existence is determined based on whether
    * or not we can successfully read content from the URL.
    *
+   * @return true if there is a way to read bytes from this Location's name
    * @see java.io.File#exists()
    */
   public boolean exists() {
@@ -580,6 +678,9 @@ public class Location {
    * If the file is a URL, then the canonical path is equivalent to the
    * absolute path ({@link #getAbsolutePath()}).  Otherwise, this method
    * will delegate to {@link java.io.File#getCanonicalPath()}.
+   *
+   * @return see above
+   * @throws IOException if the path cannot be retrieved
    */
   public String getCanonicalPath() throws IOException {
     return isURL ? getAbsolutePath() : file.getCanonicalPath();
@@ -589,6 +690,7 @@ public class Location {
    * Returns the name of this file, i.e. the last name in the path name
    * sequence.
    *
+   * @return the relative path name
    * @see java.io.File#getName()
    */
   public String getName() {
@@ -606,6 +708,7 @@ public class Location {
    * and every name in the path name sequence except for the last.
    * If this file does not have a parent directory, then null is returned.
    *
+   * @return see above
    * @see java.io.File#getParent()
    */
   public String getParent() {
@@ -629,9 +732,8 @@ public class Location {
   }
 
   /**
-   * Tests whether or not this path name is absolute.
-   * If the path name is a URL, this method will always return true.
-   *
+   * @return true if this path name is absolute.
+   *         If the path name is a URL, this method will always return true.
    * @see java.io.File#isAbsolute()
    */
   public boolean isAbsolute() {
@@ -640,8 +742,7 @@ public class Location {
   }
 
   /**
-   * Returns true if this pathname exists and represents a directory.
-   *
+   * @return true if this pathname exists and represents a directory.
    * @see java.io.File#isDirectory()
    */
   public boolean isDirectory() {
@@ -654,8 +755,7 @@ public class Location {
   }
 
   /**
-   * Returns true if this pathname exists and represents a regular file.
-   *
+   * @return true if this pathname exists and represents a regular file.
    * @see java.io.File#exists()
    */
   public boolean isFile() {
@@ -664,9 +764,8 @@ public class Location {
   }
 
   /**
-   * Returns true if the pathname is 'hidden'.  This method will always
-   * return false if the pathname corresponds to a URL.
-   *
+   * @return true if the pathname is 'hidden'.  This method will always
+   *         return false if the pathname corresponds to a URL.
    * @see java.io.File#isHidden()
    */
   public boolean isHidden() {
@@ -682,10 +781,8 @@ public class Location {
   }
 
   /**
-   * Return the last modification time of this file, in milliseconds since
-   * the UNIX epoch.
-   * If the file does not exist, 0 is returned.
-   *
+   * @return the last modification time of this file, in milliseconds since
+   *         the UNIX epoch. If the file does not exist, 0 is returned.
    * @see java.io.File#lastModified()
    * @see java.net.URLConnection#getLastModified()
    */
@@ -704,6 +801,7 @@ public class Location {
   }
 
   /**
+   * @return the length of the file or stream in bytes
    * @see java.io.File#length()
    * @see java.net.URLConnection#getContentLength()
    */
@@ -722,18 +820,18 @@ public class Location {
   }
 
   /**
-   * Return a list of file names in this directory.  Hidden files will be
-   * included in the list.
-   * If this is not a directory, return null.
+   * @return a list of file names in this directory.  Hidden files will be
+   *         included in the list. If this is not a directory, return null.
+   * @see #list(boolean)
    */
   public String[] list() {
     return list(false);
   }
 
   /**
-   * Return a list of absolute files in this directory.  Hidden files will
-   * be included in the list.
-   * If this is not a directory, return null.
+   * @return a list of absolute files in this directory.  Hidden files will
+   *         be included in the list. If this is not a directory, return null.
+   * @see #list()
    */
   public Location[] listFiles() {
     String[] s = list();
@@ -747,8 +845,8 @@ public class Location {
   }
 
   /**
-   * Return the URL corresponding to this pathname.
-   *
+   * @return the URL corresponding to this pathname.
+   * @throws MalformedURLException if the pathname is not a valid URL
    * @see java.io.File#toURL()
    */
   public URL toURL() throws MalformedURLException {

@@ -62,6 +62,8 @@ public class IniParser {
 
   /**
    * Set the String that identifies a comment.  Defaults to "#".
+   *
+   * @param delimiter the String used to identify comments
    */
   public void setCommentDelimiter(String delimiter) {
     commentDelimiter = delimiter;
@@ -72,12 +74,22 @@ public class IniParser {
    * line continues on the following line.
    *
    * By default, a '\' does continue the line.
+   *
+   * @param slashContinues true if a '\' at the end of a line signifies that
+   *        the line continues on the following line
    */
   public void setBackslashContinuesLine(boolean slashContinues) {
     this.slashContinues = slashContinues;
   }
 
-  /** Parses the INI-style configuration data from the given resource. */
+  /**
+   * Parses the INI-style configuration data from the given resource.
+   *
+   * @param path the name of the resource to read
+   * @return the IniList parsed from the named resource
+   * @see #openTextResource(String)
+   * @throws IOException if the resource cannot be read
+   */
   public IniList parseINI(String path)
     throws IOException
   {
@@ -87,6 +99,12 @@ public class IniParser {
   /**
    * Parses the INI-style configuration data from the given resource,
    * using the given class to find the resource.
+   *
+   * @param path the name of the resource to read
+   * @param c the Class to use for finding the named resource
+   * @return the IniList parsed from the named resource
+   * @see #openTextResource(String, Class)
+   * @throws IOException if the resource cannot be read
    */
   public IniList parseINI(String path, Class<?> c)
     throws IOException
@@ -96,6 +114,10 @@ public class IniParser {
 
   /**
    * Parses the INI-style wrapping the given file in a {@link BufferedReader}
+   *
+   * @param file the file on disk from which to read
+   * @return the IniList parsed from the file
+   * @throws IOException if the file cannot be read
    */
   public IniList parseINI(File file)
     throws IOException
@@ -121,7 +143,13 @@ public class IniParser {
     }
   }
 
-  /** Parses the INI-style configuration data from the given input stream. */
+  /**
+   * Parses the INI-style configuration data from the given input stream.
+   *
+   * @param in the BufferedReader stream from which to read
+   * @return the IniList parsed from the reader
+   * @throws IOException if the stream cannot be read
+   */
   public IniList parseINI(BufferedReader in)
     throws IOException
   {
@@ -186,12 +214,25 @@ public class IniParser {
 
   // -- Utility methods --
 
-  /** Opens a buffered reader for the given resource. */
+  /**
+   * Opens a buffered reader for the given resource.
+   *
+   * @param path the name of the resource to read
+   * @return the BufferedReader corresponding to the named resource
+   * @see #openTextResource(String)
+   */
   public static BufferedReader openTextResource(String path) {
     return openTextResource(path, IniParser.class);
   }
 
-  /** Opens a buffered reader for the given resource. */
+  /**
+   * Opens a buffered reader for the given resource.
+   *
+   * @param path the name of the resource to read
+   * @param c the Class to use for finding the named resource
+   * @return the BufferedReader corresponding to the named resource
+   * @see #openTextResource(String)
+   */
   public static BufferedReader openTextResource(String path, Class<?> c) {
     try {
       return new BufferedReader(new InputStreamReader(

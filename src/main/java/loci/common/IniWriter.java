@@ -58,12 +58,25 @@ public class IniWriter {
   /**
    * Saves the given IniList to the given file.
    * If the given file already exists, then the IniList will be appended.
+   *
+   * @param ini the {@link IniList} to be written
+   * @param path the path to a writable file on disk
+   * @throws IOException if there is an error during writing
    */
   public void saveINI(IniList ini, String path) throws IOException {
     saveINI(ini, path, true);
   }
 
-  /** Saves the given IniList to the given file. */
+  /**
+   * Saves the given IniList to the given file.
+   *
+   * @param ini the {@link IniList} to be written
+   * @param path the path to a writable file on disk
+   * @param append true if the INI data should be appended to
+   *               the end of the file if it already exists
+   * @param sorted true if the INI keys should be sorted before writing
+   * @throws IOException if there is an error during writing
+   */
   public void saveINI(IniList ini, String path, boolean append, boolean sorted)
     throws IOException
   {
@@ -92,7 +105,15 @@ public class IniWriter {
     out.close();
   }
 
-  /** Saves the given IniList to the given file. */
+  /**
+   * Saves the given IniList to the given file.
+   *
+   * @param ini the {@link IniList} to be written
+   * @param path the path to a writable file on disk
+   * @param append true if the INI data should be appended to
+   *               the end of the file if it already exists
+   * @throws IOException if there is an error during writing
+   */
   public void saveINI(IniList ini, String path, boolean append)
     throws IOException
   {

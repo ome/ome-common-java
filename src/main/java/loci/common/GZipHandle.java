@@ -53,6 +53,7 @@ public class GZipHandle extends StreamHandle {
   /**
    * Construct a new GZipHandle for the given file.
    *
+   * @param file the path to the GZip file
    * @throws HandleException if the given file name is not a GZip file.
    */
   public GZipHandle(String file) throws IOException {
@@ -76,7 +77,11 @@ public class GZipHandle extends StreamHandle {
 
   // -- GZipHandle API methods --
 
-  /** Returns true if the given filename is a gzip file. */
+  /**
+   * @param file the path to the GZip file
+   * @return true if the given filename is a gzip file
+   * @throws IOException if the file cannot be read
+   */
   public static boolean isGZipFile(String file) throws IOException {
     if (!file.toLowerCase().endsWith(".gz")) return false;
 

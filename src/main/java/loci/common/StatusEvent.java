@@ -53,22 +53,46 @@ public class StatusEvent {
 
   // -- Constructor --
 
-  /** Constructs a status event. */
+  /**
+   * Constructs a non-warning status event.
+   * The initial progress and maximum progress are set to -1.
+   *
+   * @param message the initial status message
+   */
   public StatusEvent(String message) {
     this(-1, -1, message);
   }
 
-  /** Constructs a status event. */
+  /**
+   * Constructs a status event.
+   * The initial progress and maximum progress are set to -1.
+   *
+   * @param message the initial status message
+   * @param warn true if this is a warning event
+   */
   public StatusEvent(String message, boolean warn) {
     this(-1, -1, message, warn);
   }
 
-  /** Constructs a status event. */
+  /**
+   * Constructs a non-warning status event.
+   *
+   * @param progress the current progress value
+   * @param maximum the maximum progress value
+   * @param message the initial status message
+   */
   public StatusEvent(int progress, int maximum, String message) {
     this(progress, maximum, message, false);
   }
 
-  /** Constructs a status event. */
+  /**
+   * Constructs a status event.
+   *
+   * @param progress the current progress value
+   * @param maximum the maximum progress value
+   * @param message the initial status message
+   * @param warn true if this is a warning event
+   */
   public StatusEvent(int progress, int maximum, String message, boolean warn) {
     this.progress = progress;
     this.maximum = maximum;
@@ -78,22 +102,30 @@ public class StatusEvent {
 
   // -- StatusEvent API methods --
 
-  /** Gets progress value. Returns -1 if progress is unknown. */
+  /**
+   * @return the progress value. Returns -1 if progress is unknown.
+   */
   public int getProgressValue() {
     return progress;
   }
 
-  /** Gets progress maximum. Returns -1 if progress is unknown. */
+  /**
+   * @return progress maximum. Returns -1 if progress is unknown.
+   */
   public int getProgressMaximum() {
     return maximum;
   }
 
-  /** Gets status message. */
+  /**
+   * @return status message.
+   */
   public String getStatusMessage() {
     return status;
   }
 
-  /** Returns whether or not this is a warning event. */
+  /**
+   * @return true if this is a warning event.
+   */
   public boolean isWarning() {
     return warning;
   }

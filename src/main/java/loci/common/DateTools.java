@@ -110,18 +110,53 @@ public final class DateTools {
   /**
    * Converts from two-word tick representation to milliseconds.
    * Mainly useful in conjunction with COBOL date conversion.
+   *
+   * @param hi the upper 32 bits of the tick count
+   * @param lo the lower 32 bits of the tick count
+   * @return the number of milliseconds corresponding to the tick count,
+   *         where 1 tick = 100 ns
    */
   public static long getMillisFromTicks(long hi, long lo) {
     long ticks = ((hi << 32) | lo);
     return ticks / 10000; // 100 ns = 0.0001 ms
   }
 
-  /** Converts the given timestamp into an ISO8601 date. */
+  /**
+   * Converts the given timestamp into an ISO8601 date.
+   *
+   * @param stamp the format-dependent timestamp
+   * @param format the format in which <code>stamp</code> is stored.
+   *               This is used to select the epoch value used for normalizing
+   *               the timestamp to milliseconds since the UNIX epoch.  Valid
+   *               values are #UNIX, #COBOL, #MICROSOFT, #ZVI, and #ALT_ZVI.
+   * @return an ISO 8601 formatted timestamp
+   * @see #UNIX_EPOCH
+   * @see #COBOL_EPOCH
+   * @see #MICROSOFT_EPOCH
+   * @see #ZVI_EPOCH
+   * @see #ALT_ZVI_EPOCH
+   */
   public static String convertDate(long stamp, int format) {
     return convertDate(stamp, format, ISO8601_FORMAT);
   }
 
-  /** Converts the given timestamp into a date string with the given format. */
+  /**
+   * Converts the given timestamp into a date string with the given format.
+   *
+   * @param stamp the format-dependent timestamp
+   * @param format the format in which <code>stamp</code> is stored.
+   *               This is used to select the epoch value used for normalizing
+   *               the timestamp to milliseconds since the UNIX epoch.  Valid
+   *               values are #UNIX, #COBOL, #MICROSOFT, #ZVI, and #ALT_ZVI.
+   * @param outputFormat the pattern used for formatting the timestamp
+   * @return a timestamp in the specified output format
+   * @see #UNIX_EPOCH
+   * @see #COBOL_EPOCH
+   * @see #MICROSOFT_EPOCH
+   * @see #ZVI_EPOCH
+   * @see #ALT_ZVI_EPOCH
+   * @see DateTimeFormat
+   */
   public static String convertDate(long stamp, int format, String outputFormat)
   {
     return convertDate(stamp, format, outputFormat, false);
@@ -132,6 +167,21 @@ public final class DateTools {
    *
    * If correctTimeZoneForGMT is set, then the timestamp will be interpreted
    * as being relative to GMT and not the local time zone.
+   *
+   * @param stamp the format-dependent timestamp
+   * @param format the format in which <code>stamp</code> is stored.
+   *               This is used to select the epoch value used for normalizing
+   *               the timestamp to milliseconds since the UNIX epoch.  Valid
+   *               values are #UNIX, #COBOL, #MICROSOFT, #ZVI, and #ALT_ZVI.
+   * @param outputFormat the pattern used for formatting the timestamp
+   * @param correctTimeZoneForGMT true if the timestamp is relative to GMT
+   * @return a timestamp in the specified output format
+   * @see #UNIX_EPOCH
+   * @see #COBOL_EPOCH
+   * @see #MICROSOFT_EPOCH
+   * @see #ZVI_EPOCH
+   * @see #ALT_ZVI_EPOCH
+   * @see DateTimeFormat
    */
   public static String convertDate(long stamp, int format, String outputFormat,
     boolean correctTimeZoneForGMT)
@@ -181,6 +231,8 @@ public final class DateTools {
    * @param date      The date to parse as a Joda timestamp
    * @param format    The date format to parse the string date
    * @param separator The separator for milliseconds
+   * @return the Joda Instant object representing the timestamp
+   * @see Instant
    */
   protected static Instant parseDate(String date, String format, String separator) {
 
@@ -244,6 +296,7 @@ public final class DateTools {
    *
    * @param date   The date to format as ISO 8601
    * @param format The date format to parse the string date
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String format) {
     return formatDate(date, format, false);
@@ -257,6 +310,7 @@ public final class DateTools {
    * @param date      The date to format as ISO 8601
    * @param format    The date format to parse the string date
    * @param separator The separator for milliseconds
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String format, String separator) {
     return formatDate(date, format, false, separator);
@@ -268,6 +322,7 @@ public final class DateTools {
    * @param date    The date to format as ISO 8601.
    * @param format  The date format to parse the string date
    * @param lenient Whether or not to leniently parse the date.
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String format, boolean lenient) {
    return formatDate(date, format, false, null);
@@ -280,6 +335,7 @@ public final class DateTools {
    * @param format    The date format to parse the string date
    * @param lenient   Whether or not to leniently parse the date.
    * @param separator The separator for milliseconds
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String format, boolean lenient, String separator) {
     if (date == null) return null;
@@ -309,6 +365,7 @@ public final class DateTools {
    *
    * @param date    The date to format as ISO 8601
    * @param formats The date possible formats to parse the string date
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String[] formats) {
     return formatDate(date, formats, false, null);
@@ -323,6 +380,7 @@ public final class DateTools {
    * @param date    The date to format as ISO 8601.
    * @param formats The date possible formats to parse the string date
    * @param lenient Whether or not to leniently parse the date.
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String[] formats,
     boolean lenient)
@@ -338,6 +396,7 @@ public final class DateTools {
    * @param date    The date to format as ISO 8601
    * @param formats The date possible formats to parse the string date
    * @param separator  The separator for milliseconds
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String[] formats, String separator) {
     return formatDate(date, formats, false, separator);
@@ -350,6 +409,7 @@ public final class DateTools {
    * @param formats    The date possible formats to parse the string date
    * @param lenient    Whether or not to leniently parse the date.
    * @param separator  The separator for milliseconds
+   * @return an ISO 8601 formatted timestamp
    */
   public static String formatDate(String date, String[] formats,
     boolean lenient, String separator)
@@ -394,7 +454,7 @@ public final class DateTools {
   }
 
   /**
-   * Returns a timestamp for the current timezone in a
+   * @return a timestamp for the current timezone in a
    * human-readable locale-independent format ("YYYY-MM-DD HH:MM:SS")
    */
   public static String getTimestamp() {
@@ -402,7 +462,7 @@ public final class DateTools {
   }
 
   /**
-   * Returns a timestamp for the current timezone in a format suitable
+   * @return a timestamp for the current timezone in a format suitable
    * for a filename in a locale-independent format
    * ("YYYY-MM-DD_HH-MM-SS")
    */
