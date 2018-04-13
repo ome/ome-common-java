@@ -657,18 +657,37 @@ public class Location {
     return mappedId != null && new File(mappedId).exists();
   }
 
-  /* @see java.io.File#getAbsoluteFile() */
+  /**
+   * Return the absolute form of this abstract location.
+   *
+   * @return a Location representing @see #getAbsolutePath
+   * @see java.io.File#getAbsoluteFile()
+   */
   public Location getAbsoluteFile() {
     return new Location(getAbsolutePath());
   }
 
-  /* @see java.io.File#getAbsolutePath() */
+  /**
+   * Return the absolute form of this abstract location.
+   *
+   * @return a string representing the absolute path
+   * @see java.io.File#getAbsolutePath()
+   */
   public String getAbsolutePath() {
     LOGGER.trace("getAbsolutePath()");
     return isURL ? url.toExternalForm() : file.getAbsolutePath();
   }
 
-  /* @see java.io.File#getCanonicalFile() */
+  /**
+   * Returns the canonical path to this file.
+   * If the file is a URL, then the canonical path is equivalent to the
+   * absolute file ({@link #getAbsoluteFile()}). Otherwise, this method
+   * will delegate to {@link java.io.File#getCanonicalFile()}.
+   *
+   * @return see above
+   * @throws IOException if the canonical path cannot be constructed
+   * @see java.io.File#getCanonicalFile()
+   */
   public Location getCanonicalFile() throws IOException {
     return isURL ? getAbsoluteFile() : new Location(file.getCanonicalFile());
   }
@@ -721,17 +740,29 @@ public class Location {
     return file.getParent();
   }
 
-  /* @see java.io.File#getParentFile() */
+  /**
+   * Returns this file's parent directory.
+   *
+   * @return the Location representing {@link #getParent()}
+   * @see java.io.File#getParentFile()
+   */
   public Location getParentFile() {
     return new Location(getParent());
   }
 
-  /* @see java.io.File#getPath() */
+  /**
+   * Returns the file's path.
+   *
+   * @return this file's path name
+   * @see java.io.File#getPath()
+   */
   public String getPath() {
     return isURL ? url.getHost() + url.getPath() : file.getPath();
   }
 
   /**
+   * Returns whether or not this file's path is absolute.
+   *
    * @return true if this path name is absolute.
    *         If the path name is a URL, this method will always return true.
    * @see java.io.File#isAbsolute()
@@ -742,6 +773,8 @@ public class Location {
   }
 
   /**
+   * Returns whether or not this file is a directory.
+   *
    * @return true if this pathname exists and represents a directory.
    * @see java.io.File#isDirectory()
    */
@@ -755,6 +788,8 @@ public class Location {
   }
 
   /**
+   * Returns whether or not this file is a regular file (i.e. not a directory).
+   *
    * @return true if this pathname exists and represents a regular file.
    * @see java.io.File#exists()
    */
@@ -764,6 +799,8 @@ public class Location {
   }
 
   /**
+   * Returns whether or not this file is marked hidden by the filesystem.
+   *
    * @return true if the pathname is 'hidden'.  This method will always
    *         return false if the pathname corresponds to a URL.
    * @see java.io.File#isHidden()
@@ -781,6 +818,8 @@ public class Location {
   }
 
   /**
+   * Return the last modification time of the file.
+   *
    * @return the last modification time of this file, in milliseconds since
    *         the UNIX epoch. If the file does not exist, 0 is returned.
    * @see java.io.File#lastModified()
@@ -801,6 +840,8 @@ public class Location {
   }
 
   /**
+   * Return the file length in bytes.
+   *
    * @return the length of the file or stream in bytes
    * @see java.io.File#length()
    * @see java.net.URLConnection#getContentLength()
@@ -820,6 +861,9 @@ public class Location {
   }
 
   /**
+   * Return a list of relative file names in this directory, or null
+   * if this file is not a directory.
+   *
    * @return a list of file names in this directory.  Hidden files will be
    *         included in the list. If this is not a directory, return null.
    * @see #list(boolean)
@@ -829,6 +873,9 @@ public class Location {
   }
 
   /**
+   * Return a list of files in this directory, or null if this file is
+   * not a directory.
+   *
    * @return a list of absolute files in this directory.  Hidden files will
    *         be included in the list. If this is not a directory, return null.
    * @see #list()
@@ -845,6 +892,8 @@ public class Location {
   }
 
   /**
+   * Return a {@link URL} corresponding to this file.
+   *
    * @return the URL corresponding to this pathname.
    * @throws MalformedURLException if the pathname is not a valid URL
    * @see java.io.File#toURL()
