@@ -244,6 +244,22 @@ public class FileHandle implements IRandomAccess {
     return raf.skipBytes(n);
   }
 
+  /* @see #skipBytes(int) */
+  @Override
+  public long skipBytes(long n) throws IOException {
+    if (n < 1) {
+      return 0;
+    }
+    final long currentPosition = getFilePointer();
+    n = Math.min(n, length() - currentPosition);
+    if (n <= Integer.MAX_VALUE) {
+      /* use standard library if possible */
+      return skipBytes((int) n);
+    }
+    seek(currentPosition + n);
+    return n;
+  }
+
   // -- DataOutput API metthods --
 
   /* @see java.io.DataOutput.write(byte[]) */

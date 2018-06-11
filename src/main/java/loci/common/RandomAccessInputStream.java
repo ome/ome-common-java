@@ -670,6 +670,11 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     return raf.skipBytes(n);
   }
 
+  /** Skip n bytes within the stream. */
+  public long skipBytes(long n) throws IOException {
+    return raf.skipBytes(n);
+  }
+
   /** Read bytes from the stream into the given array. */
   @Override
   public int read(byte[] array) throws IOException {

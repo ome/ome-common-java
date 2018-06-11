@@ -469,6 +469,12 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /* @see java.io.DataInput.skipBytes(int) */
   @Override
   public int skipBytes(int n) throws IOException {
+    return (int) skipBytes((long) n);
+  }
+
+  /* @see #skipBytes(int) */
+  @Override
+  public long skipBytes(long n) throws IOException {
     if (n < 1) {
       return 0;
     }
@@ -476,7 +482,7 @@ public class NIOFileHandle extends AbstractNIOHandle {
     long newPosition = oldPosition + Math.min(n, length());
 
     buffer(newPosition, 0);
-    return (int) (position - oldPosition);
+    return position - oldPosition;
   }
 
   // -- DataOutput API methods --
