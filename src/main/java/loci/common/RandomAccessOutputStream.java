@@ -39,6 +39,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.google.common.math.LongMath;
+
 /**
  * RandomAccessOutputStream provides methods for writing to files and
  * byte arrays.
@@ -118,7 +120,16 @@ public class RandomAccessOutputStream extends OutputStream implements DataOutput
    * @throws IOException if the offset cannot be changed
    */
   public void skipBytes(int skip) throws IOException {
-    outputFile.seek(outputFile.getFilePointer() + skip);
+    final long currentPosition = outputFile.getFilePointer();
+    final long newPosition;
+    try {
+      /* in Java 8 can instead use addExact */
+      newPosition = LongMath.checkedAdd(currentPosition, skip);
+    } catch (ArithmeticException ae) {
+      /* translate to expected checked exception */
+      throw new IOException("seek is out of range", ae);
+    }
+    outputFile.seek(newPosition);
   }
 
   /**
