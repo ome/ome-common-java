@@ -62,6 +62,9 @@ public class URLHandle extends StreamHandle {
 
   /**
    * Constructs a new URLHandle using the given URL.
+   *
+   * @param url the fully qualified URL path
+   * @throws IOException if the URL is invalid or unreadable
    */
   public URLHandle(String url) throws IOException {
     if (!url.startsWith("http") && !url.startsWith("file:")) {

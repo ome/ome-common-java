@@ -154,6 +154,8 @@ public final class XMLTools {
   /**
    * Creates a new {@link DocumentBuilder} via {@link DocumentBuilderFactory}
    * or logs and throws a {@link RuntimeException}.
+   *
+   * @return the default {@link DocumentBuilder} instance
    */
   public static DocumentBuilder createBuilder() {
     try {
@@ -168,12 +170,22 @@ public final class XMLTools {
   /**
    * Calls {@link DocumentBuilder#newDocument()} on a
    * {@link #createBuilder() new builder}.
+   *
+   * @return an empty {@link Document}
    */
   public static Document createDocument() {
     return createBuilder().newDocument();
   }
 
-  /** Parses a DOM from the given XML file on disk. */
+  /**
+   * Parses a DOM from the given XML file on disk.
+   *
+   * @param file a file on disk that contains XML
+   * @return a {@link Document} reflecting the contents of the file
+   * @throws ParserConfigurationException if the XML parser cannot be created
+   * @throws SAXException if there is an error parsing the XML
+   * @throws IOException if there is an error reading from the file
+   */
   public static Document parseDOM(File file)
     throws ParserConfigurationException, SAXException, IOException
   {
@@ -186,7 +198,15 @@ public final class XMLTools {
     }
   }
 
-  /** Parses a DOM from the given XML string. */
+  /**
+   * Parses a DOM from the given XML string.
+   *
+   * @param xml XML data
+   * @return a {@link Document} reflecting the XML string
+   * @throws ParserConfigurationException if the XML parser cannot be created
+   * @throws SAXException if there is an error parsing the XML
+   * @throws IOException if there is an error reading from the file
+   */
   public static Document parseDOM(String xml)
     throws ParserConfigurationException, SAXException, IOException
   {
@@ -200,7 +220,15 @@ public final class XMLTools {
     }
   }
 
-  /** Parses a DOM from the given XML input stream. */
+  /**
+   * Parses a DOM from the given XML input stream.
+   *
+   * @param is the {@link InputStream} containing XML
+   * @return a {@link Document} representing the XML
+   * @throws ParserConfigurationException if the XML parser cannot be created
+   * @throws SAXException if there is an error parsing the XML
+   * @throws IOException if there is an error reading from the stream
+   */
   public static Document parseDOM(InputStream is)
     throws ParserConfigurationException, SAXException, IOException
   {
@@ -215,7 +243,15 @@ public final class XMLTools {
     return db.parse(in);
   }
 
-  /** Converts the given DOM back to a string. */
+  /**
+   * Converts the given DOM back to a string.
+   *
+   * @param doc the {@link Document} representing the XML
+   * @return a string representation of the XML
+   * @throws TransformerConfigurationException if there is an error
+   *         initializing the conversion
+   * @throws TransformerException if there is an error during writing
+   */
   public static String getXML(Document doc)
     throws TransformerConfigurationException, TransformerException
   {
@@ -228,6 +264,8 @@ public final class XMLTools {
   /**
    * Dumps the given OME-XML DOM tree to a string.
    * @param schemaLocation if null, no xmlns attribute will be added.
+   * @param doc the {@link Document} representing the XML to be written
+   * @param r the {@link Element} to use for adding the schema location
    * @return OME-XML as a string.
    */
   public static String dumpXML(String schemaLocation, Document doc, Element r) {
@@ -237,6 +275,10 @@ public final class XMLTools {
   /**
    * Dumps the given OME-XML DOM tree to a string.
    * @param schemaLocation if null, no xmlns attribute will be added.
+   * @param doc the {@link Document} representing the XML to be written
+   * @param r the {@link Element} to use for adding the schema location
+   * @param includeXMLDeclaration false if the XML declaration should
+   *        be omitted, see {@link OutputKeys#OMIT_XML_DECLARATION}
    * @return OME-XML as a string.
    */
   public static String dumpXML(String schemaLocation, Document doc, Element r,
@@ -263,7 +305,15 @@ public final class XMLTools {
 
   // -- Filtering --
 
-  /** Escape special characters. */
+  /**
+   * Escape special characters.
+   * Replaces quotes, ampersands, and angle brackets
+   * with the escaped equivalent.
+   *
+   * @param s input string containing characters to escape
+   * @return copy of the input string with characters escaped
+   *         as described above
+   */
   public static String escapeXML(String s) {
     StringBuffer sb = new StringBuffer();
 
@@ -293,7 +343,13 @@ public final class XMLTools {
     return sb.toString();
   }
 
-  /** Remove invalid characters from an XML string. */
+  /**
+   * Remove invalid characters from an XML string.
+   *
+   * @param s the input string from which to remove invalid characters
+   * @return a copy of the input string with CR, LF, tab, and control
+   *         characters replaced by a single space
+   */
   public static String sanitizeXML(String s) {
     final char[] c = s.toCharArray();
     for (int i=0; i<s.length(); i++) {
@@ -308,12 +364,27 @@ public final class XMLTools {
     return new String(c);
   }
 
-  /** Indents XML to be more readable. */
+  /**
+   * Indents XML to be more readable.
+   * Uses 3 spaces to indent, and may indent CDATA.
+   *
+   * @param xml the XML string to format
+   * @return the formatted XML string
+   * @see #indentXML(String, int, boolean)
+   */
   public static String indentXML(String xml) {
     return indentXML(xml, 3, false);
   }
 
-  /** Indents XML by the given spacing to be more readable. */
+  /**
+   * Indents XML by the given spacing to be more readable.
+   * CDATA may be indented.
+   *
+   * @param xml the XML string to format
+   * @param spacing the number of spaces by which to indent
+   * @return the formatted XML string
+   * @see #indentXML(String, int, boolean)
+   */
   public static String indentXML(String xml, int spacing) {
     return indentXML(xml, spacing, false);
   }
@@ -321,6 +392,13 @@ public final class XMLTools {
   /**
    * Indents XML to be more readable, avoiding any whitespace
    * injection into CDATA if the preserveCData flag is set.
+   * Uses 3 spaces to indent.
+   *
+   * @param xml the XML string to format
+   * @param preserveCData true if CDATA nodes should be preserved
+   *                      with no indenting
+   * @return the formatted XML string
+   * @see #indentXML(String, int, boolean)
    */
   public static String indentXML(String xml, boolean preserveCData) {
     return indentXML(xml, 3, preserveCData);
@@ -329,6 +407,12 @@ public final class XMLTools {
   /**
    * Indents XML by the given spacing to be more readable, avoiding any
    * whitespace injection into CDATA if the preserveCData flag is set.
+   *
+   * @param xml the XML string to format
+   * @param spacing the number of spaces by which to indent
+   * @param preserveCData true if CDATA nodes should be preserved
+   *                      with no indenting
+   * @return the formatted XML string
    */
   public static String indentXML(String xml, int spacing,
     boolean preserveCData)
@@ -391,7 +475,14 @@ public final class XMLTools {
 
   // -- Parsing --
 
-  /** Parses the given XML string into a list of key/value pairs. */
+  /**
+   * Parses the given XML string into a list of key/value pairs.
+   *
+   * @param xml the {@link InputStream} representing the XML
+   * @return a hashtable of key/value pairs representing the XML
+   * @throws IOException if there is an error during parsing
+   * @see MetadataHandler
+   */
   public static Hashtable<String, String> parseXML(String xml)
     throws IOException
   {
@@ -402,6 +493,10 @@ public final class XMLTools {
 
   /**
    * Parses the given XML string using the specified XML handler.
+   *
+   * @param xml the string representing the XML
+   * @param handler the {@link DefaultHandler} to use for parsing
+   * @throws IOException if there is an error during parsing
    */
   public static void parseXML(String xml, DefaultHandler handler)
     throws IOException
@@ -413,6 +508,10 @@ public final class XMLTools {
    * Parses the XML contained in the given input stream into
    * using the specified XML handler.
    * Be very careful, as 'stream' <b>will</b> be closed by the SAX parser.
+   *
+   * @param stream the {@link RandomAccessInputStream} representing the XML
+   * @param handler the {@link DefaultHandler} to use for parsing
+   * @throws IOException if there is an error during parsing
    */
   public static void parseXML(RandomAccessInputStream stream,
     DefaultHandler handler) throws IOException
@@ -423,6 +522,10 @@ public final class XMLTools {
   /**
    * Parses the XML contained in the given byte array into
    * using the specified XML handler.
+   *
+   * @param xml the byte array representing the XML
+   * @param handler the {@link DefaultHandler} to use for parsing
+   * @throws IOException if there is an error during parsing
    */
   public static void parseXML(byte[] xml, DefaultHandler handler)
     throws IOException
@@ -433,6 +536,10 @@ public final class XMLTools {
   /**
    * Parses the XML contained in the given InputStream using the
    * specified XML handler.
+   *
+   * @param xml the {@link InputStream} representing the XML
+   * @param handler the {@link DefaultHandler} to use for parsing
+   * @throws IOException if there is an error during parsing
    */
   public static void parseXML(InputStream xml, DefaultHandler handler)
     throws IOException
@@ -457,14 +564,28 @@ public final class XMLTools {
 
   // -- I/O --
 
-  /** Writes the specified DOM to the given output stream. */
+  /**
+   * Writes the specified DOM to the given output stream.
+   *
+   * @param os the {@link OutputStream} to which XML should be written
+   * @param doc the {@link Document} representing the XML to write
+   * @throws TransformerException if there is an error during writing
+   */
   public static void writeXML(OutputStream os, Document doc)
     throws TransformerException
   {
     writeXML(os, doc, true);
   }
 
-  /** Writes the specified DOM to the given output stream. */
+  /**
+   * Writes the specified DOM to the given output stream.
+   *
+   * @param os the {@link OutputStream} to which XML should be written
+   * @param doc the {@link Document} representing the XML to write
+   * @param includeXMLDeclaration false if the XML declaration should
+   *        be omitted, see {@link OutputKeys#OMIT_XML_DECLARATION}
+   * @throws TransformerException if there is an error during writing
+   */
   public static void writeXML(OutputStream os, Document doc,
     boolean includeXMLDeclaration)
     throws TransformerException
@@ -472,7 +593,15 @@ public final class XMLTools {
     writeXML(new StreamResult(os), doc, includeXMLDeclaration);
   }
 
-  /** Writes the specified DOM to the given stream. */
+  /**
+   * Writes the specified DOM to the given stream.
+   *
+   * @param output the {@link Result} to which XML should be written
+   * @param doc the {@link Document} representing the XML to write
+   * @param includeXMLDeclaration false if the XML declaration should
+   *        be omitted, see {@link OutputKeys#OMIT_XML_DECLARATION}
+   * @throws TransformerException if there is an error during writing
+   */
   public static void writeXML(Result output, Document doc,
     boolean includeXMLDeclaration)
     throws TransformerException
@@ -487,7 +616,13 @@ public final class XMLTools {
 
   // -- XSLT --
 
-  /** Gets an XSLT template from the given resource location. */
+  /**
+   * Gets an XSLT template from the given resource location.
+   *
+   * @param resourcePath the name of the stylesheet resource
+   * @param sourceClass the class to use when searching for the resource
+   * @return a {@link Templates} object representing the stylesheet
+   */
   public static Templates getStylesheet(String resourcePath,
     Class<?> sourceClass)
   {
@@ -524,7 +659,13 @@ public final class XMLTools {
     return null;
   }
 
-  /** Replaces NS:tag with NS_tag for undeclared namespaces */
+  /**
+   * Replaces NS:tag with NS_tag for undeclared namespaces
+   *
+   * @param xml the XML string whose namespaces need to be replaced
+   * @return a copy of the input string with NS:tag replaced by NS_tag
+   *         for any undeclared namespaces
+   */
   public static String avoidUndeclaredNamespaces(String xml) {
     int gt = xml.indexOf('>');
     if (gt > 0 && xml.startsWith("<?xml ")) {
@@ -569,7 +710,15 @@ public final class XMLTools {
     return xml;
   }
 
-  /** Transforms the given XML string using the specified XSLT stylesheet. */
+  /**
+   * Transforms the given XML string using the specified XSLT stylesheet.
+   *
+   * @param xml the XML string to be transformed
+   * @param xslt the {@link Templates} object representing an XSLT stylesheet
+   * @return the XML string that results from applying the stylesheet
+   * @throws IOException if there is an error parsing the XML
+   * @see #getStylesheet(String, Class)
+   */
   public static String transformXML(String xml, Templates xslt)
     throws IOException
   {
@@ -577,7 +726,16 @@ public final class XMLTools {
     return transformXML(new StreamSource(new StringReader(xml)), xslt);
   }
 
-  /** Transforms the given XML data using the specified XSLT stylesheet. */
+  /**
+   * Transforms the given XML data using the specified XSLT stylesheet.
+   *
+   * @param xmlSource the {@link Source} object representing
+   *                  the XML to be transformed
+   * @param xslt the {@link Templates} object representing an XSLT stylesheet
+   * @return the XML string that results from applying the stylesheet
+   * @throws IOException if there is an error parsing the XML
+   * @see #getStylesheet(String, Class)
+   */
   public static String transformXML(Source xmlSource, Templates xslt)
     throws IOException
   {

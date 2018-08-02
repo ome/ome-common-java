@@ -76,26 +76,41 @@ public class NIOInputStream extends InputStream implements DataInput {
 
   // -- Constructors --
 
-  /** Constructs an NIOInputStream around the given file. */
+  /**
+   * Constructs an NIOInputStream around the given file.
+   *
+   * @param filename the path to a readable file on disk
+   * @throws IOException if the path is invalid or unreadable
+   */
   public NIOInputStream(String filename) throws IOException {
     this.filename = filename;
     file = new File(filename);
     raf = new FileHandle(file, "r");
   }
 
-  /** Constructs a random access stream around the given handle. */
+  /**
+   * Constructs a random access stream around the given handle.
+   *
+   * @param handle the {@link IRandomAccess} to wrap in a stream
+   */
   public NIOInputStream(IRandomAccess handle) {
     raf = handle;
   }
 
-  /** Constructs a random access stream around the given byte array. */
+  /**
+   * Constructs a random access stream around the given byte array.
+   *
+   * @param array the byte array to wrap in a stream
+   */
   public NIOInputStream(byte[] array) {
     this(new ByteArrayHandle(array));
   }
 
   // -- NIOInputStream API methods --
 
-  /** Returns the underlying InputStream. */
+  /**
+   * @return the underlying InputStream.
+   */
   public DataInputStream getInputStream() {
     return null;
   }
@@ -103,11 +118,18 @@ public class NIOInputStream extends InputStream implements DataInput {
   /**
    * Sets the number of bytes by which to extend the stream.  This only applies
    * to InputStream API methods.
+   *
+   * @param extend the number of bytes by which to extend the stream
    */
   public void setExtend(int extend) {
   }
 
-  /** Seeks to the given offset within the stream. */
+  /**
+   * Seeks to the given offset within the stream.
+   *
+   * @param pos the offset to which to seek
+   * @throws IOException if the seek is not successful
+   */
   public void seek(long pos) throws IOException {
     raf.seek(pos);
   }
@@ -118,12 +140,19 @@ public class NIOInputStream extends InputStream implements DataInput {
     return raf.readUnsignedByte();
   }
 
-  /** Gets the number of bytes in the file. */
+  /**
+   * Gets the number of bytes in the file.
+   *
+   * @return the length of the stream in bytes
+   * @throws IOException if the length cannot be retrieved
+   */
   public long length() throws IOException {
     return raf.length();
   }
 
-  /** Gets the current (absolute) file pointer. */
+  /**
+   * @return the current (absolute) file pointer.
+   */
   public long getFilePointer() {
     try {
       return raf.getFilePointer();
@@ -137,12 +166,18 @@ public class NIOInputStream extends InputStream implements DataInput {
   public void close() throws IOException {
   }
 
-  /** Sets the endianness of the stream. */
+  /**
+   * Sets the endianness of the stream.
+   *
+   * @param isLittleEndian true if the stream order is little-endian
+   */
   public void order(boolean isLittleEndian) {
     this.isLittleEndian = isLittleEndian;
   }
 
-  /** Gets the endianness of the stream. */
+  /**
+   * @return the endianness of the stream.
+   */
   public boolean isLittleEndian() {
     return isLittleEndian;
   }
@@ -150,6 +185,9 @@ public class NIOInputStream extends InputStream implements DataInput {
   /**
    * Reads a string ending with one of the characters in the given string.
    *
+   * @param lastChars string containing possible final characters for the returned string
+   * @return the smallest string that ends in one of the characters in <code>lastChars</code>
+   * @throws IOException If the maximum length (512 MB) is exceeded.
    * @see #findString(String...)
    */
   public String readString(String lastChars) throws IOException {
@@ -170,6 +208,7 @@ public class NIOInputStream extends InputStream implements DataInput {
    * @return The string from the initial position through the end of the
    *   terminating sequence, or through the end of the stream if no
    *   terminating sequence is found.
+   * @throws IOException If the maximum search length (512 MB) is exceeded.
    */
   public String findString(String... terminators) throws IOException {
     return findString(true, DEFAULT_BLOCK_SIZE, terminators);
@@ -189,6 +228,8 @@ public class NIOInputStream extends InputStream implements DataInput {
    * @return The string from the initial position through the end of the
    *   terminating sequence, or through the end of the stream if no
    *   terminating sequence is found, or null if saveString flag is unset.
+   * @throws IOException If saveString flag is set
+   *   and the maximum search length (512 MB) is exceeded.
    */
   public String findString(boolean saveString, String... terminators)
     throws IOException
@@ -206,6 +247,7 @@ public class NIOInputStream extends InputStream implements DataInput {
    * @return The string from the initial position through the end of the
    *   terminating sequence, or through the end of the stream if no
    *   terminating sequence is found.
+   * @throws IOException If the maximum search length (512 MB) is exceeded.
    */
   public String findString(int blockSize, String... terminators)
     throws IOException
@@ -350,12 +392,24 @@ public class NIOInputStream extends InputStream implements DataInput {
     return findString("\n");
   }
 
-  /** Read a string of arbitrary length, terminated by a null char. */
+  /**
+   * Read a string of arbitrary length, terminated by a null char.
+   *
+   * @return the smallest string such that the last character is a null byte
+   * @throws IOException if a null-terminated string is not found
+   * @see #findString(String...)
+   */
   public String readCString() throws IOException {
     return findString("\0");
   }
 
-  /** Read a string of length n. */
+  /**
+   * Read a string of length n.
+   *
+   * @param n the number of bytes to read
+   * @return a string representing the next <code>n</code> bytes in the stream
+   * @throws IOException if there is an error during reading
+   */
   public String readString(int n) throws IOException {
     byte[] b = new byte[n];
     readFully(b);

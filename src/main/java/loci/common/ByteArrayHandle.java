@@ -60,11 +60,20 @@ public class ByteArrayHandle extends AbstractNIOHandle {
   /**
    * Creates a random access byte stream to read from, and
    * write to, the bytes specified by the byte[] argument.
+   *
+   * @param bytes byte array to work with
    */
   public ByteArrayHandle(byte[] bytes) {
     buffer = ByteBuffer.wrap(bytes);
   }
 
+  /**
+   *
+   * Creates a random access byte stream to read from, and
+   * write to, the supplied ByteBuffer.
+   *
+   * @param bytes ByteBuffer used for reading and writing
+   */
   public ByteArrayHandle(ByteBuffer bytes) {
     buffer = bytes;
   }
@@ -86,7 +95,11 @@ public class ByteArrayHandle extends AbstractNIOHandle {
 
   // -- ByteArrayHandle API methods --
 
-  /** Gets the byte array backing this FileHandle. */
+  /**
+   * Gets a byte array representing the current state of this ByteArrayHandle.
+   *
+   * @return a byte array representation of the backing ByteBuffer
+   */
   public byte[] getBytes() {
     return buffer.array();
   }

@@ -72,51 +72,94 @@ public class RandomAccessOutputStream extends OutputStream implements DataOutput
     outputFile = handle;
   }
 
-  /** Constructs a random access stream around the given byte array. */
+  /**
+   * Constructs a random access stream around the given byte array.
+   *
+   * @param array the byte array to be written to
+   * @throws IOException if the array cannot be wrapped
+   *                     in a {@link ByteArrayHandle}
+   */
   public RandomAccessOutputStream(byte[] array) throws IOException {
     this(new ByteArrayHandle(array));
   }
 
   // -- RandomAccessOutputStream API methods --
 
-  /** Seeks to the given offset within the stream. */
+  /**
+   * Seeks to the given offset within the stream.
+   *
+   * @param pos the new offset within the stream
+   * @throws IOException is the seek is not successful
+   */
   public void seek(long pos) throws IOException {
     outputFile.seek(pos);
   }
 
-  /** Returns the current offset within the stream. */
+  /**
+   * @return the current offset within the stream.
+   * @throws IOException if the offset cannot be retrieved
+   */
   public long getFilePointer() throws IOException {
     return outputFile.getFilePointer();
   }
 
-  /** Returns the length of the file. */
+  /**
+   * @return the length of the file
+   * @throws IOException if the length cannot be retrieved
+   */
   public long length() throws IOException {
     return outputFile.length();
   }
 
-  /** Advances the current offset by the given number of bytes. */
+  /**
+   * Advances the current offset by the given number of bytes.
+   *
+   * @param skip the number of bytes to skip
+   * @throws IOException if the offset cannot be changed
+   */
   public void skipBytes(int skip) throws IOException {
     outputFile.seek(outputFile.getFilePointer() + skip);
   }
 
-  /** Sets the endianness of the stream. */
+  /**
+   * Sets the endianness of the stream.
+   *
+   * @param little true if the byte order of the stream is little-endian
+   */
   public void order(boolean little) {
     outputFile.setOrder(
       little ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
   }
 
-  /** Gets the endianness of the stream. */
+  /**
+   * Gets the endianness of the stream.
+   *
+   * @return true if the byte order of the stream is little-endian
+   */
   public boolean isLittleEndian() {
     return outputFile.getOrder() == ByteOrder.LITTLE_ENDIAN;
   }
 
-  /** Writes the given string followed by a newline character. */
+  /**
+   * Writes the given string followed by a newline character.
+   *
+   * @param s the line of text to be written.  A newline does not
+   *          need to be appended, as this method automatically writes
+   *          a newline character.
+   * @throws IOException if writing is not possible
+   */
   public void writeLine(String s) throws IOException {
     writeBytes(s);
     writeBytes("\n");
   }
 
-  /** Writes the given value using the given number of bits. */
+  /**
+   * Writes the given value using the given number of bits.
+   *
+   * @param value int value to be written
+   * @param numBits exact number of bits to be written
+   * @throws IOException if writing fails for any reason
+   */
   public void writeBits(int value, int numBits) throws IOException {
     if (numBits <= 0) {
       return;
@@ -139,8 +182,13 @@ public class RandomAccessOutputStream extends OutputStream implements DataOutput
   /**
    * Writes the bits represented by a bit string to the buffer.
    *
+   * @param bitString a string of '0' and/or '1' characters representing
+   *                  bits to be written. Each character in the string results
+   *                  in a call to {@link #writeBits(int, int)}
+   *                  that writes 1 bit.
    * @throws IllegalArgumentException If any characters other than
    *   '0' and '1' appear in the string.
+   * @throws IOException if writing fails for any other reason
    */
   public void writeBits(String bitString) throws IOException {
     if (bitString == null) {

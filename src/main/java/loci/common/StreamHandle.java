@@ -459,6 +459,8 @@ public abstract class StreamHandle implements IRandomAccess {
    * Close and reopen the stream; the stream pointer and mark should be
    * reset to 0.  This method is called if we need to seek backwards within
    * the stream.
+   *
+   * @throws IOException if the stream cannot be reset
    */
   protected abstract void resetStream() throws IOException;
 

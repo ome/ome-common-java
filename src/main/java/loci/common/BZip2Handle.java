@@ -52,6 +52,7 @@ public class BZip2Handle extends StreamHandle {
   /**
    * Construct a new BZip2Handle corresponding to the given file.
    *
+   * @param file the path to a file on disk
    * @throws HandleException if the given file is not a BZip2 file.
    */
   public BZip2Handle(String file) throws IOException {
@@ -77,7 +78,14 @@ public class BZip2Handle extends StreamHandle {
 
   // -- BZip2Handle API methods --
 
-  /** Returns true if the given filename is a BZip2 file. */
+  /**
+   * Returns true if the given filename is a BZip2 file.
+   *
+   * @param file the path to a file on disk
+   * @return true if file's extension is .bz2 and the
+   *         first 2 bytes are the BZip2 magic marker
+   * @throws IOException if the file is not readable
+   */
   public static boolean isBZip2File(String file) throws IOException {
     if (!file.toLowerCase().endsWith(".bz2")) {
       return false;

@@ -68,7 +68,16 @@ public final class DataTools {
 
   private DataTools() { }
 
-  /** Reads the contents of the given file into a string. */
+  /**
+   * Reads the contents of the given file into a string.
+   *
+   * @param id name of the file to read
+   *           this can be any name supported by Location,
+   *           not necessarily a file on disk
+   * @return the complete contents of the specified file
+   * @throws IOException if the file cannot be read or is larger than 2GB
+   * @see Location#getMappedId(String)
+   */
   public static String readFile(String id) throws IOException {
     RandomAccessInputStream in = new RandomAccessInputStream(id);
     long idLen = in.length();
@@ -87,6 +96,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to a short. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to use for translation
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the short value that results from concatenating the specified bytes
    */
   public static short bytesToShort(byte[] bytes, int off, int len,
     boolean little)
@@ -104,6 +119,11 @@ public final class DataTools {
    * Translates up to the first 2 bytes of a byte array beyond the given
    * offset to a short. If there are fewer than 2 bytes available
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to use for translation
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the short value that results from concatenating the specified bytes
    */
   public static short bytesToShort(byte[] bytes, int off, boolean little) {
     return bytesToShort(bytes, off, 2, little);
@@ -113,6 +133,10 @@ public final class DataTools {
    * Translates up to the first 2 bytes of a byte array to a short.
    * If there are fewer than 2 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to use for translation
+   * @param little true if the bytes are provided in little-endian order
+   * @return the short value that results from concatenating the specified bytes
    */
   public static short bytesToShort(byte[] bytes, boolean little) {
     return bytesToShort(bytes, 0, 2, little);
@@ -122,6 +146,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array byond the given
    * offset to a short. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to use for translation
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the short value that results from concatenating the specified bytes
    */
   public static short bytesToShort(short[] bytes, int off, int len,
     boolean little)
@@ -138,6 +168,12 @@ public final class DataTools {
    * Translates up to the first 2 bytes of a byte array byond the given
    * offset to a short. If there are fewer than 2 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a short
+   * @param off offset into array of bytes; should be non-negative and less than
+   *        the length of the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the short value that results from concatenating the specified bytes
    */
   public static short bytesToShort(short[] bytes, int off, boolean little) {
     return bytesToShort(bytes, off, 2, little);
@@ -147,6 +183,10 @@ public final class DataTools {
    * Translates up to the first 2 bytes of a byte array to a short.
    * If there are fewer than 2 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a short
+   * @param little true if the bytes are provided in little-endian order
+   * @return the short value that results from concatenating the specified bytes
    */
   public static short bytesToShort(short[] bytes, boolean little) {
     return bytesToShort(bytes, 0, 2, little);
@@ -156,6 +196,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to an int. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a int
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the int value that results from concatenating the specified bytes
    */
   public static int bytesToInt(byte[] bytes, int off, int len,
     boolean little)
@@ -173,6 +219,11 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array beyond the given
    * offset to an int. If there are fewer than 4 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a int
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the int value that results from concatenating the specified bytes
    */
   public static int bytesToInt(byte[] bytes, int off, boolean little) {
     return bytesToInt(bytes, off, 4, little);
@@ -182,6 +233,11 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array to an int.
    * If there are fewer than 4 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   *
+   * @param bytes array of bytes to be translated to a int
+   * @param little true if the bytes are provided in little-endian order
+   * @return the int value that results from concatenating the specified bytes
    */
   public static int bytesToInt(byte[] bytes, boolean little) {
     return bytesToInt(bytes, 0, 4, little);
@@ -191,6 +247,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to an int. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a int
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the int value that results from concatenating the specified bytes
    */
   public static int bytesToInt(short[] bytes, int off, int len,
     boolean little)
@@ -207,6 +269,11 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array beyond the given
    * offset to an int. If there are fewer than 4 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a int
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the int value that results from concatenating the specified bytes
    */
   public static int bytesToInt(short[] bytes, int off, boolean little) {
     return bytesToInt(bytes, off, 4, little);
@@ -216,6 +283,10 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array to an int.
    * If there are fewer than 4 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a int
+   * @param little true if the bytes are provided in little-endian order
+   * @return the int value that results from concatenating the specified bytes
    */
   public static int bytesToInt(short[] bytes, boolean little) {
     return bytesToInt(bytes, 0, 4, little);
@@ -225,6 +296,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to a float. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a float
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the float value that results from concatenating the specified bytes
    */
   public static float bytesToFloat(byte[] bytes, int off, int len,
     boolean little)
@@ -236,6 +313,11 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array beyond a given
    * offset to a float. If there are fewer than 4 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a float
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the float value that results from concatenating the specified bytes
    */
   public static float bytesToFloat(byte[] bytes, int off, boolean little) {
     return bytesToFloat(bytes, off, 4, little);
@@ -245,6 +327,10 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array to a float.
    * If there are fewer than 4 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a float
+   * @param little true if the bytes are provided in little-endian order
+   * @return the float value that results from concatenating the specified bytes
    */
   public static float bytesToFloat(byte[] bytes, boolean little) {
     return bytesToFloat(bytes, 0, 4, little);
@@ -254,6 +340,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond a given
    * offset to a float. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a float
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the float value that results from concatenating the specified bytes
    */
   public static float bytesToFloat(short[] bytes, int off, int len,
     boolean little)
@@ -265,6 +357,11 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array beyond a given
    * offset to a float. If there are fewer than 4 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a float
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the float value that results from concatenating the specified bytes
    */
   public static float bytesToFloat(short[] bytes, int off, boolean little) {
     return bytesToFloat(bytes, off, 4, little);
@@ -274,6 +371,10 @@ public final class DataTools {
    * Translates up to the first 4 bytes of a byte array to a float.
    * If there are fewer than 4 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a float
+   * @param little true if the bytes are provided in little-endian order
+   * @return the float value that results from concatenating the specified bytes
    */
   public static float bytesToFloat(short[] bytes, boolean little) {
     return bytesToFloat(bytes, 0, 4, little);
@@ -283,6 +384,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to a long. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a long
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the long value that results from concatenating the specified bytes
    */
   public static long bytesToLong(byte[] bytes, int off, int len,
     boolean little)
@@ -300,6 +407,11 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array beyond the given
    * offset to a long. If there are fewer than 8 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a long
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the long value that results from concatenating the specified bytes
    */
   public static long bytesToLong(byte[] bytes, int off, boolean little) {
     return bytesToLong(bytes, off, 8, little);
@@ -309,6 +421,10 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array to a long.
    * If there are fewer than 8 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a long
+   * @param little true if the bytes are provided in little-endian order
+   * @return the long value that results from concatenating the specified bytes
    */
   public static long bytesToLong(byte[] bytes, boolean little) {
     return bytesToLong(bytes, 0, 8, little);
@@ -318,6 +434,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to a long. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a long
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the long value that results from concatenating the specified bytes
    */
   public static long bytesToLong(short[] bytes, int off, int len,
     boolean little)
@@ -334,6 +456,11 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array beyond the given
    * offset to a long. If there are fewer than 8 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a long
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the long value that results from concatenating the specified bytes
    */
   public static long bytesToLong(short[] bytes, int off, boolean little) {
     return bytesToLong(bytes, off, 8, little);
@@ -343,6 +470,10 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array to a long.
    * If there are fewer than 8 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a long
+   * @param little true if the bytes are provided in little-endian order
+   * @return the long value that results from concatenating the specified bytes
    */
   public static long bytesToLong(short[] bytes, boolean little) {
     return bytesToLong(bytes, 0, 8, little);
@@ -352,6 +483,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to a double. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a double
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the double value that results from concatenating the specified bytes
    */
   public static double bytesToDouble(byte[] bytes, int off, int len,
     boolean little)
@@ -363,6 +500,11 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array beyond the given
    * offset to a double. If there are fewer than 8 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a double
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the double value that results from concatenating the specified bytes
    */
   public static double bytesToDouble(byte[] bytes, int off,
     boolean little)
@@ -374,6 +516,10 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array to a double.
    * If there are fewer than 8 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of bytes to be translated to a double
+   * @param little true if the bytes are provided in little-endian order
+   * @return the double value that results from concatenating the specified bytes
    */
   public static double bytesToDouble(byte[] bytes, boolean little) {
     return bytesToDouble(bytes, 0, 8, little);
@@ -383,6 +529,12 @@ public final class DataTools {
    * Translates up to the first len bytes of a byte array beyond the given
    * offset to a double. If there are fewer than len bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a double
+   * @param off offset to the first byte in the array
+   * @param len number of bytes to use
+   * @param little true if the bytes are provided in little-endian order
+   * @return the double value that results from concatenating the specified bytes
    */
   public static double bytesToDouble(short[] bytes, int off, int len,
     boolean little)
@@ -394,6 +546,11 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array beyond the given
    * offset to a double. If there are fewer than 8 bytes available,
    * the MSBs are all assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a double
+   * @param off offset to the first byte in the array
+   * @param little true if the bytes are provided in little-endian order
+   * @return the double value that results from concatenating the specified bytes
    */
   public static double bytesToDouble(short[] bytes, int off,
     boolean little)
@@ -405,12 +562,22 @@ public final class DataTools {
    * Translates up to the first 8 bytes of a byte array to a double.
    * If there are fewer than 8 bytes available, the MSBs are all
    * assumed to be zero (regardless of endianness).
+   *
+   * @param bytes array of unsigned bytes to be translated to a double
+   * @param little true if the bytes are provided in little-endian order
+   * @return the double value that results from concatenating the specified bytes
    */
   public static double bytesToDouble(short[] bytes, boolean little) {
     return bytesToDouble(bytes, 0, 8, little);
   }
 
-  /** Translates the given byte array into a String of hexadecimal digits. */
+  /**
+   * Translates the given byte array into a String of hexadecimal digits.
+   *
+   * @param b the array of bytes to parse
+   * @return a string of length <code>2 * b.length</code> representing the
+   *         hexadecimal digits of each byte in <code>b</code> concatenated
+   */
   public static String bytesToHex(byte[] b) {
     StringBuffer sb = new StringBuffer();
     for (int i=0; i<b.length; i++) {
@@ -423,6 +590,8 @@ public final class DataTools {
 
   /**
    * Parses the input string into a short
+   *
+   * @param value a String representation of a short value
    * @return {@code null} if the string could not be parsed
    */
   public static Short parseShort(String value) {
@@ -436,6 +605,8 @@ public final class DataTools {
 
   /**
    * Parses the input string into a byte
+   *
+   * @param value a String representation of a byte value
    * @return {@code null} if the string could not be parsed
    */
   public static Byte parseByte(String value) {
@@ -449,6 +620,8 @@ public final class DataTools {
 
   /**
    * Parses the input string into an integer
+   *
+   * @param value a String representation of an int value
    * @return {@code null} if the string could not be parsed
    */
   public static Integer parseInteger(String value) {
@@ -462,6 +635,8 @@ public final class DataTools {
 
   /**
    * Parses the input string into a long
+   *
+   * @param value a String representation of a long value
    * @return {@code null} if the string could not be parsed
    */
   public static Long parseLong(String value) {
@@ -476,6 +651,7 @@ public final class DataTools {
   /**
    * Parses the input string into a float accounting for the locale decimal
    * separator
+   * @param value a String representation of a float value
    * @return {@code null} if the string could not be parsed
    */
   public static Float parseFloat(String value) {
@@ -491,6 +667,7 @@ public final class DataTools {
   /**
    * Parses the input string into a double accounting for the locale decimal
    * separator
+   * @param value a String representation of a double value
    * @return {@code null} if the string could not be parsed
    */
   public static Double parseDouble(String value) {
@@ -506,6 +683,10 @@ public final class DataTools {
   /**
    * Normalizes the decimal separator for the user's locale.
    * @deprecated Use {@link #parseDouble(String)} instead
+   *
+   * @param value the String representation of a double value,
+   *        which may contain invalid characters that prevent parsing
+   * @return see above
    */
   @Deprecated
   public static String sanitizeDouble(String value) {
@@ -524,42 +705,78 @@ public final class DataTools {
 
   // -- Word decoding - primitive types to bytes --
 
-  /** Translates the short value into an array of two bytes. */
+  /**
+   * Translates the short value into an array of two bytes.
+   *
+   * @param value the short to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length 2
+   */
   public static byte[] shortToBytes(short value, boolean little) {
     byte[] v = new byte[2];
     unpackBytes(value, v, 0, 2, little);
     return v;
   }
 
-  /** Translates the int value into an array of four bytes. */
+  /**
+   * Translates the int value into an array of four bytes.
+   *
+   * @param value the int to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length 4
+   */
   public static byte[] intToBytes(int value, boolean little) {
     byte[] v = new byte[4];
     unpackBytes(value, v, 0, 4, little);
     return v;
   }
 
-  /** Translates the float value into an array of four bytes. */
+  /**
+   * Translates the float value into an array of four bytes.
+   *
+   * @param value the float to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length 4
+   */
   public static byte[] floatToBytes(float value, boolean little) {
     byte[] v = new byte[4];
     unpackBytes(Float.floatToIntBits(value), v, 0, 4, little);
     return v;
   }
 
-  /** Translates the long value into an array of eight bytes. */
+  /**
+   * Translates the long value into an array of eight bytes.
+   *
+   * @param value the long to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length 8
+   */
   public static byte[] longToBytes(long value, boolean little) {
     byte[] v = new byte[8];
     unpackBytes(value, v, 0, 8, little);
     return v;
   }
 
-  /** Translates the double value into an array of eight bytes. */
+  /**
+   * Translates the double value into an array of eight bytes.
+   *
+   * @param value the double to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length 8
+   */
   public static byte[] doubleToBytes(double value, boolean little) {
     byte[] v = new byte[8];
     unpackBytes(Double.doubleToLongBits(value), v, 0, 8, little);
     return v;
   }
 
-  /** Translates an array of short values into an array of byte values. */
+  /**
+   * Translates an array of short values into an array of byte values.
+   *
+   * @param values the shorts to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length <code>2 * values.length</code>
+   */
   public static byte[] shortsToBytes(short[] values, boolean little) {
     byte[] v = new byte[values.length * 2];
     for (int i=0; i<values.length; i++) {
@@ -568,7 +785,13 @@ public final class DataTools {
     return v;
   }
 
-  /** Translates an array of int values into an array of byte values. */
+  /**
+   * Translates an array of int values into an array of byte values.
+   *
+   * @param values the ints to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length <code>4 * values.length</code>
+   */
   public static byte[] intsToBytes(int[] values, boolean little) {
     byte[] v = new byte[values.length * 4];
     for (int i=0; i<values.length; i++) {
@@ -577,7 +800,13 @@ public final class DataTools {
     return v;
   }
 
-  /** Translates an array of float values into an array of byte values. */
+  /**
+   * Translates an array of float values into an array of byte values.
+   *
+   * @param values the floats to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length <code>4 * values.length</code>
+   */
   public static byte[] floatsToBytes(float[] values, boolean little) {
     byte[] v = new byte[values.length * 4];
     for (int i=0; i<values.length; i++) {
@@ -586,7 +815,13 @@ public final class DataTools {
     return v;
   }
 
-  /** Translates an array of long values into an array of byte values. */
+  /**
+   * Translates an array of long values into an array of byte values.
+   *
+   * @param values the longs to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length <code>8 * values.length</code>
+   */
   public static byte[] longsToBytes(long[] values, boolean little) {
     byte[] v = new byte[values.length * 8];
     for (int i=0; i<values.length; i++) {
@@ -595,7 +830,13 @@ public final class DataTools {
     return v;
   }
 
-  /** Translates an array of double values into an array of byte values. */
+  /**
+   * Translates an array of double values into an array of byte values.
+   *
+   * @param values the doubles to be split into bytes
+   * @param little true if the returned bytes should be in little-endian order
+   * @return byte array with length <code>8 * values.length</code>
+   */
   public static byte[] doublesToBytes(double[] values, boolean little) {
     byte[] v = new byte[values.length * 8];
     for (int i=0; i<values.length; i++) {
@@ -608,6 +849,11 @@ public final class DataTools {
    * Translates nBytes of the given long and places the result in the
    * given byte array.
    *
+   * @param value the long to be split into bytes
+   * @param buf the byte array in which to store the unpacked bytes
+   * @param ndx the offset to the first byte in the array
+   * @param nBytes the number of unpacked bytes
+   * @param little true if the unpacked bytes should be in little-endian order
    * @throws IllegalArgumentException
    *   if the specified indices fall outside the buffer
    */
@@ -638,6 +884,7 @@ public final class DataTools {
    *   (e.g. if bpp == 2, we should return an array of type short).
    * @param fp If set and bpp == 4 or bpp == 8, then return floats or doubles.
    * @param little Whether byte array is in little-endian order.
+   * @return an array of primitives
    */
   public static Object makeDataArray(byte[] b,
     int bpp, boolean fp, boolean little)
@@ -769,33 +1016,74 @@ public final class DataTools {
 
   // -- Byte swapping --
 
+  /**
+   * Reverse the order of bytes in the given short.
+   *
+   * @param x short value to byte swap
+   * @return short value resulting from byte swapping <code>x</code>
+   */
   public static short swap(short x) {
     return (short) ((x << 8) | ((x >> 8) & 0xFF));
   }
-
+  /**
+   * Reverse the order of bytes in the given char.
+   *
+   * @param x char value to byte swap
+   * @return char value resulting from byte swapping <code>x</code>
+   */
   public static char swap(char x) {
     return (char) ((x << 8) | ((x >> 8) & 0xFF));
   }
 
+  /**
+   * Reverse the order of bytes in the given int.
+   *
+   * @param x int value to byte swap
+   * @return int value resulting from byte swapping <code>x</code>
+   */
   public static int swap(int x) {
     return (swap((short) x) << 16) | (swap((short) (x >> 16)) & 0xFFFF);
   }
 
+  /**
+   * Reverse the order of bytes in the given long.
+   *
+   * @param x long value to byte swap
+   * @return long value resulting from byte swapping <code>x</code>
+   */
   public static long swap(long x) {
     return ((long) swap((int) x) << 32) | (swap((int) (x >> 32)) & 0xFFFFFFFFL);
   }
 
+  /**
+   * Reverse the order of bytes in the given float.
+   *
+   * @param x float value to byte swap
+   * @return float value resulting from byte swapping <code>x</code>
+   */
   public static float swap(float x) {
     return Float.intBitsToFloat(swap(Float.floatToIntBits(x)));
   }
 
+  /**
+   * Reverse the order of bytes in the given double.
+   *
+   * @param x double value to byte swap
+   * @return double value resulting from byte swapping <code>x</code>
+   */
   public static double swap(double x) {
     return Double.longBitsToDouble(swap(Double.doubleToLongBits(x)));
   }
 
   // -- Strings --
 
-  /** Remove null bytes from a string. */
+  /**
+   * Remove null bytes from a string.
+   *
+   * @param toStrip String from which to remove null bytes
+   * @return a String copy of <code>toStrip</code> with all
+   *         null (0) bytes removed
+   */
   public static String stripString(String toStrip) {
     StringBuffer s = new StringBuffer();
     for (int i=0; i<toStrip.length(); i++) {
@@ -806,7 +1094,29 @@ public final class DataTools {
     return s.toString().trim();
   }
 
-  /** Check if two filenames have the same prefix. */
+  /**
+   * Check if two filenames have the same prefix.
+   * The order in which the filenames are supplied does not matter.
+   *
+   * Examples:
+   *  s1 = /tmp/path.txt
+   *  s2 = /home/anonymous/path.png
+   *  returns true
+   *
+   *  s1 = /tmp/path1.txt
+   *  s2 = /tmp/path246.txt
+   *  returns false
+   *
+   *  s1 = /tmp/path.txt
+   *  s2 = /tmp/path246.txt
+   *  returns true
+   *
+   * @param s1 first String filename to compare
+   * @param s2 second String filename to compare
+   * @return true if the relative filename without suffix for
+   *         either input filename is a substring of the other
+   *         input filenames' relative filename without suffix
+   */
   public static boolean samePrefix(String s1, String s2) {
     if (s1 == null || s2 == null) return false;
     int n1 = s1.indexOf('.');
@@ -821,7 +1131,14 @@ public final class DataTools {
     return sub1.equals(sub2) || sub1.startsWith(sub2) || sub2.startsWith(sub1);
   }
 
-  /** Remove unprintable characters from the given string. */
+  /**
+   * Remove unprintable characters from the given string.
+   *
+   * @param s String from which to remove unprintable characters
+   * @return a String copy of <code>s</code> with tabs, newlines,
+   *         and control characters removed
+   * @see Character#isISOControl(char)
+   */
   public static String sanitize(String s) {
     if (s == null) return null;
     StringBuffer buf = new StringBuffer(s);
@@ -839,6 +1156,10 @@ public final class DataTools {
   /**
    * Normalize the given float array so that the minimum value maps to 0.0
    * and the maximum value maps to 1.0.
+   *
+   * @param data array of <code>float</code> values to normalize
+   * @return array of <code>float</code> values in the range
+   *         <code>[0.0, 1.0]</code>
    */
   public static float[] normalizeFloats(float[] data) {
     float[] rtn = new float[data.length];
@@ -873,6 +1194,10 @@ public final class DataTools {
   /**
    * Normalize the given double array so that the minimum value maps to 0.0
    * and the maximum value maps to 1.0.
+   *
+   * @param data array of <code>double</code> values to normalize
+   * @return array of <code>double</code> values in the range
+   *         <code>[0.0, 1.0]</code>
    */
   public static double[] normalizeDoubles(double[] data) {
     double[] rtn = new double[data.length];
@@ -982,7 +1307,15 @@ public final class DataTools {
     return total;
   }
 
-  /** Returns true if the given value is contained in the given array. */
+  /**
+   * Returns true if the given value is contained in the given array.
+   *
+   * @param array an array of ints to search
+   * @param value the int for which to search
+   * @return true if <code>array</code> contains at least one occurence of
+   *         <code>value</code>
+   * @see #indexOf(int[], int)
+   */
   public static boolean containsValue(int[] array, int value) {
     return indexOf(array, value) != -1;
   }
@@ -990,6 +1323,11 @@ public final class DataTools {
   /**
    * Returns the index of the first occurrence of the given value in the given
    * array. If the value is not in the array, returns -1.
+   *
+   * @param array an array of ints to search
+   * @param value the int for which to search
+   * @return the index of the first occurence of <code>value</code> in
+   *         <code>array</code>, or -1 if <code>value</code> is not found
    */
   public static int indexOf(int[] array, int value) {
     for (int i=0; i<array.length; i++) {
@@ -1001,6 +1339,11 @@ public final class DataTools {
   /**
    * Returns the index of the first occurrence of the given value in the given
    * Object array. If the value is not in the array, returns -1.
+   *
+   * @param array an array of Objects to search
+   * @param value the Object for which to search
+   * @return the index of the first occurence of <code>value</code> in
+   *         <code>array</code>, or -1 if <code>value</code> is not found
    */
   public static int indexOf(Object[] array, Object value) {
     for (int i=0; i<array.length; i++) {

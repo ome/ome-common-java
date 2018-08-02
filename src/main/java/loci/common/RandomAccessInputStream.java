@@ -117,6 +117,9 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
   /**
    * Constructs a hybrid RandomAccessFile/DataInputStream
    * around the given file.
+   *
+   * @param file a name that can be passed to {@link Location#getHandle(String)}
+   * @throws IOException if the name is invalid
    */
   public RandomAccessInputStream(String file) throws IOException {
     this(Location.getHandle(file), file);
@@ -125,13 +128,22 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
   /**
    * Constructs a hybrid RandomAccessFile/DataInputStream
    * around the given file.
+   *
+   * @param file a name that can be passed to {@link Location#getHandle(String)}
+   * @param bufferSize the size of the caching buffer in bytes
+   * @throws IOException if the name is invalid
    */
   public RandomAccessInputStream(String file, int bufferSize) throws IOException
   {
     this(Location.getHandle(file, false, true, bufferSize), file);
   }
 
-  /** Constructs a random access stream around the given handle. */
+  /**
+   * Constructs a random access stream around the given handle.
+   *
+   * @param handle the {@link IRandomAccess} to be wrapped
+   * @throws IOException if the handle is invalid
+   */
   public RandomAccessInputStream(IRandomAccess handle) throws IOException {
     this(handle, null);
   }
@@ -139,6 +151,10 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
   /**
    * Constructs a random access stream around the given handle,
    * and with the associated file path.
+   *
+   * @param handle the {@link IRandomAccess} to be wrapped
+   * @param file the name associated with the handle. Can be null.
+   * @throws IOException if the handle is invalid
    */
   public RandomAccessInputStream(IRandomAccess handle, String file)
     throws IOException
@@ -153,7 +169,12 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     length = -1;
   }
 
-  /** Constructs a random access stream around the given byte array. */
+  /**
+   * Constructs a random access stream around the given byte array.
+   *
+   * @param array the byte array to be wrapped via {@link ByteArrayHandle}
+   * @throws IOException if the {@link ByteArrayHandle} cannot be created
+   */
   public RandomAccessInputStream(byte[] array) throws IOException {
     this(new ByteArrayHandle(array));
   }
@@ -163,18 +184,29 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
   /**
    * Sets the native encoding of the stream.
    *
+   * @param encoding the name of a standard charset to use when
+   *                 working with strings
    * @see loci.common.Constants#ENCODING
+   * @see java.nio.charset.Charset
    */
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
 
-  /** Seeks to the given offset within the stream. */
+  /**
+   * Seeks to the given offset within the stream.
+   *
+   * @param pos the new byte offset
+   * @throws IOException if the seek fails
+   */
   public void seek(long pos) throws IOException {
     raf.seek(pos);
   }
 
-  /** Gets the number of bytes in the file. */
+  /**
+   * @return the number of bytes in the file.
+   * @throws IOException if the length cannot be retrieved
+   */
   public long length() throws IOException {
     return length < 0 ? raf.length() : length;
   }
@@ -186,6 +218,9 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
    * the file itself.
    *
    * Passing in a negative value will reset the length to the stream's real length.
+   *
+   * @param newLength the new stream length as defined above
+   * @throws IOException if the original stream length cannot be retrieved
    */
   public void setLength(long newLength) throws IOException {
     if (newLength < length()) {
@@ -193,7 +228,10 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     }
   }
 
-  /** Gets the current (absolute) file pointer. */
+  /**
+   * @return the current (absolute) file pointer.
+   * @throws IOException if the current pointer cannot be retrieved
+   */
   public long getFilePointer() throws IOException {
     return raf.getFilePointer();
   }
@@ -210,14 +248,22 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     markedPos = -1;
   }
 
-  /** Sets the endianness of the stream. */
+  /**
+   * Sets the endianness of the stream.
+   *
+   * @param little true if the stream ordering should be little-endian
+   */
   public void order(boolean little) {
     if (raf != null) {
       raf.setOrder(little ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
     }
   }
 
-  /** Gets the endianness of the stream. */
+  /**
+   * Gets the endianness of the stream.
+   *
+   * @return true if the stream ordering is little-endian
+   */
   public boolean isLittleEndian() {
     return raf.getOrder() == ByteOrder.LITTLE_ENDIAN;
   }
@@ -225,6 +271,11 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
   /**
    * Reads a string ending with one of the characters in the given string.
    *
+   * @param lastChars each character is a possible terminator
+   * @return The string from the initial position through the end of the
+   *   terminating sequence, or through the end of the stream if no
+   *   terminating sequence is found.
+   * @throws IOException If the maximum search length (512 MB) is exceeded.
    * @see #findString(String...)
    */
   public String readString(String lastChars) throws IOException {
@@ -244,6 +295,7 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
    * @return The string from the initial position through the end of the
    *   terminating sequence, or through the end of the stream if no
    *   terminating sequence is found.
+   * @throws IOException If the maximum search length (512 MB) is exceeded.
    */
   public String findString(String... terminators) throws IOException {
     return findString(true, DEFAULT_BLOCK_SIZE, terminators);
@@ -280,6 +332,7 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
    * @return The string from the initial position through the end of the
    *   terminating sequence, or through the end of the stream if no
    *   terminating sequence is found.
+   * @throws IOException If the maximum search length (512 MB) is exceeded.
    */
   public String findString(int blockSize, String... terminators)
     throws IOException
@@ -380,6 +433,8 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
    * Skips a number of bits in the BitBuffer.
    *
    * @param bits Number of bits to skip
+   * @throws IllegalArgumentException if bits is negative
+   * @throws IOException if an error occurs while skipping
    */
   public void skipBits(long bits) throws IOException {
     if (bits < 0) {
@@ -410,6 +465,8 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
    *
    * @param bitsToRead the number of bits to read from the bit buffer
    * @return the value of the bits read
+   * @throws IllegalArgumentException if bits is negative
+   * @throws IOException if an error occurs while skipping
    */
   public int readBits(int bitsToRead) throws IOException {
     if (bitsToRead < 0) {
@@ -509,6 +566,9 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
 
   /**
    * Read four input bytes and return an unsigned value.
+   *
+   * @return the next 4 bytes in the stream as a long
+   * @throws IOException if there is an error during reading
    */
   public long readUnsignedInt() throws IOException {
     return readInt() & 0xffffffffL;
@@ -521,7 +581,12 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     return line.length() == 0 ? null : line;
   }
 
-  /** Read a string of arbitrary length, terminated by a null char. */
+  /**
+   * Read a string of arbitrary length, terminated by a null char.
+   *
+   * @return the shortest null-terminated string from the current pointer
+   * @throws IOException if there is an error during reading
+   */
   public String readCString() throws IOException {
     String line = findString("\0");
     return line.length() == 0 ? null : line;
@@ -534,6 +599,7 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
    * @param n The length of the array.
    * @return See above
    * @throws IOException Thrown if an error occurred while reading the data.
+   * @see #setEncoding(String)
    */
   public String readByteToString(int n) throws IOException {
     n = (int) Math.min(available(), n);
@@ -552,7 +618,14 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     return new String(s.getBytes(encoding), encoding);
   }
 
-  /** Read a string of up to length n. */
+  /**
+   * Read a string of up to length n.
+   *
+   * @param n the number of bytes to read
+   * @return a string representing the read bytes, using the default encoding
+   * @throws IOException if an error occurred during reading
+   * @see #setEncoding(String)
+   */
   public String readString(int n) throws IOException {
     int avail = available();
     if (n > avail) n = avail;
@@ -615,13 +688,26 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     return rtn;
   }
 
-  /** Read bytes from the stream into the given buffer. */
+  /**
+   * Read bytes from the stream into the given buffer.
+   *
+   * @param buf the {@link ByteBuffer} to fill. <code>buf.capacity()</code>
+   *            determines the number of bytes to read
+   * @return the number of bytes read
+   * @throws IOException if an error occurred during reading
+   */
   public int read(ByteBuffer buf) throws IOException {
     return raf.read(buf);
   }
 
   /**
    * Read n bytes from the stream into the given buffer at the specified offset.
+   *
+   * @param buf the {@link ByteBuffer} to fill
+   * @param offset the offset to the first byte in the buffer
+   * @param n the number of bytes to read
+   * @return the number of bytes actually read
+   * @throws IOException if an error occurred during reading
    */
   public int read(ByteBuffer buf, int offset, int n) throws IOException {
     return raf.read(buf, offset, n);

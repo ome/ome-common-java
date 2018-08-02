@@ -60,7 +60,11 @@ public class Region {
 
   // -- Region API --
 
-  /** Returns true if this region intersects the given region. */
+  /**
+   * @param r the region to check for intersection
+   * @return true if this region intersects the given region
+   * @see java.awt.Rectangle#intersects(java.awt.Rectangle)
+   */
   public boolean intersects(Region r) {
     int tw = this.width;
     int th = this.height;
@@ -86,6 +90,11 @@ public class Region {
    * Returns a Region representing the intersection of this Region with the
    * given Region.  If the two Regions do not intersect, the result is an
    * empty Region.
+   *
+   * @param r the region for which to calculate an intersection (or overlap)
+   * @return a Region representing the intersection (overlap) of the two Regions.
+   *         If the two Regions have no common area, then the width and/or height
+   *         of the returned Region will be 0.  null is never returned.
    */
   public Region intersection(Region r) {
     int x = Math.max(this.x, r.x);
@@ -102,6 +111,10 @@ public class Region {
   /**
    * Returns true if the point specified by the given X and Y coordinates
    * is contained within this region.
+   *
+   * @param xc the integer X coordinate of a point
+   * @param yc the integer Y coordinate of a point
+   * @return true if this Region encloses the given point
    */
   public boolean containsPoint(int xc, int yc) {
     return intersects(new Region(xc, yc, 1, 1));

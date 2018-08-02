@@ -43,7 +43,10 @@ import java.util.List;
  */
 public class IniList extends ArrayList<IniTable> {
 
-  /** Gets the table names (headers) in the list. */
+  /**
+   * Gets the table names (headers) in the list.
+   * @return a List containing the name of each {@link IniTable}
+   */
   public List<String> getHeaders() {
     List<String> headers = new ArrayList<String>();
     for (IniTable table : this) {
@@ -53,7 +56,13 @@ public class IniList extends ArrayList<IniTable> {
     return headers;
   }
 
-  /** Gets the table with the given name (header). */
+  /**
+   * Gets the table with the given name (header).
+   *
+   * @param tableName the name of the table to look up
+   * @return the {@link IniTable} representing the named table,
+   *         or null if no table with that name exists
+   */
   public IniTable getTable(String tableName) {
     for (IniTable table : this) {
       String header = table.get(IniTable.HEADER_KEY);
@@ -65,6 +74,9 @@ public class IniList extends ArrayList<IniTable> {
   /**
    * Flattens all of the INI tables into a single HashMap whose keys are
    * of the format "[table name] table key".
+   *
+   * @return a HashMap containing all key/value pairs in every {@link IniTable}
+   *         as described above
    */
   public HashMap<String, String> flattenIntoHashMap() {
     HashMap<String, String> h = new HashMap<String, String>();

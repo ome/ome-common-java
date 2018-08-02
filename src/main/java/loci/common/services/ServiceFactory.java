@@ -141,6 +141,7 @@ public class ServiceFactory {
 
   /**
    * Retrieves an instance of a given service.
+   * @param <T> generic service type
    * @param type Interface type of the service.
    * @return A newly instantiated service.
    * @throws DependencyException If there is an error instantiating the

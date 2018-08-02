@@ -59,6 +59,10 @@ public class FileHandle implements IRandomAccess {
   /**
    * Creates a random access file stream to read from, and
    * optionally to write to, the file specified by the File argument.
+   *
+   * @param file a {@link File} representing a file on disk
+   * @param mode a valid access mode as defined in {@link RandomAccessFile}
+   * @throws FileNotFoundException if the file does not exist
    */
   public FileHandle(File file, String mode) throws FileNotFoundException {
     raf = new RandomAccessFile(file, mode);
@@ -67,6 +71,10 @@ public class FileHandle implements IRandomAccess {
   /**
    * Creates a random access file stream to read from, and
    * optionally to write to, a file with the specified name.
+   *
+   * @param name the path to a file on disk
+   * @param mode a valid access mode as defined in {@link RandomAccessFile}
+   * @throws FileNotFoundException if the file does not exist
    */
   public FileHandle(String name, String mode) throws FileNotFoundException {
     raf = new RandomAccessFile(name, mode);
@@ -74,7 +82,9 @@ public class FileHandle implements IRandomAccess {
 
   // -- FileHandle API methods --
 
-  /** Gets the random access file object backing this FileHandle. */
+  /**
+   * @return the {@link RandomAccessFile} object backing this FileHandle.
+   */
   public RandomAccessFile getRandomAccessFile() { return raf; }
 
   // -- IRandomAccess API methods --

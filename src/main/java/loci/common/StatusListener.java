@@ -39,7 +39,11 @@ import java.util.EventListener;
  */
 public interface StatusListener extends EventListener {
 
-  /** Called when status is updated. */
+  /**
+   * Called when status is updated.
+   *
+   * @param e the event representing the current status
+   */
   void statusUpdated(StatusEvent e);
 
 }

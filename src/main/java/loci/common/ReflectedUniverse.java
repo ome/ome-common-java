@@ -80,12 +80,22 @@ public class ReflectedUniverse {
    * Constructs a new reflected universe, with the given URLs
    * representing additional search paths for imported classes
    * (in addition to the CLASSPATH).
+   *
+   * @param urls array of URLs to search for additional classes.
+   *             Each URL is typically a JAR file that is not on
+   *             the CLASSPATH.
    */
   public ReflectedUniverse(URL[] urls) {
     this(urls == null ? null : new URLClassLoader(urls));
   }
 
-  /** Constructs a new reflected universe that uses the given class loader. */
+  /**
+   * Constructs a new reflected universe that uses the given class loader.
+   *
+   * @param loader the ClassLoader to use in this universe.
+   *               If null, the default ClassLoader for the ReflectedUniverse
+   *               class will be used.
+   */
   public ReflectedUniverse(ClassLoader loader) {
     variables = new HashMap<String, Object>();
     this.loader = loader == null ? getClass().getClassLoader() : loader;
@@ -96,6 +106,10 @@ public class ReflectedUniverse {
   /**
    * Returns whether the given object is compatible with the
    * specified class for the purposes of reflection.
+   *
+   * @param c the base class
+   * @param o the object that needs type checking
+   * @return true if the object is an instance of the base class
    */
   public static boolean isInstance(Class<?> c, Object o) {
     return (o == null || c.isInstance(o) ||
@@ -140,6 +154,13 @@ public class ReflectedUniverse {
    *     </ol>
    *   </li>
    * </ul>
+   *
+   * @param command the command to be executed (see examples above)
+   * @return the result of executing the command. For import statements,
+   *         the return value is null. Otherwise, the return value of
+   *         the invoked method or the value assigned to a variable
+   *         is returned (depending upon the command).
+   * @throws ReflectException if the command is invalid or fails to execute
    */
   public Object exec(String command) throws ReflectException {
     command = command.trim();
@@ -322,48 +343,93 @@ public class ReflectedUniverse {
     return result;
   }
 
-  /** Registers a variable in the universe. */
+  /**
+   * Registers a variable in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param obj the value to assign to the variable
+   */
   public void setVar(String varName, Object obj) {
     if (obj == null) variables.remove(varName);
     else variables.put(varName, obj);
   }
 
-  /** Registers a variable of primitive type boolean in the universe. */
+  /**
+   * Registers a variable of primitive type boolean in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param b the boolean value to assign to the variable
+   */
   public void setVar(String varName, boolean b) {
     setVar(varName, new Boolean(b));
   }
 
-  /** Registers a variable of primitive type byte in the universe. */
+  /**
+   * Registers a variable of primitive type byte in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param b the byte value to assign to the variable
+   */
   public void setVar(String varName, byte b) {
     setVar(varName, new Byte(b));
   }
 
-  /** Registers a variable of primitive type char in the universe. */
+  /**
+   * Registers a variable of primitive type char in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param c the char value to assign to the variable
+   */
   public void setVar(String varName, char c) {
     setVar(varName, Character.valueOf(c));
   }
 
-  /** Registers a variable of primitive type double in the universe. */
+  /**
+   * Registers a variable of primitive type double in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param d the double value to assign to the variable
+   */
   public void setVar(String varName, double d) {
     setVar(varName, new Double(d));
   }
 
-  /** Registers a variable of primitive type float in the universe. */
+  /**
+   * Registers a variable of primitive type float in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param f the float value to assign to the variable
+   */
   public void setVar(String varName, float f) {
     setVar(varName, new Float(f));
   }
 
-  /** Registers a variable of primitive type int in the universe. */
+  /**
+   * Registers a variable of primitive type int in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param i the int value to assign to the variable
+   */
   public void setVar(String varName, int i) {
     setVar(varName, Integer.valueOf(i));
   }
 
-  /** Registers a variable of primitive type long in the universe. */
+  /**
+   * Registers a variable of primitive type long in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param l the long value to assign to the variable
+   */
   public void setVar(String varName, long l) {
     setVar(varName, Long.valueOf(l));
   }
 
-  /** Registers a variable of primitive type short in the universe. */
+  /**
+   * Registers a variable of primitive type short in the universe.
+   *
+   * @param varName the name of the variable to assign
+   * @param s the short value to assign to the variable
+   */
   public void setVar(String varName, short s) {
     setVar(varName, Short.valueOf(s));
   }
@@ -371,6 +437,10 @@ public class ReflectedUniverse {
   /**
    * Returns the value of a variable or field in the universe.
    * Primitive types will be wrapped in their Java Object wrapper classes.
+   *
+   * @param varName the name of the variable to retrieve
+   * @return the current value of the variable
+   * @throws ReflectException if the variable name or value is invalid
    */
   public Object getVar(String varName) throws ReflectException {
     if (varName.equals("null")) {
@@ -439,12 +509,20 @@ public class ReflectedUniverse {
     return var;
   }
 
-  /** Sets whether access modifiers (protected, private, etc.) are ignored. */
+  /**
+   * Sets whether access modifiers (protected, private, etc.) are ignored.
+   *
+   * @param ignore true if access modifiers should be ignored
+   */
   public void setAccessibilityIgnored(boolean ignore) {
     force = ignore;
   }
 
-  /** Gets whether access modifiers (protected, private, etc.) are ignored. */
+  /**
+   * Gets whether access modifiers (protected, private, etc.) are ignored.
+   *
+   * @return true if access modifiers are currently ignored
+   */
   public boolean isAccessibilityIgnored() {
     return force;
   }
@@ -453,6 +531,9 @@ public class ReflectedUniverse {
 
   /**
    * Allows exploration of a reflected universe in an interactive environment.
+   *
+   * @param args if non-empty, access modifiers will be ignored
+   * @throws IOException if there is an error reading from stdin
    */
   public static void main(String[] args) throws IOException {
     ReflectedUniverse r = new ReflectedUniverse();
