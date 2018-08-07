@@ -227,6 +227,16 @@ public class NIOFileHandle extends AbstractNIOHandle {
   public void setLength(long length) throws IOException {
     if (raf.length() < length) {
       raf.setLength(length);
+      if (raf.length() != length) {
+        // something went wrong with setting the length
+        // use writes to make up the difference
+        byte[] b = new byte[defaultRWBufferSize];
+        while (raf.length() < length) {
+          raf.seek(raf.length());
+          int len = (int) Math.min(b.length, length - raf.length());
+          raf.write(b, 0, len);
+        }
+      }
     }
     raf.seek(length - 1);
     buffer = null;
