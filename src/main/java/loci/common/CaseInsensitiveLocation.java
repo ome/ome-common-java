@@ -39,7 +39,9 @@ import java.util.HashSet;
 
 /**
  * Case insensitive variant of Location.
+ * @deprecated use {@link Location} instead
  */
+@Deprecated
 public class CaseInsensitiveLocation extends Location {
 
   // Fields
