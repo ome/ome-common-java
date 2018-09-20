@@ -395,7 +395,10 @@ public class Location {
       LOGGER.trace("no handle was mapped for this ID");
       String mapId = getMappedId(id);
 
-      if (id.startsWith("http://") || id.startsWith("https://")) {
+      if (id.startsWith("s3://")) {
+        handle = new S3Handle(mapId);
+      }
+      else if (id.startsWith("http://") || id.startsWith("https://")) {
         handle = new URLHandle(mapId);
       }
       else if (allowArchiveHandles && ZipHandle.isZipFile(mapId)) {
