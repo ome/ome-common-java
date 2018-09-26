@@ -37,9 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,8 +91,9 @@ public class Location {
 
   // -- Fields --
 
-  private boolean isURL = true;
+  private boolean isURL = false;
   private URL url;
+  private URI uri;
   private File file;
 
   // -- Constructors --
@@ -107,22 +106,7 @@ public class Location {
    * @see #getMappedFile(String)
    */
   public Location(String pathname) {
-    LOGGER.trace("Location({})", pathname);
-    if (pathname.contains("://")) {
-      // Avoid expensive exception handling in case when path is
-      // obviously not an URL
-      try {
-        url = new URL(getMappedId(pathname));
-      }
-      catch (MalformedURLException e) {
-        LOGGER.trace("Location is not a URL", e);
-        isURL = false;
-      }
-    } else {
-      LOGGER.trace("Location is not a URL");
-      isURL = false;
-    }
-    if (!isURL) file = new File(getMappedId(pathname));
+    this((String) null, pathname);
   }
 
   /**
@@ -145,7 +129,40 @@ public class Location {
    * @param child the relative path name
    */
   public Location(String parent, String child) {
-    this(parent + File.separator + child);
+    LOGGER.trace("Location({}, {})", parent, child);
+
+    String mapped = null;
+    String pathname = null;
+
+    // First handle possible URIs
+    if (child.contains("://")) {
+      // Avoid expensive exception handling in case when path is
+      // obviously not an URL
+      try {
+        mapped = getMappedId(child);
+        pathname = child;
+        uri = new URI(mapped);
+        isURL = true;
+        url = uri.toURL();
+      }
+      catch (URISyntaxException | MalformedURLException e) {
+        // TODO: this should possibly throw
+        // possibly leaves url null
+      }
+    }
+
+    // If not a URI, then deal with relative vs. absolute paths
+    if (pathname == null) {
+      if (parent != null) {
+        pathname = parent + File.separator + child;
+      } else {
+        pathname = child;
+      }
+      mapped = getMappedId(pathname);
+    }
+
+    if (!isURL) file = new File(mapped);
+
   }
 
   /**
@@ -467,6 +484,17 @@ public class Location {
     final List<String> files = new ArrayList<String>();
     if (isURL) {
       try {
+        if (url == null) {
+          // Likely s3
+          if (!exists()) {
+            return null;
+          }
+          if (uri.toString().endsWith("/")) {
+            return new String[0];
+          } else {
+            return null;
+          }
+        }
         URLConnection c = url.openConnection();
         InputStream is = c.getInputStream();
         boolean foundEnd = false;
@@ -542,7 +570,8 @@ public class Location {
    */
   public boolean canRead() {
     LOGGER.trace("canRead()");
-    return isURL ? (isDirectory() || isFile() || exists()) : file.canRead();
+    // Note: isFile calls exist
+    return isURL ? (isDirectory() || isFile()) : file.canRead();
   }
 
   /**
@@ -645,7 +674,9 @@ public class Location {
     LOGGER.trace("exists()");
     if (isURL) {
       try {
-        url.getContent();
+        // TODO: existence should almost certainly be cached.
+        IRandomAccess handle = getHandle(uri.toString());
+        handle.length();
         return true;
       }
       catch (IOException e) {
@@ -678,7 +709,7 @@ public class Location {
    */
   public String getAbsolutePath() {
     LOGGER.trace("getAbsolutePath()");
-    return isURL ? url.toExternalForm() : file.getAbsolutePath();
+    return isURL ? uri.normalize().toString() : file.getAbsolutePath();
   }
 
   /**
@@ -718,9 +749,8 @@ public class Location {
   public String getName() {
     LOGGER.trace("getName()");
     if (isURL) {
-      String name = url.getFile();
-      name = name.substring(name.lastIndexOf("/") + 1);
-      return name;
+      // TODO: we should just store new File(uri) in file
+      return  new File(uri.getPath()).getName();
     }
     return file.getName();
   }
@@ -760,7 +790,7 @@ public class Location {
    * @see java.io.File#getPath()
    */
   public String getPath() {
-    return isURL ? url.getHost() + url.getPath() : file.getPath();
+    return isURL ? uri.getHost() + uri.getPath() : file.getPath();
   }
 
   /**
@@ -772,7 +802,7 @@ public class Location {
    */
   public boolean isAbsolute() {
     LOGGER.trace("isAbsolute()");
-    return isURL ? true : file.isAbsolute();
+    return isURL ? uri.isAbsolute() : file.isAbsolute();
   }
 
   /**
@@ -784,8 +814,13 @@ public class Location {
   public boolean isDirectory() {
     LOGGER.trace("isDirectory()");
     if (isURL) {
-      String[] list = list();
-      return list != null;
+      if ("s3".equals(uri.getScheme())) {
+        return uri.toString().endsWith("/") && exists();
+      } else {
+        // TODO: this should be removed as well.
+        String[] list = list();
+        return list != null;
+      }
     }
     return file.isDirectory();
   }
@@ -832,7 +867,11 @@ public class Location {
     LOGGER.trace("lastModified()");
     if (isURL) {
       try {
-        return url.openConnection().getLastModified();
+        if (url != null) {
+          return url.openConnection().getLastModified();
+        } else {
+          return 0;
+        }
       }
       catch (IOException e) {
         LOGGER.trace("Could not determine URL's last modification time", e);
@@ -911,7 +950,7 @@ public class Location {
    */
   @Override
   public String toString() {
-    return isURL ? url.toString() : file.toString();
+    return isURL ? uri.toString() : file.toString();
   }
 
 }
