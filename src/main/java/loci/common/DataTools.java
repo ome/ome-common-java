@@ -657,7 +657,10 @@ public final class DataTools {
   public static Float parseFloat(String value) {
     if (value == null) return null;
     try {
-      return nf.get().parse(value.replaceAll(",", ".")).floatValue();
+      // upper-case before parsing to ensure that scientific notation
+      // is handled correctly
+      String toParse = value.replaceAll(",", ".").toUpperCase();
+      return nf.get().parse(toParse).floatValue();
     } catch (ParseException e) {
       LOGGER.debug("Could not parse float value", e);
     }
@@ -673,7 +676,10 @@ public final class DataTools {
   public static Double parseDouble(String value) {
     if (value == null) return null;
     try {
-      return nf.get().parse(value.replaceAll(",", ".")).doubleValue();
+      // upper-case before parsing to ensure that scientific notation
+      // is handled correctly
+      String toParse = value.replaceAll(",", ".").toUpperCase();
+      return nf.get().parse(toParse).doubleValue();
     } catch (ParseException e) {
       LOGGER.debug("Could not parse double value", e);
     }
@@ -694,6 +700,9 @@ public final class DataTools {
     char separator = new DecimalFormatSymbols().getDecimalSeparator();
     char usedSeparator = separator == '.' ? ',' : '.';
     value = value.replace(usedSeparator, separator);
+    // upper-case before parsing to ensure that scientific notation
+    // is handled correctly
+    value = value.toUpperCase();
     try {
       Double.parseDouble(value);
     }
