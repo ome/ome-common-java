@@ -36,6 +36,7 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.Arrays;
@@ -92,27 +93,29 @@ public class LocationTest {
       new Location("http://www.openmicroscopy.org/"),
       new Location("https://www.openmicroscopy.org/"),
       new Location("https://www.openmicroscopy.org/nonexisting"),
-      new Location(hiddenFile)
+      new Location(hiddenFile),
+      new Location("s3://server/bucket-dne/key/"),
+      new Location("s3://server/bucket-dne/key/file.tif"),
     };
 
     exists = new boolean[] {
-      true, false, true, true, true, false, true
+      true, false, true, true, true, false, true, false, false
     };
 
     isDirectory = new boolean[] {
-      false, false, true, false, false, false, false
+      false, false, true, false, false, false, false, false, false
     };
 
     isHidden = new boolean[] {
-      false, false, false, false, false, false, true
+      false, false, false, false, false, false, true, false, false
     };
 
     mode = new String[] {
-      "rw", "", "rw", "r", "r", "","rw"
+      "rw", "", "rw", "r", "r", "","rw", "", "" // S3 isn't readable
     };
 
     isRemote = new boolean[] {
-      false, false, false, true, true, true, false
+      false, false, false, true, true, true, false, true, true
     };
   }
 
@@ -244,7 +247,11 @@ public class LocationTest {
       if (file.isDirectory() && !path.endsWith(File.separator)) {
         path += File.separator;
       }
-      assertEquals(file.getName(), file.toURL(), new URL(path));
+      try {
+        assertEquals(file.getName(), file.toURL(), new URL(path));
+      } catch (MalformedURLException e) {
+        assertEquals(path, true, path.contains("s3://"));
+      }
     }
   }
 
