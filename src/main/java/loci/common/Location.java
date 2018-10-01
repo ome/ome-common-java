@@ -135,7 +135,7 @@ public class Location {
     String pathname = null;
 
     // First handle possible URIs
-    if (child.contains("://")) {
+    if (child != null && child.contains("://")) {
       // Avoid expensive exception handling in case when path is
       // obviously not an URL
       try {
@@ -154,6 +154,7 @@ public class Location {
     // If not a URI, then deal with relative vs. absolute paths
     if (pathname == null) {
       if (parent != null) {
+        // TODO: in some cases child here may be null
         pathname = parent + File.separator + child;
       } else {
         pathname = child;
