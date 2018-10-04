@@ -437,6 +437,7 @@ public class Location {
           handle = new NIOFileHandle(mapId, writable ? "rw" : "r");
         }
       }
+      LOGGER.trace("Created new handle {} -> {}", id, handle);
     }
     LOGGER.trace("Location.getHandle: {} -> {}", id, handle);
     return handle;
@@ -678,6 +679,7 @@ public class Location {
         // TODO: existence should almost certainly be cached.
         IRandomAccess handle = getHandle(uri.toString());
         handle.length();
+        handle.close();
         return true;
       }
       catch (IOException e) {
@@ -893,7 +895,10 @@ public class Location {
     LOGGER.trace("length()");
     if (isURL) {
       try {
-        return url.openConnection().getContentLength();
+        IRandomAccess handle = getHandle(uri.toString());
+        long len = handle.length();
+        handle.close();
+        return len;
       }
       catch (IOException e) {
         LOGGER.trace("Could not determine URL's content length", e);
