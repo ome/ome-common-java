@@ -52,8 +52,6 @@ import org.xmlpull.v1.XmlPullParserException;
  * Provides random access to S3 buckets using the IRandomAccess interface.
  * Instances of S3Handle are read-only.
  *
- * TODO: How does one handle buckets with periods
- *
  * @see IRandomAccess
  * @see StreamHandle
  * @see java.net.URLConnection
@@ -63,11 +61,11 @@ public class S3Handle extends StreamHandle {
 
   public final static String DEFAULT_SERVER = "https://s3.amazonaws.com";
 
-  /** Format: "s3://accessKey:secrectKey@bucket.endpoint/key" */
+  /** Format: "s3://accessKey:secretKey@server-endpoint/bucket/path" */
   public final static String URI_PATTERN = "(s3://)?" +
           "((?<access>.*):(?<secret>.*)@)?" +
-          "(?<bucket>.*?)"+
-          "([.](?<server>.*?)((:)(?<port>\\d+))?)?"+
+          "((?<server>.*?)((:)(?<port>\\d+))?)?"+
+          "/(?<bucket>.*?)"+
           "/(?<path>.*)";
 
   public final static Pattern URI_PARSER = Pattern.compile(URI_PATTERN);
