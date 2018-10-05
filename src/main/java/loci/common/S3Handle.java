@@ -62,6 +62,11 @@ import org.slf4j.LoggerFactory;
  */
 public class S3Handle extends StreamHandle {
 
+  /** Default protocol for fetching s3://
+   # TODO: Default to https for improved security
+   */
+  public final static String DEFAULT_S3_PROTOCOL = "http";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(S3Handle.class);
 
   /** Format: "s3://accessKey:secretKey@server-endpoint/bucket/path" */
@@ -148,8 +153,7 @@ public class S3Handle extends StreamHandle {
       // TODO: Decide how to handle S3Handle reader settings
       protocol = System.getenv("BF_S3_PROTOCOL");
       if (protocol == null) {
-        // TODO: Default to https for improved security
-        protocol = "http";
+        protocol = DEFAULT_S3_PROTOCOL;
       }
     }
     return protocol + "://" + m.group("server");
