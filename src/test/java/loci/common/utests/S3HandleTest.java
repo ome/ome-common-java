@@ -45,6 +45,7 @@ import static org.testng.AssertJUnit.assertEquals;
  *
  * @see loci.common.URLHandle
  */
+@Test(groups="readTests")
 public class S3HandleTest {
 
   // -- Fields --
@@ -59,17 +60,8 @@ public class S3HandleTest {
   // -- Test methods --
 
   @Test
-  public void testParseDefault() throws IOException {
-    S3Handle s3 = new S3Handle("s3://bucket/key/file.tif", false);
-    assertEquals(S3Handle.DEFAULT_SERVER, s3.getServer());
-    assertEquals(0, s3.getPort());
-    assertEquals("bucket", s3.getBucket());
-    assertEquals("key/file.tif", s3.getPath());
-  }
-
-  @Test
   public void testParseLocalhost() throws IOException {
-    S3Handle s3 = new S3Handle("s3://bucket.localhost:9000/key/file.tif", false);
+    S3Handle s3 = new S3Handle("s3://localhost:9000/bucket/key/file.tif", false);
     assertEquals("http://localhost", s3.getServer());
     assertEquals(9000, s3.getPort());
     assertEquals("bucket", s3.getBucket());
@@ -77,18 +69,10 @@ public class S3HandleTest {
   }
 
   @Test
-  public void testSetLocalhost() throws IOException {
-    S3Handle s3 = new S3Handle("localhost", "s3://bucket/key/file.tif", false);
-    assertEquals("http://localhost", s3.getServer());
-    assertEquals(0, s3.getPort());
-    assertEquals("bucket", s3.getBucket());
-    assertEquals("key/file.tif", s3.getPath());
-  }
-
-  @Test
   public void testParseAuth() throws IOException {
-    S3Handle s3 = new S3Handle("s3://access:secret@bucket/key/file.tif", false);
-    assertEquals(S3Handle.DEFAULT_SERVER, s3.getServer());
+    S3Handle s3 = new S3Handle(
+      "s3://access:secret@s3.example.org/bucket/key/file.tif", false);
+    assertEquals("s3.example.org", s3.getServer());
     assertEquals(0, s3.getPort());
     assertEquals("bucket", s3.getBucket());
     assertEquals("key/file.tif", s3.getPath());
@@ -96,11 +80,20 @@ public class S3HandleTest {
 
   @Test
   public void testParseAuthLocalhost() throws IOException {
-    S3Handle s3 = new S3Handle("s3://access:secret@bucket.localhost:9000/key/file.tif", false);
+    S3Handle s3 = new S3Handle("s3://access:secret@localhost:9000/bucket/key/file.tif", false);
     assertEquals("http://localhost", s3.getServer());
     assertEquals(9000, s3.getPort());
     assertEquals("bucket", s3.getBucket());
     assertEquals("key/file.tif", s3.getPath());
   }
 
+  @Test
+  public void testParseProtocol() throws IOException {
+    S3Handle s3 = new S3Handle(
+      "example://localhost/bucket/key/file.tif", false);
+    assertEquals("example://localhost", s3.getServer());
+    assertEquals(0, s3.getPort());
+    assertEquals("bucket", s3.getBucket());
+    assertEquals("key/file.tif", s3.getPath());
+  }
 }

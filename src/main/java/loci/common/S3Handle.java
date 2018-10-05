@@ -62,9 +62,10 @@ public class S3Handle extends StreamHandle {
   public final static String DEFAULT_SERVER = "https://s3.amazonaws.com";
 
   /** Format: "s3://accessKey:secretKey@server-endpoint/bucket/path" */
-  public final static String URI_PATTERN = "(s3://)?" +
+  public final static String URI_PATTERN =
+          "(?<protocol>.+?)://" +
           "((?<access>.*):(?<secret>.*)@)?" +
-          "((?<server>.*?)((:)(?<port>\\d+))?)?"+
+          "(?<server>.+?)((:)(?<port>\\d+))?"+
           "/(?<bucket>.*?)"+
           "/(?<path>.*)";
 
@@ -93,19 +94,25 @@ public class S3Handle extends StreamHandle {
 
   private MinioClient s3Client;
 
+  /**
+   * Open an S3 file
+   *
+   * @param url the full URL to the S3 resource
+   * @throws IOException if there is an error during opening
+   */
   public S3Handle(String url) throws IOException {
-    this(null, url);
+    this(url, true);
   }
 
-  public S3Handle(String server, String uri) throws IOException {
-    this(server, uri, true);
-  }
-
+  /**
+   * Open an S3 file
+   *
+   * @param url the full URL to the S3 resource
+   * @param initialize If true open the stream, otherwise just parse connection
+   *        string
+   * @throws IOException if there is an error during opening
+   */
   public S3Handle(String uri, boolean initialize) throws IOException {
-    this(null, uri, initialize);
-  }
-
-  public S3Handle(String server, String uri, boolean initialize) throws IOException {
     this.uri = uri;
     Matcher m = URI_PARSER.matcher(uri);
     if (!m.matches()) {
@@ -115,7 +122,7 @@ public class S3Handle extends StreamHandle {
     this.accessKey = m.group("access");
     this.secretKey = m.group("secret");
     this.bucket = m.group("bucket");
-    this.server = server(m, server);
+    this.server = server(m);
     this.path = m.group("path");
     this.port = port(m);
     if (initialize) {
@@ -132,15 +139,17 @@ public class S3Handle extends StreamHandle {
     }
   }
 
-  private String server(Matcher m, String server) {
-    String s = m.group("server");
-    if (s == null) {
-      s = server != null ? server : DEFAULT_SERVER;
+  private String server(Matcher m) {
+    String protocol = m.group("protocol");
+    if (protocol.equals("s3")) {
+      // TODO: Decide how to handle S3Handle reader settings
+      protocol = System.getenv("BF_S3_PROTOCOL");
+      if (protocol == null) {
+        // TODO: Default to https for improved security
+        protocol = "http";
+      }
     }
-    if (!s.contains("://")) {
-      s = "http://" + s;
-    }
-    return s;
+    return protocol + "://" + m.group("server");
   }
 
   public String getServer() {
