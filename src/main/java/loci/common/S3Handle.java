@@ -65,7 +65,7 @@ public class S3Handle extends StreamHandle {
   /** Default protocol for fetching s3://
    # TODO: Default to https for improved security
    */
-  public final static String DEFAULT_S3_PROTOCOL = "http";
+  public final static String DEFAULT_S3_PROTOCOL = "https";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(S3Handle.class);
 
@@ -78,6 +78,9 @@ public class S3Handle extends StreamHandle {
           "/(?<path>.*)";
 
   public final static Pattern URI_PARSER = Pattern.compile(URI_PATTERN);
+
+  /** S3 configuration */
+  private final Settings settings;
 
   /** full string used to configure this handle */
   private final String uri;
@@ -109,7 +112,7 @@ public class S3Handle extends StreamHandle {
    * @throws IOException if there is an error during opening
    */
   public S3Handle(String url) throws IOException {
-    this(url, true);
+    this(url, true, null);
   }
 
   /**
@@ -118,9 +121,16 @@ public class S3Handle extends StreamHandle {
    * @param url the full URL to the S3 resource
    * @param initialize If true open the stream, otherwise just parse connection
    *        string
+   * @param s custom settings object
    * @throws IOException if there is an error during opening
    */
-  public S3Handle(String uri, boolean initialize) throws IOException {
+  public S3Handle(String uri, boolean initialize, Settings s) throws IOException {
+    if (s == null) {
+      this.settings = new StreamHandle.Settings();
+    }
+    else {
+      this.settings = s;
+    }
     this.uri = uri;
     Matcher m = URI_PARSER.matcher(uri);
     if (!m.matches()) {
@@ -150,8 +160,7 @@ public class S3Handle extends StreamHandle {
   private String server(Matcher m) {
     String protocol = m.group("protocol");
     if (protocol.equals("s3")) {
-      // TODO: Decide how to handle S3Handle reader settings
-      protocol = System.getenv("BF_S3_PROTOCOL");
+      protocol = this.settings.get("BF_S3_PROTOCOL");
       if (protocol == null) {
         protocol = DEFAULT_S3_PROTOCOL;
       }

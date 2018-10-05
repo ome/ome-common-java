@@ -52,6 +52,13 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class StreamHandle implements IRandomAccess {
 
+  // TODO: Decide how to handle S3Handle and other reader settings
+  public static class Settings {
+    public String get(String key) {
+      return System.getenv(key);
+    }
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StreamHandle.class);
 
   // -- Fields --
