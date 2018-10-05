@@ -48,6 +48,9 @@ import io.minio.ObjectStat;
 import io.minio.errors.*;
 import org.xmlpull.v1.XmlPullParserException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Provides random access to S3 buckets using the IRandomAccess interface.
  * Instances of S3Handle are read-only.
@@ -59,7 +62,7 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public class S3Handle extends StreamHandle {
 
-  public final static String DEFAULT_SERVER = "https://s3.amazonaws.com";
+  private static final Logger LOGGER = LoggerFactory.getLogger(S3Handle.class);
 
   /** Format: "s3://accessKey:secretKey@server-endpoint/bucket/path" */
   public final static String URI_PATTERN =
@@ -170,6 +173,7 @@ public class S3Handle extends StreamHandle {
 
   @Override
   protected void resetStream() throws IOException {
+    LOGGER.trace("Resetting");
     try {
       s3Client = new MinioClient(server, port, accessKey, secretKey);
       ObjectStat stat = s3Client.statObject(bucket, path);

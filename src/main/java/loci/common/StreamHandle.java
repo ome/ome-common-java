@@ -39,6 +39,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Abstract IRandomAccess implementation for reading from InputStreams and
  * writing to OutputStreams.
@@ -48,6 +51,8 @@ import java.nio.ByteOrder;
  * @author Melissa Linkert melissa at glencoesoftware.com
  */
 public abstract class StreamHandle implements IRandomAccess {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StreamHandle.class);
 
   // -- Fields --
 
@@ -89,6 +94,7 @@ public abstract class StreamHandle implements IRandomAccess {
   /* @see IRandomAccess#close() */
   @Override
   public void close() throws IOException {
+    LOGGER.trace("closing");
     length = fp = mark = 0;
     if (stream != null) stream.close();
     if (outStream != null) outStream.close();
@@ -106,18 +112,22 @@ public abstract class StreamHandle implements IRandomAccess {
   /* @see IRandomAccess#length() */
   @Override
   public long length() throws IOException {
+    // Too verbose
+    // LOGGER.trace("{}", length);
     return length;
   }
 
   /* @see IRandomAccess#read(byte[]) */
   @Override
   public int read(byte[] b) throws IOException {
+    LOGGER.trace("0 {}", b.length);
     return read(b, 0, b.length);
   }
 
   /* @see IRandomAccess#read(byte[], int, int) */
   @Override
   public int read(byte[] b, int off, int len) throws IOException {
+    LOGGER.trace("{} {}", off, len);
     int n = stream.read(b, off, len);
     if (n >= 0) fp += n;
     else n = 0;
@@ -139,6 +149,7 @@ public abstract class StreamHandle implements IRandomAccess {
   /* @see IRandomAccess#read(ByteBuffer, int, int) */
   @Override
   public int read(ByteBuffer buffer, int off, int len) throws IOException {
+    LOGGER.trace("{} {}", off, len);
     if (buffer.hasArray()) {
       return read(buffer.array(), off, len);
     }
@@ -152,6 +163,7 @@ public abstract class StreamHandle implements IRandomAccess {
   /* @see IRandomAccess#seek(long) */
   @Override
   public void seek(long pos) throws IOException {
+    LOGGER.trace("{}", pos);
     long diff = pos - fp;
     fp = pos;
 
@@ -170,12 +182,14 @@ public abstract class StreamHandle implements IRandomAccess {
   /* @see IRandomAccess.write(ByteBuffer) */
   @Override
   public void write(ByteBuffer buf) throws IOException {
+    LOGGER.trace("0 {}", buf.capacity());
     write(buf, 0, buf.capacity());
   }
 
   /* @see IRandomAccess.write(ByteBuffer, int, int) */
   @Override
   public void write(ByteBuffer buf, int off, int len) throws IOException {
+    LOGGER.trace("{} {}", off, len);
     buf.position(off);
     if (buf.hasArray()) {
       write(buf.array(), off, len);
