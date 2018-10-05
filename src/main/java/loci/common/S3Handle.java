@@ -214,8 +214,7 @@ public class S3Handle extends StreamHandle {
     }
     else {
       LOGGER.debug("Caching {} to {}", s3, cachepath);
-      Files.createDirectories(cachepath.getParent());
-      s3.downloadObject(cachepath.toString());
+      s3.downloadObject(cachepath);
       LOGGER.debug("Downloaded {}", cachepath);
     }
     return cachepath.toString();
@@ -230,12 +229,13 @@ public class S3Handle extends StreamHandle {
     return cachekey;
   }
 
-  protected void downloadObject(String destination) throws HandleException {
+  protected void downloadObject(Path destination) throws HandleException {
     LOGGER.trace("destination:{}", destination);
     try {
       s3Client = new MinioClient(server, port, accessKey, secretKey);
       ObjectStat stat = s3Client.statObject(bucket, path);
-      s3Client.getObject(bucket, path, destination);
+      Files.createDirectories(destination.getParent());
+      s3Client.getObject(bucket, path, destination.toString());
     } catch (
       IOException |
       InvalidKeyException |
