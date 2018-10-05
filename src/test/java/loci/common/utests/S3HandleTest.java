@@ -72,7 +72,7 @@ public class S3HandleTest {
   public void testParseAuth() throws IOException {
     S3Handle s3 = new S3Handle(
       "s3://access:secret@s3.example.org/bucket/key/file.tif", false);
-    assertEquals("s3.example.org", s3.getServer());
+    assertEquals("http://s3.example.org", s3.getServer());
     assertEquals(0, s3.getPort());
     assertEquals("bucket", s3.getBucket());
     assertEquals("key/file.tif", s3.getPath());
