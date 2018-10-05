@@ -209,11 +209,12 @@ public class S3Handle extends StreamHandle {
             InternalException |
             InvalidArgumentException e) {
       throw new IOException(String.format(
-              "failed to load s3: %s\n" +
-              "\tserver:%s\n"+
-              "\tport:%d\n"+
-              "\tbucket:%s\n"+
-              "\tpath:%s", uri, server, port, bucket, path), e);
+              "failed to load s3: %s\n\t%s", uri, this), e);
     }
+  }
+
+  public String toString() {
+    return String.format("server:%s port:%d bucket:%s path:%s",
+                          server, port, bucket, path);
   }
 }
