@@ -38,12 +38,16 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.minio.MinioClient;
+import io.minio.errors.MinioException;
 import io.minio.ObjectStat;
 import io.minio.errors.*;
 import org.xmlpull.v1.XmlPullParserException;
@@ -74,8 +78,8 @@ public class S3Handle extends StreamHandle {
           "(?<protocol>.+?)://" +
           "((?<access>.*):(?<secret>.*)@)?" +
           "(?<server>.+?)((:)(?<port>\\d+))?"+
-          "/(?<bucket>.*?)"+
-          "/(?<path>.*)";
+          "(/(?<bucket>.+?))?"+
+          "(/(?<path>.+))?";
 
   public final static Pattern URI_PARSER = Pattern.compile(URI_PATTERN);
 
@@ -182,6 +186,64 @@ public class S3Handle extends StreamHandle {
 
   public String getPath() {
     return path;
+  }
+
+  /**
+   * Download an S3 object to a file system cache if it doesn't already exist
+   *
+   * @param url the full URL to the S3 resource
+   * @param s custom settings object
+   * @return File path to the cached object
+   * @throws IOException if there is an error during reading or writing
+   */
+  public static String cacheObject(String url, Settings s) throws
+      IOException,
+      HandleException {
+    S3Handle s3 = new S3Handle(url, false, s);
+    String cacheroot = s.getRemoteCacheRootDir();
+    if (cacheroot == null) {
+      throw new HandleException("Remote cache root dir is not set");
+    }
+    // TODO: Need to ensure this path is safe. Is there a Java method to check?
+    String cacheobj = s3.getCacheKey();
+    // Hopefully creates a cross-platform path
+    Path cachepath = Paths.get(cacheroot, cacheobj);
+
+    if (Files.exists(cachepath)) {
+      LOGGER.debug("Found existing cache for {} at {}", s3, cachepath);
+    }
+    else {
+      LOGGER.debug("Caching {} to {}", s3, cachepath);
+      Files.createDirectories(cachepath.getParent());
+      s3.downloadObject(cachepath.toString());
+      LOGGER.debug("Downloaded {}", cachepath);
+    }
+    return cachepath.toString();
+  }
+
+  public String getCacheKey(){
+    String cachekey =
+      getServer().replace("://", "/") + "/" +
+      getPort() + "/" +
+      getBucket() + "/" +
+      getPath();
+    return cachekey;
+  }
+
+  protected void downloadObject(String destination) throws HandleException {
+    LOGGER.trace("destination:{}", destination);
+    try {
+      s3Client = new MinioClient(server, port, accessKey, secretKey);
+      ObjectStat stat = s3Client.statObject(bucket, path);
+      s3Client.getObject(bucket, path, destination);
+    } catch (
+      IOException |
+      InvalidKeyException |
+      MinioException |
+      NoSuchAlgorithmException |
+      XmlPullParserException e) {
+        throw new HandleException("Download failed " + toString(), e);
+      }
   }
 
   @Override

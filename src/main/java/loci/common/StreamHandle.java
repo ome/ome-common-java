@@ -57,6 +57,10 @@ public abstract class StreamHandle implements IRandomAccess {
     public String get(String key) {
       return System.getenv(key);
     }
+
+    public String getRemoteCacheRootDir() {
+      return get("BF_REMOTE_CACHE_ROOTDIR");
+    }
   }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StreamHandle.class);
