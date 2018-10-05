@@ -414,7 +414,20 @@ public class Location {
       String mapId = getMappedId(id);
 
       if (id.startsWith("s3://")) {
-        handle = new S3Handle(mapId);
+        StreamHandle.Settings ss = new StreamHandle.Settings();
+        if (ss.getRemoteCacheRootDir() != null) {
+          String cachedFile = S3Handle.cacheObject(mapId, ss);
+          if (bufferSize > 0) {
+            handle = new NIOFileHandle(
+              new File(cachedFile), "r", bufferSize);
+          }
+          else {
+            handle = new NIOFileHandle(cachedFile, "r");
+          }
+        }
+        else {
+          handle = new S3Handle(mapId);
+        }
       }
       else if (id.startsWith("http://") || id.startsWith("https://")) {
         handle = new URLHandle(mapId);
