@@ -231,6 +231,9 @@ public class S3Handle extends StreamHandle {
 
   protected void downloadObject(Path destination) throws HandleException {
     LOGGER.trace("destination:{}", destination);
+    if (path == null) {
+      throw new HandleException("Download path=null not allowed");
+    }
     try {
       s3Client = new MinioClient(server, port, accessKey, secretKey);
       ObjectStat stat = s3Client.statObject(bucket, path);
