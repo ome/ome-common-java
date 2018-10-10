@@ -502,10 +502,12 @@ public class NIOFileHandle extends AbstractNIOHandle {
   /* @see IRandomAccess.write(ByteBuffer, int, int) */
   @Override
   public void write(ByteBuffer buf, int off, int len) throws IOException {
-    writeSetup(len);
+    // Don't bother with writeSetup() because we're just throwing the buffer away again.
+    // Also, the channel.write() will handle resizing the file as needed.
     buf.limit(off + len);
     buf.position(off);
     position += channel.write(buf, position);
+    raf.seek(position);
     buffer = null;
   }
 
