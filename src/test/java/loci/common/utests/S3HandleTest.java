@@ -98,19 +98,9 @@ public class S3HandleTest {
     assertEquals("key/file.tif", s3.getPath());
   }
 
-  private class MockSettings extends StreamHandle.Settings {
-    public String get(String key) {
-      if (key.equals("BF_S3_PROTOCOL")) {
-        return "custom";
-      }
-      return super.get(key);
-    }
-  }
-
   @Test
   public void testDefaultProtocol() throws IOException {
-    StreamHandle.Settings s = new MockSettings();
-    S3Handle s3 = new S3Handle("s3://localhost/bucket/key/file.tif", false, s);
+    S3Handle s3 = new S3Handle("s3+custom://localhost/bucket/key/file.tif", false, null);
     assertEquals("custom://localhost", s3.getServer());
     assertEquals(0, s3.getPort());
     assertEquals("bucket", s3.getBucket());

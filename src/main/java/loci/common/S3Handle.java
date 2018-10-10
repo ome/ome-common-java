@@ -164,10 +164,10 @@ public class S3Handle extends StreamHandle {
   private String server(Matcher m) {
     String protocol = m.group("protocol");
     if (protocol.equals("s3")) {
-      protocol = this.settings.get("BF_S3_PROTOCOL");
-      if (protocol == null) {
-        protocol = DEFAULT_S3_PROTOCOL;
-      }
+      protocol = DEFAULT_S3_PROTOCOL;
+    }
+    else if (protocol.startsWith("s3+")) {
+      protocol = protocol.substring(3);
     }
     return protocol + "://" + m.group("server");
   }
