@@ -66,30 +66,18 @@ import org.slf4j.LoggerFactory;
  */
 public class S3Handle extends StreamHandle {
 
-  /** Default protocol for fetching s3://
-   # TODO: Default to https for improved security
-   */
+  /** Default protocol for fetching s3:// */
   public final static String DEFAULT_S3_PROTOCOL = "https";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(S3Handle.class);
-
-  /** Format: "s3://accessKey:secretKey@server-endpoint/bucket/path" */
-  public final static String URI_PATTERN =
-          "(?<protocol>.+?)://" +
-          "((?<access>.*):(?<secret>.*)@)?" +
-          "(?<server>.+?)((:)(?<port>\\d+))?"+
-          "(/(?<bucket>.+?)?)?"+
-          "(/(?<path>.+)?)?";
-
-  public final static Pattern URI_PARSER = Pattern.compile(URI_PATTERN);
 
   protected final static Pattern SCHEME_PARSER = Pattern.compile("s3(\\+\\p{Alnum}+)?://.*");
 
   /** S3 configuration */
   private final Settings settings;
 
-  /** full string used to configure this handle */
-  private final String uri;
+  /** Parsed URI used to configure this handle */
+  private final URI uri;
 
   /** access key, if provided */
   private final String accessKey;
@@ -137,48 +125,79 @@ public class S3Handle extends StreamHandle {
    * @param s custom settings object
    * @throws IOException if there is an error during opening
    */
-  public S3Handle(String uri, boolean initialize, Settings s) throws IOException {
+  public S3Handle(String uristr, boolean initialize, Settings s) throws
+      IOException {
     if (s == null) {
       this.settings = new StreamHandle.Settings();
     }
     else {
       this.settings = s;
     }
-    this.uri = uri;
-    Matcher m = URI_PARSER.matcher(uri);
-    if (!m.matches()) {
-      throw new RuntimeException(String.format(
-              "%s does not match pattern %s", uri, URI_PATTERN));
+
+    try {
+      this.uri = new URI(uristr);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException("Invalid URI " + uristr, e);
     }
-    this.accessKey = m.group("access");
-    this.secretKey = m.group("secret");
-    this.bucket = m.group("bucket");
-    this.server = server(m);
-    this.path = m.group("path");
-    this.port = port(m);
+
+    // access[:secret]
+    String auth = this.uri.getUserInfo();
+    String accessKey = null;
+    String secretKey = null;
+    if (auth != null) {
+      String[] authparts = auth.split(":", 2);
+      accessKey = authparts[0];
+      if (authparts.length > 1) {
+        secretKey = authparts[1];
+      }
+    }
+    this.accessKey = accessKey;
+    this.secretKey = secretKey;
+
+    String protocol;
+    String scheme = this.uri.getScheme();
+    if (scheme.equals("s3")) {
+      protocol = DEFAULT_S3_PROTOCOL;
+    }
+    else if (scheme.startsWith("s3+")) {
+      protocol = scheme.substring(3);
+    }
+    else {
+      protocol = scheme;
+    }
+    this.server = protocol + "://" + this.uri.getHost();
+
+    if (this.uri.getPort() == -1) {
+      this.port = 0;
+    }
+    else {
+      this.port = this.uri.getPort();
+    }
+
+    // First path component is the bucket
+    // TODO: Parsing this seems way more complicated than it should be
+    String fullpath = this.uri.getPath();
+    if (fullpath == null || fullpath.length() == 0) {
+      fullpath = "/";
+    }
+    // Leading / means first element is always ""
+    String[] pathparts = fullpath.split("/", 3);
+    if (pathparts[1].length() > 0) {
+      this.bucket = pathparts[1];
+    }
+    else {
+      this.bucket = null;
+    }
+    if (pathparts.length > 2 && pathparts[2].length() > 0) {
+      this.path = pathparts[2];
+    }
+    else {
+      this.path = null;
+    }
+
     if (initialize) {
       resetStream();
     }
-  }
-
-  private int port(Matcher m) {
-    String p = m.group("port");
-    if (p == null) {
-      return 0;
-    } else {
-      return Integer.valueOf(p);
-    }
-  }
-
-  private String server(Matcher m) {
-    String protocol = m.group("protocol");
-    if (protocol.equals("s3")) {
-      protocol = DEFAULT_S3_PROTOCOL;
-    }
-    else if (protocol.startsWith("s3+")) {
-      protocol = protocol.substring(3);
-    }
-    return protocol + "://" + m.group("server");
   }
 
   public String getServer() {
