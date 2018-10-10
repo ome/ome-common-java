@@ -106,4 +106,40 @@ public class S3HandleTest {
     assertEquals("bucket", s3.getBucket());
     assertEquals("key/file.tif", s3.getPath());
   }
+
+  @Test
+  public void testParseNoSlash() throws IOException {
+    S3Handle s3 = new S3Handle("s3://localhost", false, null);
+    assertEquals("https://localhost", s3.getServer());
+    assertEquals(0, s3.getPort());
+    assertEquals(null, s3.getBucket());
+    assertEquals(null, s3.getPath());
+  }
+
+  @Test
+  public void testParseSlashNoBucket() throws IOException {
+    S3Handle s3 = new S3Handle("s3://localhost/", false, null);
+    assertEquals("https://localhost", s3.getServer());
+    assertEquals(0, s3.getPort());
+    assertEquals(null, s3.getBucket());
+    assertEquals(null, s3.getPath());
+  }
+
+  @Test
+  public void testParseBucketNoSlash() throws IOException {
+    S3Handle s3 = new S3Handle("s3://localhost/bucket", false, null);
+    assertEquals("https://localhost", s3.getServer());
+    assertEquals(0, s3.getPort());
+    assertEquals("bucket", s3.getBucket());
+    assertEquals(null, s3.getPath());
+  }
+
+  @Test
+  public void testParseBucketSlash() throws IOException {
+    S3Handle s3 = new S3Handle("s3://localhost/bucket/", false, null);
+    assertEquals("https://localhost", s3.getServer());
+    assertEquals(0, s3.getPort());
+    assertEquals("bucket", s3.getBucket());
+    assertEquals(null, s3.getPath());
+  }
 }

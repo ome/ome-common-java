@@ -78,8 +78,8 @@ public class S3Handle extends StreamHandle {
           "(?<protocol>.+?)://" +
           "((?<access>.*):(?<secret>.*)@)?" +
           "(?<server>.+?)((:)(?<port>\\d+))?"+
-          "(/(?<bucket>.+?))?"+
-          "(/(?<path>.+))?";
+          "(/(?<bucket>.+?)?)?"+
+          "(/(?<path>.+)?)?";
 
   public final static Pattern URI_PARSER = Pattern.compile(URI_PATTERN);
 
