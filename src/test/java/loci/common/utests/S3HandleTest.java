@@ -40,6 +40,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * Unit tests for the loci.common.S3Handle class.
@@ -59,6 +61,14 @@ public class S3HandleTest {
   }
 
   // -- Test methods --
+
+  @Test
+  public void canHandleScheme() {
+    assertTrue(S3Handle.canHandleScheme("s3://"));
+    assertTrue(S3Handle.canHandleScheme("s3+transport://abc"));
+    assertFalse(S3Handle.canHandleScheme("s345://"));
+    assertFalse(S3Handle.canHandleScheme("http+s3://"));
+  }
 
   @Test
   public void testParseLocalhost() throws IOException {

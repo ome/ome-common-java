@@ -83,6 +83,8 @@ public class S3Handle extends StreamHandle {
 
   public final static Pattern URI_PARSER = Pattern.compile(URI_PATTERN);
 
+  protected final static Pattern SCHEME_PARSER = Pattern.compile("s3(\\+\\p{Alnum}+)?://.*");
+
   /** S3 configuration */
   private final Settings settings;
 
@@ -108,6 +110,13 @@ public class S3Handle extends StreamHandle {
   private final String path;
 
   private MinioClient s3Client;
+
+  /**
+   * Return true if this is a URL with an s3 scheme
+   */
+  public static boolean canHandleScheme(String url) {
+    return SCHEME_PARSER.matcher(url).matches();
+  }
 
   /**
    * Open an S3 file

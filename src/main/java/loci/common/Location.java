@@ -413,7 +413,7 @@ public class Location {
       LOGGER.trace("no handle was mapped for this ID");
       String mapId = getMappedId(id);
 
-      if (id.startsWith("s3://")) {
+      if (S3Handle.canHandleScheme(id)) {
         StreamHandle.Settings ss = new StreamHandle.Settings();
         if (ss.getRemoteCacheRootDir() != null) {
           String cachedFile = S3Handle.cacheObject(mapId, ss);
