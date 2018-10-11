@@ -71,7 +71,7 @@ public class S3Handle extends StreamHandle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(S3Handle.class);
 
-  protected final static Pattern SCHEME_PARSER = Pattern.compile("s3(\\+\\p{Alnum}+)?://.*");
+  protected final static Pattern SCHEME_PARSER = Pattern.compile("s3(\\+\\p{Alnum}+)?(://.*)?");
 
   /** S3 configuration */
   private final Settings settings;

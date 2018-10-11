@@ -63,11 +63,13 @@ public class S3HandleTest {
   // -- Test methods --
 
   @Test
-  public void canHandleScheme() {
+  public void testCanHandleScheme() {
     assertTrue(S3Handle.canHandleScheme("s3://"));
     assertTrue(S3Handle.canHandleScheme("s3+transport://abc"));
+    assertTrue(S3Handle.canHandleScheme("s3+transport"));
     assertFalse(S3Handle.canHandleScheme("s345://"));
     assertFalse(S3Handle.canHandleScheme("http+s3://"));
+    assertFalse(S3Handle.canHandleScheme("https"));
   }
 
   @Test
