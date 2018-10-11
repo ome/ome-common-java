@@ -277,9 +277,40 @@ public class S3Handle extends StreamHandle {
       }
   }
 
+  /**
+   * Is this an accessible bucket?
+   *
+   * @return True if a bucket
+   * @throws IOException if there is an error during reading or writing
+   */
+  public boolean isBucket() throws IOException {
+    if (bucket == null || path !=null ) {
+      return false;
+    }
+    try {
+      s3Client = new MinioClient(server, port, accessKey, secretKey);
+      boolean isBucket = s3Client.bucketExists(bucket);
+      LOGGER.debug("isBucket? {} {}", this, isBucket);
+      return isBucket;
+    } catch (
+      InvalidKeyException |
+      MinioException |
+      NoSuchAlgorithmException |
+      XmlPullParserException e) {
+      throw new IOException(String.format(
+              "bucketExists failed: %s", this), e);
+    }
+  }
+
   @Override
   protected void resetStream() throws IOException {
     LOGGER.trace("Resetting");
+    if (bucket == null) {
+      throw new IOException("bucket is null");
+    }
+    if (path == null) {
+      throw new IOException("path is null");
+    }
     try {
       s3Client = new MinioClient(server, port, accessKey, secretKey);
       ObjectStat stat = s3Client.statObject(bucket, path);

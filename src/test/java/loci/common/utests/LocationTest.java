@@ -138,7 +138,7 @@ public class LocationTest {
   // -- Tests --
 
   @Test
-  public void testReadWriteMode() {
+  public void testReadWriteMode() throws IOException {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
       String msg = files[i].getName();
@@ -180,14 +180,14 @@ public class LocationTest {
   }
 
   @Test
-  public void testIsDirectory() {
+  public void testIsDirectory() throws IOException {
     for (int i=0; i<files.length; i++) {
       assertEquals(files[i].getName(), files[i].isDirectory(), isDirectory[i]);
     }
   }
 
   @Test
-  public void testIsFile() {
+  public void testIsFile() throws IOException {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
       assertEquals(files[i].getName(), files[i].isFile(),
@@ -203,7 +203,7 @@ public class LocationTest {
   }
 
   @Test
-  public void testListFiles() {
+  public void testListFiles() throws IOException {
     for (int i=0; i<files.length; i++) {
       String[] completeList = files[i].list();
       String[] unhiddenList = files[i].list(true);
