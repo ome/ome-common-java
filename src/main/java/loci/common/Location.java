@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -796,8 +798,13 @@ public class Location {
   public String getParent() {
     LOGGER.trace("getParent()");
     if (isURL) {
+      // TODO For S3 we should take account of directories not really existing
       String absPath = getAbsolutePath();
       absPath = absPath.substring(0, absPath.lastIndexOf("/"));
+      final Pattern pattern = Pattern.compile("[^/]+:/$");
+      if (pattern.matcher(absPath).matches()) {
+        return null;
+      }
       return absPath;
     }
     return file.getParent();

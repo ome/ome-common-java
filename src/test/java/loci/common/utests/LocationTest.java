@@ -60,6 +60,7 @@ public class LocationTest {
   // -- Fields --
 
   private Location[] files;
+  private Location[] rootFiles;
   private boolean[] exists;
   private boolean[] isDirectory;
   private boolean[] isHidden;
@@ -93,29 +94,81 @@ public class LocationTest {
       new Location("http://www.openmicroscopy.org/"),
       new Location("https://www.openmicroscopy.org/"),
       new Location("https://www.openmicroscopy.org/nonexisting"),
+      new Location("https://www.openmicroscopy.org/nonexisting/:/+/symbols"),
       new Location(hiddenFile),
       new Location("s3://server/bucket-dne/key/"),
       new Location("s3://server/bucket-dne/key/file.tif"),
     };
 
+    rootFiles = new Location[] {
+      new Location("/"),
+      new Location("https://www.openmicroscopy.org"),
+      new Location("s3://server"),
+    };
+
     exists = new boolean[] {
-      true, false, true, true, true, false, true, false, false
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false
     };
 
     isDirectory = new boolean[] {
-      false, false, true, false, false, false, false, false, false
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     };
 
     isHidden = new boolean[] {
-      false, false, false, false, false, false, true, false, false
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
     };
 
     mode = new String[] {
-      "rw", "", "rw", "r", "r", "","rw", "", "" // S3 isn't readable
+      "rw",
+      "",
+      "rw",
+      "r",
+      "r",
+      "",
+      "",
+      "rw",
+      "",
+      "" // S3 isn't readable
     };
 
     isRemote = new boolean[] {
-      false, false, false, true, true, true, false, true, true
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
     };
   }
 
@@ -176,6 +229,13 @@ public class LocationTest {
     for (Location file : files) {
       assertEquals(file.getName(), file.getParent(),
         file.getParentFile().getAbsolutePath());
+    }
+  }
+
+  @Test
+  public void testParentRoot() {
+    for (Location file : rootFiles) {
+      assertEquals(file.getName(), file.getParent(), null);
     }
   }
 
