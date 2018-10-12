@@ -62,6 +62,12 @@ public class Location {
   private static final boolean IS_WINDOWS =
     System.getProperty("os.name").startsWith("Windows");
 
+  // -- Enumerations --
+  protected enum UrlType {
+    GENERIC,
+    S3
+  };
+
   // -- Static fields --
 
   /** Map from given filenames to actual filenames. */
@@ -92,6 +98,7 @@ public class Location {
   // -- Fields --
 
   private boolean isURL = false;
+  private UrlType urlType;
   private URL url;
   private URI uri;
   private File file;
@@ -143,6 +150,12 @@ public class Location {
         pathname = child;
         uri = new URI(mapped);
         isURL = true;
+        if (S3Handle.canHandleScheme(uri.toString())) {
+          urlType = UrlType.S3;
+        }
+        else {
+          urlType = UrlType.GENERIC;
+        }
         url = uri.toURL();
       }
       catch (URISyntaxException | MalformedURLException e) {
@@ -499,9 +512,8 @@ public class Location {
     final List<String> files = new ArrayList<String>();
     if (isURL) {
       try {
-        if (url == null) {
-          // Likely s3
-          if (S3Handle.canHandleScheme(uri.getScheme()) && isDirectory()) {
+        if (urlType == UrlType.S3) {
+          if (isDirectory()) {
             // TODO: This is complicated, not sure what to do here
             // See comment in isDirectory()
             LOGGER.trace("list s3 {}: Returning []", uri);
@@ -832,7 +844,7 @@ public class Location {
   public boolean isDirectory() throws IOException {
     LOGGER.trace("isDirectory()");
     if (isURL) {
-      if (S3Handle.canHandleScheme(uri.getScheme())) {
+      if (urlType == UrlType.S3) {
         // TODO: This is complicated
         //
         // S3 doesn't have directories, but keys can contain / which we
