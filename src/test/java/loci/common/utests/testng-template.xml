@@ -213,6 +213,11 @@
             <class name="loci.common.utests.DebugToolsTest"/>
         </classes>
     </test>
+    <test name="Downsampling">
+        <classes>
+            <class name="loci.common.utests.SimpleImageScalerTest"/>
+        </classes>
+    </test>
     <!--
     <test name="Encoding">
       <classes>
