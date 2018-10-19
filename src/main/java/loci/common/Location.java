@@ -9,13 +9,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -599,7 +600,7 @@ public class Location {
    * @return see above
    * @see java.io.File#canRead()
    */
-  public boolean canRead() throws IOException {
+  public boolean canRead() {
     LOGGER.trace("canRead()");
     // Note: isFile calls exist
     return isURL ? (isDirectory() || isFile()) : file.canRead();
@@ -848,7 +849,7 @@ public class Location {
    * @return true if this pathname exists and represents a directory.
    * @see java.io.File#isDirectory()
    */
-  public boolean isDirectory() throws IOException {
+  public boolean isDirectory() {
     LOGGER.trace("isDirectory()");
     if (isURL) {
       if (urlType == UrlType.S3) {
@@ -864,10 +865,14 @@ public class Location {
         //
         // S3 buckets are the closest thing to a proper directory
         // so for now
-        S3Handle h = new S3Handle(uri.toString(), false, null);
-        boolean isBucket = h.isBucket();
-        h.close();
-        return isBucket;
+        try {
+          S3Handle h = new S3Handle(uri.toString(), false, null);
+          boolean isBucket = h.isBucket();
+          h.close();
+          return isBucket;
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
       } else {
         // TODO: this should be removed as well.
         String[] list = list();
@@ -883,7 +888,7 @@ public class Location {
    * @return true if this pathname exists and represents a regular file.
    * @see java.io.File#exists()
    */
-  public boolean isFile() throws IOException {
+  public boolean isFile() {
     LOGGER.trace("isFile()");
     return isURL ? (!isDirectory() && exists()) : file.isFile();
   }

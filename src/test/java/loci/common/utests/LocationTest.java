@@ -9,13 +9,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -191,7 +191,7 @@ public class LocationTest {
   // -- Tests --
 
   @Test
-  public void testReadWriteMode() throws IOException {
+  public void testReadWriteMode() {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
       String msg = files[i].getName();
@@ -240,14 +240,14 @@ public class LocationTest {
   }
 
   @Test
-  public void testIsDirectory() throws IOException {
+  public void testIsDirectory() {
     for (int i=0; i<files.length; i++) {
       assertEquals(files[i].getName(), files[i].isDirectory(), isDirectory[i]);
     }
   }
 
   @Test
-  public void testIsFile() throws IOException {
+  public void testIsFile() {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
       assertEquals(files[i].getName(), files[i].isFile(),
@@ -263,7 +263,7 @@ public class LocationTest {
   }
 
   @Test
-  public void testListFiles() throws IOException {
+  public void testListFiles() {
     for (int i=0; i<files.length; i++) {
       String[] completeList = files[i].list();
       String[] unhiddenList = files[i].list(true);
