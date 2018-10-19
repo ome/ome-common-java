@@ -98,6 +98,15 @@ public class Location {
   private static final Map<String, ListingsResult> fileListings =
     new MapMaker().makeMap();  // like Java's ConcurrentHashMap
 
+  /** Pattern to match child URLs */
+  private static final Pattern URL_MATCHER = Pattern.compile(
+    "\\p{Alnum}+(\\+\\p{Alnum}+)?://.*");
+
+  /** Pattern to detect when getParent has gone past the parent of a URL */
+  private static final Pattern URL_ABOVE_PARENT = Pattern.compile(
+    "\\p{Alnum}+(\\+\\p{Alnum}+)?:/$");
+
+
   // -- Fields --
 
   private boolean isURL = false;
@@ -145,7 +154,7 @@ public class Location {
     String pathname = null;
 
     // First handle possible URIs
-    if (child != null && child.contains("://")) {
+    if (child != null && URL_MATCHER.matcher(child).matches()) {
       // Avoid expensive exception handling in case when path is
       // obviously not an URL
       try {
@@ -803,8 +812,7 @@ public class Location {
       // TODO For S3 we should take account of directories not really existing
       String absPath = getAbsolutePath();
       absPath = absPath.substring(0, absPath.lastIndexOf("/"));
-      final Pattern pattern = Pattern.compile("[^/]+:/$");
-      if (pattern.matcher(absPath).matches()) {
+      if (URL_ABOVE_PARENT.matcher(absPath).matches()) {
         return null;
       }
       return absPath;
