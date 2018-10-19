@@ -155,15 +155,16 @@ public class Location {
         isURL = true;
         if (S3Handle.canHandleScheme(uri.toString())) {
           urlType = UrlType.S3;
+          url = null;
         }
         else {
           urlType = UrlType.GENERIC;
+          url = uri.toURL();
         }
-        url = uri.toURL();
       }
       catch (URISyntaxException | MalformedURLException e) {
-        // TODO: this should possibly throw
-        // possibly leaves url null
+        throw new UncheckedIOException(new IOException(
+          "Invalid URL: " + child, e));
       }
     }
 
