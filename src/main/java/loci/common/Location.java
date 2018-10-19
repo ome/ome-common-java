@@ -172,8 +172,13 @@ public class Location {
         }
       }
       catch (URISyntaxException | MalformedURLException e) {
-        throw new UncheckedIOException(new IOException(
-          "Invalid URL: " + child, e));
+        // Readers such as FilePatternReader may pass invalid URI paths
+        // containing <> so don't throw, instead treat as a non-URL
+        LOGGER.debug("Invalid URL: {} {}", child, e);
+        isURL = false;
+        urlType = null;
+        url = null;
+        uri = null;
       }
     }
 
