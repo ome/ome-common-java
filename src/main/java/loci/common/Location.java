@@ -880,7 +880,7 @@ public class Location {
         // S3 buckets are the closest thing to a proper directory
         // so for now
         try {
-          S3Handle h = new S3Handle(uri.toString(), false, null);
+          S3Handle h = new S3Handle(uri.toString());
           boolean isBucket = h.isBucket();
           h.close();
           return isBucket;

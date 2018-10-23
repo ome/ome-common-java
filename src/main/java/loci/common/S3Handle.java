@@ -97,10 +97,27 @@ public class S3Handle extends StreamHandle {
   /** remaining path, or key, for this accessed resource */
   private final String path;
 
+  /** Minio client */
   private MinioClient s3Client;
+
+  /** Remote file stat */
+  private ObjectStat stat;
+
+  /** Is this a directory (currently only buckets are considered directories */
+  private boolean isBucket;
+
+  /**
+   * Exception if thrown during construction
+   */
+  private Throwable objectNotFound;
+
+  /** If seeking more than this distance reset and reopen at offset */
+  protected static final int S3_MAX_FORWARD_SEEK = 1048576;
 
   /**
    * Return true if this is a URL with an s3 scheme
+   * @param url URL
+   * @return true if this class can handle url
    */
   public static boolean canHandleScheme(String url) {
     return SCHEME_PARSER.matcher(url).matches();
@@ -119,7 +136,7 @@ public class S3Handle extends StreamHandle {
   /**
    * Open an S3 file
    *
-   * @param url the full URL to the S3 resource
+   * @param uristr the full URL to the S3 resource
    * @param initialize If true open the stream, otherwise just parse connection
    *        string
    * @param s custom settings object
@@ -195,7 +212,64 @@ public class S3Handle extends StreamHandle {
       this.path = null;
     }
 
+    this.isBucket = false;
+    this.stat = null;
+
     if (initialize) {
+      // Throw if there is a connection error, otherwise save the exception and only throw if a method
+      // that requires a valid object is called
+      this.connect();
+      try {
+        this.initialize();
+      }
+      catch (
+        IOException |
+        MinioException |
+        InvalidKeyException |
+        NoSuchAlgorithmException |
+        XmlPullParserException e) {
+        this.objectNotFound = e;
+        LOGGER.trace("Object not found: {}", this);
+      }
+      LOGGER.trace("isBucket:{} stat:{}", isBucket, stat);
+    }
+  }
+
+  /**
+   * Connect to the server
+   * @throws IOException if there was an error connecting to the server
+   */
+  protected void connect() throws IOException {
+    try {
+      s3Client = new MinioClient(server, port, accessKey, secretKey);
+    }
+    catch (MinioException e) {
+      throw new IOException(String.format(
+              "Failed to connect: %s", this), e);
+    }
+    LOGGER.trace("connected:{}", this);
+  }
+
+  /**
+   * Check bucket or object exists
+   * @throws IOException if unable to get the object
+   * @throws MinioException if unable to get the object
+   * @throws InvalidKeyException if unable to get the object
+   * @throws NoSuchAlgorithmException if unable to get the object
+   * @throws XmlPullParserException if unable to get the object
+   */
+  protected void initialize() throws
+      IOException,
+      MinioException,
+      InvalidKeyException,
+      NoSuchAlgorithmException,
+      XmlPullParserException {
+    if (path == null) {
+      isBucket = s3Client.bucketExists(bucket);
+    }
+    else {
+      isBucket = false;
+      stat = s3Client.statObject(bucket, path);
       resetStream();
     }
   }
@@ -223,15 +297,16 @@ public class S3Handle extends StreamHandle {
    * @param s custom settings object
    * @return File path to the cached object
    * @throws IOException if there is an error during reading or writing
+   * @throws HandleException if no destination for the cache is provided
    */
   public static String cacheObject(String url, Settings s) throws
       IOException,
       HandleException {
-    S3Handle s3 = new S3Handle(url, false, s);
     String cacheroot = s.getRemoteCacheRootDir();
     if (cacheroot == null) {
       throw new HandleException("Remote cache root dir is not set");
     }
+    S3Handle s3 = new S3Handle(url, true, s);
     // TODO: Need to ensure this path is safe. Is there a Java method to check?
     String cacheobj = s3.getCacheKey();
     // Hopefully creates a cross-platform path
@@ -257,17 +332,19 @@ public class S3Handle extends StreamHandle {
     return cachekey;
   }
 
-  protected void downloadObject(Path destination) throws HandleException {
+  protected void downloadObject(Path destination) throws HandleException, IOException {
     LOGGER.trace("destination:{}", destination);
+    if (this.objectNotFound != null) {
+      throw new IOException("Object not found", this.objectNotFound);
+    }
     if (path == null) {
       throw new HandleException("Download path=null not allowed");
     }
     try {
-      s3Client = new MinioClient(server, port, accessKey, secretKey);
-      ObjectStat stat = s3Client.statObject(bucket, path);
       Files.createDirectories(destination.getParent());
       s3Client.getObject(bucket, path, destination.toString());
-    } catch (
+    }
+    catch (
       IOException |
       InvalidKeyException |
       MinioException |
@@ -281,30 +358,60 @@ public class S3Handle extends StreamHandle {
    * Is this an accessible bucket?
    *
    * @return True if a bucket
-   * @throws IOException if there is an error during reading or writing
    */
-  public boolean isBucket() throws IOException {
-    if (bucket == null || path !=null ) {
-      return false;
+  public boolean isBucket() {
+//    if (this.objectNotFound != null) {
+//      throw new IOException("Object not found", this.objectNotFound);
+//    }
+    return isBucket;
+  }
+
+  /* @see IRandomAccess#length() */
+  @Override
+  public long length() throws IOException {
+    if (this.objectNotFound != null) {
+      throw new IOException("Object not found", this.objectNotFound);
     }
-    try {
-      s3Client = new MinioClient(server, port, accessKey, secretKey);
-      boolean isBucket = s3Client.bucketExists(bucket);
-      LOGGER.debug("isBucket? {} {}", this, isBucket);
-      return isBucket;
-    } catch (
-      InvalidKeyException |
-      MinioException |
-      NoSuchAlgorithmException |
-      XmlPullParserException e) {
-      throw new IOException(String.format(
-              "bucketExists failed: %s", this), e);
+    return length;
+  }
+
+  /**
+   * @see StreamHandle#seek(long)
+   */
+  @Override
+  public void seek(long pos) throws IOException {
+    LOGGER.trace("{}", pos);
+    if (this.objectNotFound != null) {
+      throw new IOException("Object not found", this.objectNotFound);
+    }
+    long diff = pos - fp;
+
+    if (diff < 0 || diff > S3_MAX_FORWARD_SEEK) {
+      resetStream(pos);
+    }
+    else {
+      super.seek(pos);
     }
   }
 
+  /**
+   * @see StreamHandle#resetStream()
+   */
   @Override
   protected void resetStream() throws IOException {
-    LOGGER.trace("Resetting");
+    resetStream(0);
+  }
+
+  /**
+   * Reset the stream to an offset position
+   * @param offset Offset into object
+   * @throws IOException if there is an error during reading or writing
+   */
+  protected void resetStream(long offset) throws IOException {
+    LOGGER.trace("Resetting {}", offset);
+    if (this.objectNotFound != null) {
+      throw new IOException("Object not found", this.objectNotFound);
+    }
     if (bucket == null) {
       throw new IOException("bucket is null");
     }
@@ -312,33 +419,25 @@ public class S3Handle extends StreamHandle {
       throw new IOException("path is null");
     }
     try {
-      s3Client = new MinioClient(server, port, accessKey, secretKey);
-      ObjectStat stat = s3Client.statObject(bucket, path);
       length = stat.length();
       stream = new DataInputStream(new BufferedInputStream(
-              s3Client.getObject(bucket, path)));
+              s3Client.getObject(bucket, path, offset)));
       stream.skip(-1L);
-      fp = 0;
-      mark = 0;
-    } catch (ConnectException |
-            InvalidEndpointException |
-            InvalidPortException |
-            InvalidBucketNameException |
-            NoSuchAlgorithmException |
-            InsufficientDataException |
-            InvalidKeyException |
-            NoResponseException |
-            XmlPullParserException |
-            ErrorResponseException |
-            InternalException |
-            InvalidArgumentException e) {
-      throw new IOException(String.format(
+      fp = offset;
+      mark = offset;
+      }
+      catch (
+        InvalidKeyException |
+        MinioException |
+        NoSuchAlgorithmException |
+        XmlPullParserException e) {
+        throw new IOException(String.format(
               "failed to load s3: %s\n\t%s", uri, this), e);
     }
   }
 
   public String toString() {
-    return String.format("server:%s port:%d bucket:%s path:%s",
-                          server, port, bucket, path);
+    return String.format("server:%s port:%d bucket:%s path:%s found:%s",
+                          server, port, bucket, path, objectNotFound == null);
   }
 }
