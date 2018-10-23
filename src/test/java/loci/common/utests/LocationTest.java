@@ -59,14 +59,21 @@ public class LocationTest {
 
   // -- Fields --
 
+  private enum LocalRemoteType {
+    LOCAL,
+    HTTP,
+    S3,
+  };
+
   private Location[] files;
   private Location[] rootFiles;
   private boolean[] exists;
   private boolean[] isDirectory;
   private boolean[] isHidden;
   private String[] mode;
-  private boolean[] isRemote;
+  private LocalRemoteType[] isRemote;
   private boolean isOnline;
+  private boolean canAccessS3;
 
   // -- Setup methods --
 
@@ -96,14 +103,15 @@ public class LocationTest {
       new Location("https://www.openmicroscopy.org/nonexisting"),
       new Location("https://www.openmicroscopy.org/nonexisting/:/+/symbols"),
       new Location(hiddenFile),
-      new Location("s3://server/bucket-dne/key/"),
-      new Location("s3://server/bucket-dne/key/file.tif"),
+      new Location("s3://minio.openmicroscopy.org/bucket-dne"),
+      new Location("s3://minio.openmicroscopy.org/bioformats.test.public"),
+      new Location("s3://minio.openmicroscopy.org/bioformats.test.public/z-series.ome.tif"),
     };
 
     rootFiles = new Location[] {
       new Location("/"),
       new Location("https://www.openmicroscopy.org"),
-      new Location("s3://server"),
+      new Location("s3://minio.openmicroscopy.org"),
     };
 
     exists = new boolean[] {
@@ -116,7 +124,8 @@ public class LocationTest {
       false,
       true,
       false,
-      false
+      true,
+      true,
     };
 
     isDirectory = new boolean[] {
@@ -129,7 +138,8 @@ public class LocationTest {
       false,
       false,
       false,
-      false
+      true,
+      false,
     };
 
     isHidden = new boolean[] {
@@ -142,7 +152,8 @@ public class LocationTest {
       false,
       true,
       false,
-      false
+      false,
+      false,
     };
 
     mode = new String[] {
@@ -155,20 +166,22 @@ public class LocationTest {
       "",
       "rw",
       "",
-      "" // S3 isn't readable
+      "r",
+      "r",
     };
 
-    isRemote = new boolean[] {
-      false,
-      false,
-      false,
-      true,
-      true,
-      true,
-      true,
-      false,
-      true,
-      true
+    isRemote = new LocalRemoteType[] {
+      LocalRemoteType.LOCAL,
+      LocalRemoteType.LOCAL,
+      LocalRemoteType.LOCAL,
+      LocalRemoteType.HTTP,
+      LocalRemoteType.HTTP,
+      LocalRemoteType.HTTP,
+      LocalRemoteType.HTTP,
+      LocalRemoteType.LOCAL,
+      LocalRemoteType.S3,
+      LocalRemoteType.S3,
+      LocalRemoteType.S3,
     };
   }
 
@@ -180,11 +193,30 @@ public class LocationTest {
     } catch (IOException e) {
       isOnline = false;
     }
+    try {
+      new Socket("minio.openmicroscopy.org", 443).close();
+      canAccessS3 = true;
+    } catch (IOException e) {
+      canAccessS3 = false;
+    }
+
+    if (!isOnline) {
+      System.err.println("WARNING: online tests are disabled!");
+    }
+    if (!canAccessS3) {
+      System.err.println("WARNING: S3 tests are disabled!");
+    }
   }
 
   private void skipIfOffline(int i) throws SkipException {
-    if (isRemote[i] && !isOnline) {
+    if (isRemote[i] == LocalRemoteType.HTTP && !isOnline) {
       throw new SkipException("must be online to test " + files[i].getName());
+    }
+  }
+
+  private void skipIfS3Offline(int i) throws SkipException {
+    if (isRemote[i] == LocalRemoteType.S3 && !canAccessS3) {
+      throw new SkipException("must have access to s3 to test " + files[i].getName());
     }
   }
 
@@ -194,6 +226,7 @@ public class LocationTest {
   public void testReadWriteMode() {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
+      skipIfS3Offline(i);
       String msg = files[i].getName();
       assertEquals(msg, files[i].canRead(), mode[i].contains("r"));
       assertEquals(msg, files[i].canWrite(), mode[i].contains("w"));
@@ -212,6 +245,7 @@ public class LocationTest {
   public void testExists() {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
+      skipIfS3Offline(i);
       assertEquals(files[i].getName(), files[i].exists(), exists[i]);
     }
   }
@@ -242,6 +276,7 @@ public class LocationTest {
   @Test
   public void testIsDirectory() {
     for (int i=0; i<files.length; i++) {
+      skipIfS3Offline(i);
       assertEquals(files[i].getName(), files[i].isDirectory(), isDirectory[i]);
     }
   }
@@ -250,6 +285,7 @@ public class LocationTest {
   public void testIsFile() {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
+      skipIfS3Offline(i);
       assertEquals(files[i].getName(), files[i].isFile(),
         !isDirectory[i] && exists[i]);
     }
