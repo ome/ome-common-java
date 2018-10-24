@@ -106,6 +106,8 @@ public class LocationTest {
       new Location("s3+http://localhost:31836/bucket-dne"),
       new Location("s3+http://localhost:31836/bioformats.test.public"),
       new Location("s3+http://localhost:31836/bioformats.test.public/single-channel.ome.tiff"),
+      new Location("s3+http://localhost:31836/bioformats.test.private/single-channel.ome.tiff"),
+      new Location("s3+http://accesskey:secretkey@localhost:31836/bioformats.test.private/single-channel.ome.tiff")
     };
 
     rootFiles = new Location[] {
@@ -126,6 +128,8 @@ public class LocationTest {
       false,
       true,
       true,
+      false,
+      true,
     };
 
     isDirectory = new boolean[] {
@@ -140,6 +144,8 @@ public class LocationTest {
       false,
       true,
       false,
+      false,
+      false,
     };
 
     isHidden = new boolean[] {
@@ -151,6 +157,8 @@ public class LocationTest {
       false,
       false,
       true,
+      false,
+      false,
       false,
       false,
       false,
@@ -168,6 +176,8 @@ public class LocationTest {
       "",
       "r",
       "r",
+      "",
+      "r",
     };
 
     isRemote = new LocalRemoteType[] {
@@ -179,6 +189,8 @@ public class LocationTest {
       LocalRemoteType.HTTP,
       LocalRemoteType.HTTP,
       LocalRemoteType.LOCAL,
+      LocalRemoteType.S3,
+      LocalRemoteType.S3,
       LocalRemoteType.S3,
       LocalRemoteType.S3,
       LocalRemoteType.S3,
