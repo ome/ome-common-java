@@ -381,7 +381,7 @@ public class S3Handle extends StreamHandle {
   @Override
   public void seek(long pos) throws IOException {
     LOGGER.trace("{}", pos);
-    if (this.objectNotFound != null) {
+    if (this.stat == null || this.objectNotFound != null) {
       throw new IOException("Object not found", this.objectNotFound);
     }
     long diff = pos - fp;
@@ -409,14 +409,8 @@ public class S3Handle extends StreamHandle {
    */
   protected void resetStream(long offset) throws IOException {
     LOGGER.trace("Resetting {}", offset);
-    if (this.objectNotFound != null) {
+    if (this.stat == null || this.objectNotFound != null) {
       throw new IOException("Object not found", this.objectNotFound);
-    }
-    if (bucket == null) {
-      throw new IOException("bucket is null");
-    }
-    if (path == null) {
-      throw new IOException("path is null");
     }
     try {
       length = stat.length();
@@ -437,7 +431,8 @@ public class S3Handle extends StreamHandle {
   }
 
   public String toString() {
+    boolean found = (objectNotFound == null) && (isBucket || stat != null);
     return String.format("server:%s port:%d bucket:%s path:%s found:%s",
-                          server, port, bucket, path, objectNotFound == null);
+                          server, port, bucket, path, found);
   }
 }
