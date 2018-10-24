@@ -478,6 +478,17 @@ public abstract class StreamHandle implements IRandomAccess {
     outStream.writeUTF(str);
   }
 
+  // -- Public methods --
+
+  /**
+   * Does this represent an accessible location?
+   * @return true if this location is accessible
+   * @throws IOException if unable to determine whether this location is accessible
+   */
+  public boolean exists() throws IOException {
+    return length >= 0;
+  }
+
   // -- Helper methods --
 
   /**

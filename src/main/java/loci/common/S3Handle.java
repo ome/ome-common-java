@@ -334,8 +334,8 @@ public class S3Handle extends StreamHandle {
 
   protected void downloadObject(Path destination) throws HandleException, IOException {
     LOGGER.trace("destination:{}", destination);
-    if (this.objectNotFound != null) {
-      throw new IOException("Object not found", this.objectNotFound);
+    if (this.stat == null || this.objectNotFound != null) {
+      throw new IOException("Object not found " + this, this.objectNotFound);
     }
     if (path == null) {
       throw new HandleException("Download path=null not allowed");
@@ -356,21 +356,22 @@ public class S3Handle extends StreamHandle {
 
   /**
    * Is this an accessible bucket?
+   * TODO: If this bucket doesn't exist do we return false or thrown an exception?
    *
    * @return True if a bucket
    */
   public boolean isBucket() {
-//    if (this.objectNotFound != null) {
-//      throw new IOException("Object not found", this.objectNotFound);
-//    }
+    //if (this.objectNotFound != null) {
+    //  throw new IOException("Object not found " + this, this.objectNotFound);
+    //}
     return isBucket;
   }
 
   /* @see IRandomAccess#length() */
   @Override
   public long length() throws IOException {
-    if (this.objectNotFound != null) {
-      throw new IOException("Object not found", this.objectNotFound);
+    if (this.stat == null || this.objectNotFound != null) {
+      throw new IOException("Object not found " + this, this.objectNotFound);
     }
     return length;
   }
@@ -382,7 +383,7 @@ public class S3Handle extends StreamHandle {
   public void seek(long pos) throws IOException {
     LOGGER.trace("{}", pos);
     if (this.stat == null || this.objectNotFound != null) {
-      throw new IOException("Object not found", this.objectNotFound);
+      throw new IOException("Object not found " + this, this.objectNotFound);
     }
     long diff = pos - fp;
 
@@ -403,6 +404,16 @@ public class S3Handle extends StreamHandle {
   }
 
   /**
+   * Does this represent an accessible location?
+   * @return true if this location is accessible
+   * @throws IOException if unable to determine whether this location is accessible
+   */
+  @Override
+  public boolean exists() throws IOException {
+    return (objectNotFound == null) && (isBucket || stat != null);
+  }
+
+  /**
    * Reset the stream to an offset position
    * @param offset Offset into object
    * @throws IOException if there is an error during reading or writing
@@ -410,7 +421,7 @@ public class S3Handle extends StreamHandle {
   protected void resetStream(long offset) throws IOException {
     LOGGER.trace("Resetting {}", offset);
     if (this.stat == null || this.objectNotFound != null) {
-      throw new IOException("Object not found", this.objectNotFound);
+      throw new IOException("Object not found " + this, this.objectNotFound);
     }
     try {
       length = stat.length();

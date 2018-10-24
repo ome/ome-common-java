@@ -722,10 +722,9 @@ public class Location {
     if (isURL) {
       try {
         // TODO: existence should almost certainly be cached.
-        IRandomAccess handle = getHandle(uri.toString());
-        handle.length();
-        handle.close();
-        return true;
+        StreamHandle handle = (StreamHandle) getHandle(uri.toString());
+        boolean exists = handle.exists();
+        return exists;
       }
       catch (IOException e) {
         LOGGER.trace("Failed to retrieve content from URL", e);
