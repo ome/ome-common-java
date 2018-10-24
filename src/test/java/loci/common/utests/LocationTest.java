@@ -233,6 +233,7 @@ public class LocationTest {
   }
 
   // -- Tests --
+  // Order of assertEquals parameters is assertEquals(message, expected, actual)
 
   @Test
   public void testReadWriteMode() {
@@ -240,16 +241,15 @@ public class LocationTest {
       skipIfOffline(i);
       skipIfS3Offline(i);
       String msg = files[i].getName();
-      assertEquals(msg, files[i].canRead(), mode[i].contains("r"));
-      assertEquals(msg, files[i].canWrite(), mode[i].contains("w"));
+      assertEquals(msg, mode[i].contains("r"), files[i].canRead());
+      assertEquals(msg, mode[i].contains("w"), files[i].canWrite());
     }
   }
 
   @Test
   public void testAbsolute() {
     for (Location file : files) {
-      assertEquals(file.getName(), file.getAbsolutePath(),
-        file.getAbsoluteFile().getAbsolutePath());
+      assertEquals(file.getName(), file.getAbsoluteFile().getAbsolutePath(), file.getAbsolutePath());
     }
   }
 
@@ -258,30 +258,28 @@ public class LocationTest {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
       skipIfS3Offline(i);
-      assertEquals(files[i].getName(), files[i].exists(), exists[i]);
+      assertEquals(files[i].getName(), exists[i], files[i].exists());
     }
   }
 
   @Test
   public void testCanonical() throws IOException {
     for (Location file : files) {
-      assertEquals(file.getName(), file.getCanonicalPath(),
-        file.getCanonicalFile().getAbsolutePath());
+      assertEquals(file.getName(), file.getCanonicalFile().getAbsolutePath(), file.getCanonicalPath());
     }
   }
 
   @Test
   public void testParent() {
     for (Location file : files) {
-      assertEquals(file.getName(), file.getParent(),
-        file.getParentFile().getAbsolutePath());
+      assertEquals(file.getName(), file.getParentFile().getAbsolutePath(), file.getParent());
     }
   }
 
   @Test
   public void testParentRoot() {
     for (Location file : rootFiles) {
-      assertEquals(file.getName(), file.getParent(), null);
+      assertEquals(file.getName(), null, file.getParent());
     }
   }
 
@@ -289,7 +287,7 @@ public class LocationTest {
   public void testIsDirectory() {
     for (int i=0; i<files.length; i++) {
       skipIfS3Offline(i);
-      assertEquals(files[i].getName(), files[i].isDirectory(), isDirectory[i]);
+      assertEquals(files[i].getName(), isDirectory[i], files[i].isDirectory());
     }
   }
 
@@ -298,15 +296,14 @@ public class LocationTest {
     for (int i=0; i<files.length; i++) {
       skipIfOffline(i);
       skipIfS3Offline(i);
-      assertEquals(files[i].getName(), files[i].isFile(),
-        !isDirectory[i] && exists[i]);
+      assertEquals(files[i].getName(), !isDirectory[i] && exists[i], files[i].isFile());
     }
   }
 
   @Test
   public void testIsHidden() {
     for (int i=0; i<files.length; i++) {
-      assertEquals(files[i].getName(), files[i].isHidden() || IS_WINDOWS, isHidden[i] || IS_WINDOWS);
+      assertEquals(files[i].getName(), isHidden[i] || IS_WINDOWS, files[i].isHidden() || IS_WINDOWS);
     }
   }
 
@@ -318,24 +315,22 @@ public class LocationTest {
       Location[] fileList = files[i].listFiles();
 
       if (!files[i].isDirectory()) {
-        assertEquals(files[i].getName(), completeList, null);
-        assertEquals(files[i].getName(), unhiddenList, null);
-        assertEquals(files[i].getName(), fileList, null);
+        assertEquals(files[i].getName(), null, completeList);
+        assertEquals(files[i].getName(), null, unhiddenList);
+        assertEquals(files[i].getName(), null, fileList);
         continue;
       }
 
-      assertEquals(files[i].getName(), completeList.length, fileList.length);
+      assertEquals(files[i].getName(), fileList.length, completeList.length);
 
       List<String> complete = Arrays.asList(completeList);
       for (String child : unhiddenList) {
-        assertEquals(files[i].getName(), complete.contains(child), true);
-        assertEquals(files[i].getName(),
-          new Location(files[i], child).isHidden(), false);
+        assertEquals(files[i].getName(), true, complete.contains(child));
+        assertEquals(files[i].getName(), false, new Location(files[i], child).isHidden());
       }
 
       for (int f=0; f<fileList.length; f++) {
-        assertEquals(files[i].getName(),
-          fileList[f].getName(), completeList[f]);
+        assertEquals(files[i].getName(), completeList[f], fileList[f].getName());
       }
     }
   }
@@ -356,7 +351,7 @@ public class LocationTest {
         path += File.separator;
       }
       try {
-        assertEquals(file.getName(), file.toURL(), new URL(path));
+        assertEquals(file.getName(), new URL(path), file.toURL());
       } catch (MalformedURLException e) {
         assertEquals(path, true, path.contains("s3+http://"));
       }
@@ -366,7 +361,7 @@ public class LocationTest {
   @Test
   public void testToString() {
     for (Location file : files) {
-      assertEquals(file.getName(), file.toString(), file.getAbsolutePath());
+      assertEquals(file.getName(), file.getAbsolutePath(), file.toString());
     }
   }
 
