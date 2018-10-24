@@ -11,5 +11,9 @@ jdk:
   - oraclejdk11
   - oraclejdk8
 
+before_script:
+  - docker build -t location-server location-server/
+  - docker run -d --name location-server -p 31836:9000 location-server
+
 matrix:
   fast_finish: true

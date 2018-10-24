@@ -103,15 +103,15 @@ public class LocationTest {
       new Location("https://www.openmicroscopy.org/nonexisting"),
       new Location("https://www.openmicroscopy.org/nonexisting/:/+/symbols"),
       new Location(hiddenFile),
-      new Location("s3://minio.openmicroscopy.org/bucket-dne"),
-      new Location("s3://minio.openmicroscopy.org/bioformats.test.public"),
-      new Location("s3://minio.openmicroscopy.org/bioformats.test.public/z-series.ome.tif"),
+      new Location("s3+http://localhost:31836/bucket-dne"),
+      new Location("s3+http://localhost:31836/bioformats.test.public"),
+      new Location("s3+http://localhost:31836/bioformats.test.public/single-channel.ome.tiff"),
     };
 
     rootFiles = new Location[] {
       new Location("/"),
       new Location("https://www.openmicroscopy.org"),
-      new Location("s3://minio.openmicroscopy.org"),
+      new Location("s3://s3.example.org"),
     };
 
     exists = new boolean[] {
@@ -194,7 +194,7 @@ public class LocationTest {
       isOnline = false;
     }
     try {
-      new Socket("minio.openmicroscopy.org", 443).close();
+      new Socket("localhost", 31836).close();
       canAccessS3 = true;
     } catch (IOException e) {
       canAccessS3 = false;
@@ -346,7 +346,7 @@ public class LocationTest {
       try {
         assertEquals(file.getName(), file.toURL(), new URL(path));
       } catch (MalformedURLException e) {
-        assertEquals(path, true, path.contains("s3://"));
+        assertEquals(path, true, path.contains("s3+http://"));
       }
     }
   }
