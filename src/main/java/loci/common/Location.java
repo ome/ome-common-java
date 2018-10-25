@@ -724,6 +724,7 @@ public class Location {
         // TODO: existence should almost certainly be cached.
         StreamHandle handle = (StreamHandle) getHandle(uri.toString());
         boolean exists = handle.exists();
+        handle.close();
         return exists;
       }
       catch (IOException e) {
