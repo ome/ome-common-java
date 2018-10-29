@@ -442,7 +442,7 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
     }
 
     bits += currentBit;
-    int bytesToSkip = (int) (bits / 8);
+    final long bytesToSkip = bits / 8;
     currentBit = (int) (bits % 8);
     if (bytesToSkip > 0) {
       skipBytes(bytesToSkip);
@@ -667,6 +667,11 @@ public class RandomAccessInputStream extends InputStream implements DataInput, C
   /** Skip n bytes within the stream. */
   @Override
   public int skipBytes(int n) throws IOException {
+    return raf.skipBytes(n);
+  }
+
+  /** Skip n bytes within the stream. */
+  public long skipBytes(long n) throws IOException {
     return raf.skipBytes(n);
   }
 

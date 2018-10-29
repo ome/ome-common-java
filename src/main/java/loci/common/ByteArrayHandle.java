@@ -379,12 +379,19 @@ public class ByteArrayHandle extends AbstractNIOHandle {
   /* @see java.io.DataInput.skipBytes(int) */
   @Override
   public int skipBytes(int n) throws IOException {
-    int skipped = (int) Math.min(n, length() - getFilePointer());
-    if (skipped < 0) {
+    return (int) skipBytes((long) n);
+  }
+
+  /* @see #skipBytes(int) */
+  @Override
+  public long skipBytes(long n) throws IOException {
+    final long currentPosition = getFilePointer();
+    n = Math.min(n, length() - currentPosition);
+    if (n <= 0) {
       return 0;
     }
-    seek(getFilePointer() + skipped);
-    return skipped;
+    seek(currentPosition + n);
+    return n;
   }
 
   // -- DataOutput API methods --

@@ -105,12 +105,9 @@ public class URLHandle extends StreamHandle {
 
   /** Skip over the given number of bytes. */
   private void skip(long bytes) throws IOException {
-    while (bytes >= Integer.MAX_VALUE) {
-      bytes -= skipBytes(Integer.MAX_VALUE);
-    }
-    int skipped = skipBytes((int) bytes);
+    long skipped = 0;
     while (skipped < bytes) {
-      int n = skipBytes((int) (bytes - skipped));
+      final long n = skipBytes(bytes - skipped);
       if (n == 0) break;
       skipped += n;
     }

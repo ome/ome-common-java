@@ -143,6 +143,14 @@ public interface IRandomAccess extends DataInput, DataOutput {
   void seek(long pos) throws IOException;
 
   /**
+   * A {@code long} variant of {@link #skipBytes(int)}.
+   * @param n the number of bytes to skip
+   * @return the number of bytes skipped
+   * @throws IOException if the operation failed
+   */
+  long skipBytes(long n) throws IOException;
+
+  /**
    * Writes up to buffer.capacity() bytes of data from the given
    * ByteBuffer to this stream.
    *
