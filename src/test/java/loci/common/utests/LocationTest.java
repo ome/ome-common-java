@@ -33,6 +33,7 @@
 package loci.common.utests;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -220,16 +221,14 @@ public class LocationTest {
     }
   }
 
-  private void skipIfOffline(int i) throws SkipException {
-    if (isRemote[i] == LocalRemoteType.HTTP && !isOnline) {
-      throw new SkipException("must be online to test " + files[i].getName());
-    }
+  private void failIfOffline(int i) throws SkipException {
+    assertFalse("must be online to test " + files[i].getName(),
+       isRemote[i] == LocalRemoteType.HTTP && !isOnline);
   }
 
-  private void skipIfS3Offline(int i) throws SkipException {
-    if (isRemote[i] == LocalRemoteType.S3 && !canAccessS3) {
-      throw new SkipException("must have access to s3 to test " + files[i].getName());
-    }
+  private void failIfS3Offline(int i) throws SkipException {
+    assertFalse("Server not found, run `cd location-server && ./start-location.sh`: " + files[i].getName(),
+      isRemote[i] == LocalRemoteType.S3 && !canAccessS3);
   }
 
   // -- Tests --
@@ -238,8 +237,8 @@ public class LocationTest {
   @Test
   public void testReadWriteMode() {
     for (int i=0; i<files.length; i++) {
-      skipIfOffline(i);
-      skipIfS3Offline(i);
+      failIfOffline(i);
+      failIfS3Offline(i);
       String msg = files[i].getName();
       assertEquals(msg, mode[i].contains("r"), files[i].canRead());
       assertEquals(msg, mode[i].contains("w"), files[i].canWrite());
@@ -256,8 +255,8 @@ public class LocationTest {
   @Test
   public void testExists() {
     for (int i=0; i<files.length; i++) {
-      skipIfOffline(i);
-      skipIfS3Offline(i);
+      failIfOffline(i);
+      failIfS3Offline(i);
       assertEquals(files[i].getName(), exists[i], files[i].exists());
     }
   }
@@ -286,7 +285,7 @@ public class LocationTest {
   @Test
   public void testIsDirectory() {
     for (int i=0; i<files.length; i++) {
-      skipIfS3Offline(i);
+      failIfS3Offline(i);
       assertEquals(files[i].getName(), isDirectory[i], files[i].isDirectory());
     }
   }
@@ -294,8 +293,8 @@ public class LocationTest {
   @Test
   public void testIsFile() {
     for (int i=0; i<files.length; i++) {
-      skipIfOffline(i);
-      skipIfS3Offline(i);
+      failIfOffline(i);
+      failIfS3Offline(i);
       assertEquals(files[i].getName(), !isDirectory[i] && exists[i], files[i].isFile());
     }
   }
