@@ -238,6 +238,10 @@
           <suiteXmlFiles>
             <suiteXmlFile>src/test/java/loci/common/utests/testng-template.xml</suiteXmlFile>
           </suiteXmlFiles>
+          <systemPropertyVariables>
+            <testng.runHttpRemoteTests>0</testng.runHttpRemoteTests>
+            <testng.runS3RemoteTests>0</testng.runS3RemoteTests>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
 

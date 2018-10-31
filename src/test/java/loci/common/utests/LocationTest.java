@@ -37,7 +37,6 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -72,8 +71,8 @@ public class LocationTest {
   private boolean[] isHidden;
   private String[] mode;
   private LocalRemoteType[] isRemote;
-  private boolean isOnline;
-  private boolean canAccessS3;
+  private static boolean runHttpRemoteTests;
+  private static boolean runS3RemoteTests;
 
   // -- Setup methods --
 
@@ -198,37 +197,27 @@ public class LocationTest {
   }
 
   @BeforeClass
-  public void checkIfOnline() throws IOException {
-    try {
-      new Socket("www.openmicroscopy.org", 80).close();
-      isOnline = true;
-    } catch (IOException e) {
-      isOnline = false;
-    }
-    try {
-      new Socket("localhost", 31836).close();
-      canAccessS3 = true;
-    } catch (IOException e) {
-      canAccessS3 = false;
-    }
+  public void checkProperties() throws IOException {
+    runHttpRemoteTests = TestUtilities.getPropValueInt("testng.runHttpRemoteTests") > 0;
+    runS3RemoteTests = TestUtilities.getPropValueInt("testng.runS3RemoteTests") > 0;
 
-    if (!isOnline) {
-      System.err.println("WARNING: online tests are disabled!");
+    if (!runHttpRemoteTests) {
+      System.err.println("WARNING: HTTP tests are disabled!");
     }
-    if (!canAccessS3) {
+    if (!runS3RemoteTests) {
       System.err.println("WARNING: S3 tests are disabled!");
     }
   }
 
-  private void skipIfOffline(int i) throws SkipException {
-    if (isRemote[i] == LocalRemoteType.HTTP && !isOnline) {
-      throw new SkipException("must be online to test " + files[i].getName());
+  private void skipIfHttpDisabled(int i) throws SkipException {
+    if (isRemote[i] == LocalRemoteType.HTTP && !runHttpRemoteTests) {
+      throw new SkipException("HTTP tests are disabled " + files[i].getName());
     }
   }
 
-  private void skipIfS3Offline(int i) throws SkipException {
-    if (isRemote[i] == LocalRemoteType.S3 && !canAccessS3) {
-      throw new SkipException("must have access to s3 to test " + files[i].getName());
+  private void skipIfS3Disabled(int i) throws SkipException {
+    if (isRemote[i] == LocalRemoteType.S3 && !runS3RemoteTests) {
+      throw new SkipException("S3 tests are disabled " + files[i].getName());
     }
   }
 
@@ -238,8 +227,8 @@ public class LocationTest {
   @Test
   public void testReadWriteMode() {
     for (int i=0; i<files.length; i++) {
-      skipIfOffline(i);
-      skipIfS3Offline(i);
+      skipIfHttpDisabled(i);
+      skipIfS3Disabled(i);
       String msg = files[i].getName();
       assertEquals(msg, mode[i].contains("r"), files[i].canRead());
       assertEquals(msg, mode[i].contains("w"), files[i].canWrite());
@@ -256,8 +245,8 @@ public class LocationTest {
   @Test
   public void testExists() {
     for (int i=0; i<files.length; i++) {
-      skipIfOffline(i);
-      skipIfS3Offline(i);
+      skipIfHttpDisabled(i);
+      skipIfS3Disabled(i);
       assertEquals(files[i].getName(), exists[i], files[i].exists());
     }
   }
@@ -286,7 +275,7 @@ public class LocationTest {
   @Test
   public void testIsDirectory() {
     for (int i=0; i<files.length; i++) {
-      skipIfS3Offline(i);
+      skipIfS3Disabled(i);
       assertEquals(files[i].getName(), isDirectory[i], files[i].isDirectory());
     }
   }
@@ -294,8 +283,8 @@ public class LocationTest {
   @Test
   public void testIsFile() {
     for (int i=0; i<files.length; i++) {
-      skipIfOffline(i);
-      skipIfS3Offline(i);
+      skipIfHttpDisabled(i);
+      skipIfS3Disabled(i);
       assertEquals(files[i].getName(), !isDirectory[i] && exists[i], files[i].isFile());
     }
   }
