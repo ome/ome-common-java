@@ -38,7 +38,6 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 import loci.common.Constants;
 import loci.common.HandleException;
@@ -70,7 +69,6 @@ public class URLHandleTest {
     FileOutputStream out = new FileOutputStream(tmpFile);
     out.write("hello, world!\n".getBytes(Constants.ENCODING));
     byte[] emptyBuffer = new byte[EMPTY_BUFFER_SIZE];
-    Arrays.fill(emptyBuffer, (byte) 0);
     out.write(emptyBuffer);
     out.write("goodbye, world!\n".getBytes(Constants.ENCODING));
     out.close();
