@@ -58,6 +58,8 @@ public class URLHandleTest {
   private URLHandle fileHandle;
   private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
 
+  private static final int EMPTY_BUFFER_SIZE = 1024 * 1024;
+
   // -- Setup methods --
 
   @BeforeMethod
@@ -66,6 +68,9 @@ public class URLHandleTest {
     tmpFile.deleteOnExit();
     FileOutputStream out = new FileOutputStream(tmpFile);
     out.write("hello, world!\n".getBytes(Constants.ENCODING));
+    byte[] emptyBuffer = new byte[EMPTY_BUFFER_SIZE];
+    out.write(emptyBuffer);
+    out.write("goodbye, world!\n".getBytes(Constants.ENCODING));
     out.close();
     String path = tmpFile.getAbsolutePath();
     fileHandle = new URLHandle((IS_WINDOWS ? "file:/" : "file://") + path);
@@ -75,7 +80,7 @@ public class URLHandleTest {
 
   @Test
   public void testLength() throws IOException {
-    assertEquals(14, fileHandle.length());
+    assertEquals(30 + EMPTY_BUFFER_SIZE, fileHandle.length());
   }
 
   @Test
@@ -152,6 +157,11 @@ public class URLHandleTest {
     fileHandle.seek(13);
     fileHandle.seek(7);
     assertEquals(0x77, fileHandle.readByte());
+
+    fileHandle.seek(23 + EMPTY_BUFFER_SIZE);
+    assertEquals(0x77, fileHandle.readByte());
+    fileHandle.seek(7);
+    assertEquals(0x77, fileHandle.readByte());
   }
 
   @Test
@@ -177,7 +187,7 @@ public class URLHandleTest {
 
   @Test (expectedExceptions = {EOFException.class})
   public void testEOF() throws IOException {
-    fileHandle.seek(16);
+    fileHandle.seek(30 + EMPTY_BUFFER_SIZE);
     fileHandle.readByte();
   }
 
