@@ -427,7 +427,6 @@ public class S3Handle extends StreamHandle {
       length = stat.length();
       stream = new DataInputStream(new BufferedInputStream(
               s3Client.getObject(bucket, path, offset)));
-      stream.skip(-1L);
       fp = offset;
       mark = offset;
       }
