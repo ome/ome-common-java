@@ -101,6 +101,12 @@ public class FileHandle implements IRandomAccess {
     return raf.getFilePointer();
   }
 
+  /* @see IRandomAccess#exists() */
+  @Override
+  public boolean exists() throws IOException {
+    return length() >= 0;
+  }
+
   /* @see IRandomAccess.length() */
   @Override
   public long length() throws IOException {
