@@ -213,20 +213,19 @@ public class S3Handle extends StreamHandle {
     this.stat = null;
 
     if (initialize) {
-      // Throw if there is a connection error, otherwise save the exception and only throw if a method
+      // Throw if there is an IOException, otherwise save the exception and only throw if a method
       // that requires a valid object is called
       this.connect();
       try {
         this.initialize();
       }
       catch (
-        IOException |
         MinioException |
         InvalidKeyException |
         NoSuchAlgorithmException |
         XmlPullParserException e) {
         this.objectNotFound = e;
-        LOGGER.trace("Object not found: {}", this);
+        LOGGER.debug("Object not found: {}", this);
       }
       LOGGER.trace("isBucket:{} stat:{}", isBucket, stat);
     }
