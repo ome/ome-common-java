@@ -35,7 +35,6 @@ package loci.common;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -43,13 +42,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import io.minio.ObjectStat;
-import io.minio.errors.*;
 import org.xmlpull.v1.XmlPullParserException;
 
 import org.slf4j.Logger;
