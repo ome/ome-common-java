@@ -299,6 +299,7 @@ public class LocationTest {
   @Test
   public void testListFiles() {
     for (int i=0; i<files.length; i++) {
+      skipIfS3Disabled(i);
       String[] completeList = files[i].list();
       String[] unhiddenList = files[i].list(true);
       Location[] fileList = files[i].listFiles();
@@ -326,7 +327,10 @@ public class LocationTest {
 
   @Test
   public void testToURL() throws IOException {
-    for (Location file : files) {
+    for (int i=0; i<files.length; i++) {
+      // S3 isDirectory will throw if connection fails
+      skipIfS3Disabled(i);
+      Location file = files[i];
       String path = file.getAbsolutePath();
       if (!path.contains("://")) {
         if (IS_WINDOWS) {
