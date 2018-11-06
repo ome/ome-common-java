@@ -63,6 +63,15 @@ import org.slf4j.LoggerFactory;
  */
 public class S3Handle extends StreamHandle {
 
+  /**
+   * An S3 IOException that was not thrown immediately
+   */
+  class DelayedObjectNotFound extends IOException {
+    DelayedObjectNotFound(S3Handle s3) {
+      super(String.format("Object not found: [%s] %s", s3, s3.objectNotFound), s3.objectNotFound);
+    }
+  }
+
   /** Default protocol for fetching s3:// */
   public final static String DEFAULT_S3_PROTOCOL = "https";
 
@@ -225,7 +234,7 @@ public class S3Handle extends StreamHandle {
         NoSuchAlgorithmException |
         XmlPullParserException e) {
         this.objectNotFound = e;
-        LOGGER.debug("Object not found: {}", this);
+        LOGGER.debug("Object not found: [{}] {}", this, e);
       }
       LOGGER.trace("isBucket:{} stat:{}", isBucket, stat);
     }
@@ -358,7 +367,7 @@ public class S3Handle extends StreamHandle {
    */
   public boolean isBucket() {
     //if (this.objectNotFound != null) {
-    //  throw new IOException("Object not found " + this, this.objectNotFound);
+    //  throw new DelayedObjectNotFound(this);
     //}
     return isBucket;
   }
@@ -367,7 +376,7 @@ public class S3Handle extends StreamHandle {
   @Override
   public long length() throws IOException {
     if (this.stat == null || this.objectNotFound != null) {
-      throw new IOException("Object not found " + this, this.objectNotFound);
+      throw new DelayedObjectNotFound(this);
     }
     return length;
   }
@@ -379,7 +388,7 @@ public class S3Handle extends StreamHandle {
   public void seek(long pos) throws IOException {
     LOGGER.trace("{}", pos);
     if (this.stat == null || this.objectNotFound != null) {
-      throw new IOException("Object not found " + this, this.objectNotFound);
+      throw new DelayedObjectNotFound(this);
     }
     long diff = pos - fp;
 
@@ -417,7 +426,7 @@ public class S3Handle extends StreamHandle {
   protected void resetStream(long offset) throws IOException {
     LOGGER.trace("Resetting {}", offset);
     if (this.stat == null || this.objectNotFound != null) {
-      throw new IOException("Object not found " + this, this.objectNotFound);
+      throw new DelayedObjectNotFound(this);
     }
     try {
       length = stat.length();
