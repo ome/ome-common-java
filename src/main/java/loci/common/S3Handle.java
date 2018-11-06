@@ -252,7 +252,7 @@ public class S3Handle extends StreamHandle {
       throw new IOException(String.format(
               "Failed to connect: %s", this), e);
     }
-    LOGGER.trace("connected:{}", this);
+    LOGGER.trace("connected: server:{} port:{}", server, port);
   }
 
   /**
