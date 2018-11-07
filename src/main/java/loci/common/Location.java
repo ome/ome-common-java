@@ -725,7 +725,7 @@ public class Location {
     if (isURL) {
       try {
         // TODO: existence should almost certainly be cached.
-        StreamHandle handle = (StreamHandle) getHandle(uri.toString());
+        IRandomAccess handle = getHandle(uri.toString());
         boolean exists = handle.exists();
         handle.close();
         return exists;
