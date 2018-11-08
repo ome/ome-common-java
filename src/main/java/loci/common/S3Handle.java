@@ -247,6 +247,8 @@ public class S3Handle extends StreamHandle {
   protected void connect() throws IOException {
     try {
       s3Client = new MinioClient(server, port, accessKey, secretKey);
+      // TODO: Replace "dev" with a version
+      s3Client.setAppInfo("Bio-Formats", "dev");
     }
     catch (MinioException e) {
       throw new IOException(String.format(
