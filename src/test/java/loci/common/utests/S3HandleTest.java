@@ -34,10 +34,14 @@ package loci.common.utests;
 
 import loci.common.S3Handle;
 import loci.common.StreamHandle;
-import org.testng.annotations.BeforeMethod;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
@@ -53,11 +57,30 @@ public class S3HandleTest {
 
   // -- Fields --
 
+  private static boolean runS3RemoteTests;
+  private Path TEMPDIR;
+
+  private static final String s3public = "s3+http://localhost:31836";
+  private static final String s3private = "s3+http://accesskey:secretkey@localhost:31836";
+
   // -- Setup methods --
 
-  @BeforeMethod
-  public void setup() {
-    // no-op
+  @BeforeClass
+  public void setup() throws IOException {
+    TEMPDIR = Files.createTempDirectory("S3HandleTest-");
+    TEMPDIR.toFile().deleteOnExit();
+
+    runS3RemoteTests = TestUtilities.getPropValueInt("testng.runS3RemoteTests") > 0;
+
+    if (!runS3RemoteTests) {
+      System.err.println("WARNING: S3 tests are disabled!");
+    }
+  }
+
+  private void skipIfS3Disabled() throws SkipException {
+    if (!runS3RemoteTests) {
+      throw new SkipException("S3 tests are disabled");
+    }
   }
 
   // -- Test methods --
@@ -153,5 +176,122 @@ public class S3HandleTest {
     assertEquals(0, s3.getPort());
     assertEquals("bucket", s3.getBucket());
     assertEquals(null, s3.getPath());
+  }
+
+  @Test
+  public void testIsBucket() throws IOException {
+    skipIfS3Disabled();
+    S3Handle s3 = new S3Handle(s3public + "/bioformats.test.public");
+    assertTrue(s3.isBucket());
+  }
+
+  @Test
+  public void testReadPublic() throws IOException {
+    skipIfS3Disabled();
+    S3Handle s3 = new S3Handle(s3public + "/bioformats.test.public/single-channel.ome.tiff");
+    assertFalse(s3.isBucket());
+    assertTrue(s3.exists());
+    assertEquals(76097, s3.length());
+  }
+
+  @Test
+  public void testReadPrivate() throws IOException {
+    skipIfS3Disabled();
+    S3Handle s3 = new S3Handle(s3private + "/bioformats.test.private/single-channel.ome.tiff");
+    assertFalse(s3.isBucket());
+    assertTrue(s3.exists());
+    assertEquals(76097, s3.length());
+  }
+
+  @Test
+  public void testReadAndSeek() throws IOException {
+    skipIfS3Disabled();
+    S3Handle s3 = new S3Handle(s3public + "/bioformats.test.public/2MBfile.txt");
+    assertFalse(s3.isBucket());
+    assertTrue(s3.exists());
+    assertEquals(2097152, s3.length());
+
+    byte[] buffer = new byte[32];
+    int r;
+
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals(".                             1\n", new String(buffer));
+
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals(".                             2\n", new String(buffer));
+
+    s3.seek(80);
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals("              3\n.               ", new String(buffer));
+
+    // Large seek (S3Handle.S3_MAX_FORWARD_SEEK)
+    s3.seek(2097056);
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals(".                         65534\n", new String(buffer));
+
+    // Reverse seek
+    s3.seek(144);
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals("              5\n.               ", new String(buffer));
+  }
+
+  @Test
+  public void testResetStream() throws IOException {
+    class S3HandleWrapper extends S3Handle {
+      public S3HandleWrapper(String url) throws IOException {
+        super(url);
+      }
+
+      @Override
+      public void resetStream() throws IOException {
+        super.resetStream();
+      }
+
+      @Override
+      public void resetStream(long offset) throws IOException {
+        super.resetStream(offset);
+      }
+    }
+
+    skipIfS3Disabled();
+    S3HandleWrapper s3 = new S3HandleWrapper(s3private + "/bioformats.test.private/2MBfile.txt");
+    assertFalse(s3.isBucket());
+    assertTrue(s3.exists());
+    assertEquals(2097152, s3.length());
+
+    byte[] buffer = new byte[32];
+    int r;
+    s3.resetStream(750144);
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals(".                         23443\n", new String(buffer));
+
+    s3.resetStream();
+    r = s3.read(buffer, 0, 32);
+    assertEquals(32, r);
+    assertEquals(".                             1\n", new String(buffer));
+  }
+
+  @Test
+  public void testCache() throws IOException {
+    class MockSettings extends StreamHandle.Settings {
+      @Override
+      public String getRemoteCacheRootDir() {
+        return TEMPDIR.toString();
+      }
+    }
+
+    skipIfS3Disabled();
+    final String expectedPath = TEMPDIR + "/http/localhost/31836/bioformats.test.public/2MBfile.txt";
+
+    String downloaded = S3Handle.cacheObject(
+        s3public + "/bioformats.test.public/2MBfile.txt", new MockSettings());
+    assertEquals(expectedPath, downloaded);
+    assertEquals(2097152, Files.size(Paths.get(downloaded)));
   }
 }
