@@ -485,6 +485,9 @@ public class Location {
         }
       }
       LOGGER.trace("Created new handle {} -> {}", id, handle);
+      // TODO: We should cache the handle, but we can't prevent callers from closing it which
+      // would make the cached handle useless to future fetches
+      //mapFile(id, handle);
     }
     LOGGER.trace("Location.getHandle: {} -> {}", id, handle);
     return handle;
