@@ -118,6 +118,44 @@ public class Location {
   private URI uri;
   private File file;
 
+  class URLLocationProperties {
+    public final long length;
+    public final boolean exists;
+
+    public URLLocationProperties(Location loc) {
+      LOGGER.trace("Getting LocationProperties");
+      boolean bexists = false;
+      long llength = 0;
+      if (!loc.isURL) {
+        throw new IllegalArgumentException("Location must be a URL");
+      }
+      try {
+        IRandomAccess handle = Location.getHandle(uri.toString());
+        try {
+          bexists = handle.exists();
+        }
+        catch (IOException e) {
+          LOGGER.trace("Failed to retrieve content from URL", e);
+        }
+        if (bexists) {
+          try {
+            llength = handle.length();
+          } catch (IOException e) {
+            LOGGER.trace("Could not determine URL's content length", e);
+          }
+        }
+        handle.close();
+      }
+      catch (IOException e) {
+        LOGGER.trace("Failed to retrieve content from URL", e);
+      }
+      this.exists = bexists;
+      this.length = llength;
+      LOGGER.trace("exists:{} length:{}", bexists, llength);
+    }
+  }
+  private URLLocationProperties cachedProperties;
+
   // -- Constructors --
 
   /**
@@ -724,20 +762,14 @@ public class Location {
    * @see java.io.File#exists()
    */
   public boolean exists() {
-    LOGGER.trace("exists()");
     if (isURL) {
-      try {
-        // TODO: existence should almost certainly be cached.
-        IRandomAccess handle = getHandle(uri.toString());
-        boolean exists = handle.exists();
-        handle.close();
-        return exists;
+      LOGGER.trace("exists(url)");
+      if (cachedProperties == null) {
+        cachedProperties = new URLLocationProperties(this);
       }
-      catch (IOException e) {
-        LOGGER.trace("Failed to retrieve content from URL", e);
-        return false;
-      }
+      return cachedProperties.exists;
     }
+    LOGGER.trace("exists(file)");
     if (file.exists()) return true;
     if (getMappedFile(file.getPath()) != null) return true;
 
@@ -966,19 +998,13 @@ public class Location {
    * @see java.net.URLConnection#getContentLength()
    */
   public long length() {
-    LOGGER.trace("length()");
     if (isURL) {
-      try {
-        IRandomAccess handle = getHandle(uri.toString());
-        long len = handle.length();
-        handle.close();
-        return len;
-      }
-      catch (IOException e) {
-        LOGGER.trace("Could not determine URL's content length", e);
-        return 0;
-      }
+      LOGGER.trace("length(url)");
+      // Ensure cachedProperties is populated
+      exists();
+      return cachedProperties.length;
     }
+    LOGGER.trace("length(file)");
     return file.length();
   }
 
