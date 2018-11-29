@@ -9,13 +9,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,7 +37,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -45,6 +48,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +67,12 @@ public class Location {
   private static final Logger LOGGER = LoggerFactory.getLogger(Location.class);
   private static final boolean IS_WINDOWS =
     System.getProperty("os.name").startsWith("Windows");
+
+  // -- Enumerations --
+  protected enum UrlType {
+    GENERIC,
+    S3
+  };
 
   // -- Static fields --
 
@@ -91,11 +101,60 @@ public class Location {
   private static final Map<String, ListingsResult> fileListings =
     new MapMaker().makeMap();  // like Java's ConcurrentHashMap
 
+  /** Pattern to match child URLs */
+  private static final Pattern URL_MATCHER = Pattern.compile(
+    "\\p{Alnum}+(\\+\\p{Alnum}+)?://.*");
+
+  /** Pattern to detect when getParent has gone past the parent of a URL */
+  private static final Pattern URL_ABOVE_PARENT = Pattern.compile(
+    "\\p{Alnum}+(\\+\\p{Alnum}+)?:/$");
+
+
   // -- Fields --
 
-  private boolean isURL = true;
+  private boolean isURL = false;
+  private UrlType urlType;
   private URL url;
+  private URI uri;
   private File file;
+
+  class URLLocationProperties {
+    public final long length;
+    public final boolean exists;
+
+    public URLLocationProperties(Location loc) {
+      LOGGER.trace("Getting LocationProperties");
+      boolean bexists = false;
+      long llength = 0;
+      if (!loc.isURL) {
+        throw new IllegalArgumentException("Location must be a URL");
+      }
+      try {
+        IRandomAccess handle = Location.getHandle(uri.toString());
+        try {
+          bexists = handle.exists();
+        }
+        catch (IOException e) {
+          LOGGER.trace("Failed to retrieve content from URL", e);
+        }
+        if (bexists) {
+          try {
+            llength = handle.length();
+          } catch (IOException e) {
+            LOGGER.trace("Could not determine URL's content length", e);
+          }
+        }
+        handle.close();
+      }
+      catch (IOException e) {
+        LOGGER.trace("Failed to retrieve content from URL", e);
+      }
+      this.exists = bexists;
+      this.length = llength;
+      LOGGER.trace("exists:{} length:{}", bexists, llength);
+    }
+  }
+  private URLLocationProperties cachedProperties;
 
   // -- Constructors --
 
@@ -107,22 +166,7 @@ public class Location {
    * @see #getMappedFile(String)
    */
   public Location(String pathname) {
-    LOGGER.trace("Location({})", pathname);
-    if (pathname.contains("://")) {
-      // Avoid expensive exception handling in case when path is
-      // obviously not an URL
-      try {
-        url = new URL(getMappedId(pathname));
-      }
-      catch (MalformedURLException e) {
-        LOGGER.trace("Location is not a URL", e);
-        isURL = false;
-      }
-    } else {
-      LOGGER.trace("Location is not a URL");
-      isURL = false;
-    }
-    if (!isURL) file = new File(getMappedId(pathname));
+    this((String) null, pathname);
   }
 
   /**
@@ -145,7 +189,53 @@ public class Location {
    * @param child the relative path name
    */
   public Location(String parent, String child) {
-    this(parent + File.separator + child);
+    LOGGER.trace("Location({}, {})", parent, child);
+
+    String mapped = null;
+    String pathname = null;
+
+    // First handle possible URIs
+    if (child != null && URL_MATCHER.matcher(child).matches()) {
+      // Avoid expensive exception handling in case when path is
+      // obviously not an URL
+      try {
+        mapped = getMappedId(child);
+        pathname = child;
+        uri = new URI(mapped);
+        isURL = true;
+        if (S3Handle.canHandleScheme(uri.toString())) {
+          urlType = UrlType.S3;
+          url = null;
+        }
+        else {
+          urlType = UrlType.GENERIC;
+          url = uri.toURL();
+        }
+      }
+      catch (URISyntaxException | MalformedURLException e) {
+        // Readers such as FilePatternReader may pass invalid URI paths
+        // containing <> so don't throw, instead treat as a non-URL
+        LOGGER.debug("Invalid URL: {} {}", child, e);
+        isURL = false;
+        urlType = null;
+        url = null;
+        uri = null;
+      }
+    }
+
+    // If not a URI, then deal with relative vs. absolute paths
+    if (pathname == null) {
+      if (parent != null) {
+        // TODO: in some cases child here may be null
+        pathname = parent + File.separator + child;
+      } else {
+        pathname = child;
+      }
+      mapped = getMappedId(pathname);
+    }
+
+    if (!isURL) file = new File(mapped);
+
   }
 
   /**
@@ -395,7 +485,23 @@ public class Location {
       LOGGER.trace("no handle was mapped for this ID");
       String mapId = getMappedId(id);
 
-      if (id.startsWith("http://") || id.startsWith("https://")) {
+      if (S3Handle.canHandleScheme(id)) {
+        StreamHandle.Settings ss = new StreamHandle.Settings();
+        if (ss.getRemoteCacheRootDir() != null) {
+          String cachedFile = S3Handle.cacheObject(mapId, ss);
+          if (bufferSize > 0) {
+            handle = new NIOFileHandle(
+              new File(cachedFile), "r", bufferSize);
+          }
+          else {
+            handle = new NIOFileHandle(cachedFile, "r");
+          }
+        }
+        else {
+          handle = new S3Handle(mapId);
+        }
+      }
+      else if (id.startsWith("http://") || id.startsWith("https://")) {
         handle = new URLHandle(mapId);
       }
       else if (allowArchiveHandles && ZipHandle.isZipFile(mapId)) {
@@ -416,6 +522,10 @@ public class Location {
           handle = new NIOFileHandle(mapId, writable ? "rw" : "r");
         }
       }
+      LOGGER.trace("Created new handle {} -> {}", id, handle);
+      // TODO: We should cache the handle, but we can't prevent callers from closing it which
+      // would make the cached handle useless to future fetches
+      //mapFile(id, handle);
     }
     LOGGER.trace("Location.getHandle: {} -> {}", id, handle);
     return handle;
@@ -464,6 +574,18 @@ public class Location {
     final List<String> files = new ArrayList<String>();
     if (isURL) {
       try {
+        if (urlType == UrlType.S3) {
+          if (isDirectory()) {
+            // TODO: This is complicated, not sure what to do here
+            // See comment in isDirectory()
+            LOGGER.trace("list s3 {}: Returning []", uri);
+            return new String[0];
+          }
+          else {
+            LOGGER.trace("list s3 {}: Returning null", uri);
+            return null;
+          }
+        }
         URLConnection c = url.openConnection();
         InputStream is = c.getInputStream();
         boolean foundEnd = false;
@@ -539,7 +661,8 @@ public class Location {
    */
   public boolean canRead() {
     LOGGER.trace("canRead()");
-    return isURL ? (isDirectory() || isFile() || exists()) : file.canRead();
+    // Note: isFile calls exist
+    return isURL ? (isDirectory() || isFile()) : file.canRead();
   }
 
   /**
@@ -639,17 +762,14 @@ public class Location {
    * @see java.io.File#exists()
    */
   public boolean exists() {
-    LOGGER.trace("exists()");
     if (isURL) {
-      try {
-        url.getContent();
-        return true;
+      LOGGER.trace("exists(url)");
+      if (cachedProperties == null) {
+        cachedProperties = new URLLocationProperties(this);
       }
-      catch (IOException e) {
-        LOGGER.trace("Failed to retrieve content from URL", e);
-        return false;
-      }
+      return cachedProperties.exists;
     }
+    LOGGER.trace("exists(file)");
     if (file.exists()) return true;
     if (getMappedFile(file.getPath()) != null) return true;
 
@@ -675,7 +795,7 @@ public class Location {
    */
   public String getAbsolutePath() {
     LOGGER.trace("getAbsolutePath()");
-    return isURL ? url.toExternalForm() : file.getAbsolutePath();
+    return isURL ? uri.normalize().toString() : file.getAbsolutePath();
   }
 
   /**
@@ -715,9 +835,8 @@ public class Location {
   public String getName() {
     LOGGER.trace("getName()");
     if (isURL) {
-      String name = url.getFile();
-      name = name.substring(name.lastIndexOf("/") + 1);
-      return name;
+      // TODO: we should just store new File(uri) in file
+      return  new File(uri.getPath()).getName();
     }
     return file.getName();
   }
@@ -733,8 +852,12 @@ public class Location {
   public String getParent() {
     LOGGER.trace("getParent()");
     if (isURL) {
+      // TODO For S3 we should take account of directories not really existing
       String absPath = getAbsolutePath();
       absPath = absPath.substring(0, absPath.lastIndexOf("/"));
+      if (URL_ABOVE_PARENT.matcher(absPath).matches()) {
+        return null;
+      }
       return absPath;
     }
     return file.getParent();
@@ -757,7 +880,7 @@ public class Location {
    * @see java.io.File#getPath()
    */
   public String getPath() {
-    return isURL ? url.getHost() + url.getPath() : file.getPath();
+    return isURL ? uri.getHost() + uri.getPath() : file.getPath();
   }
 
   /**
@@ -769,7 +892,7 @@ public class Location {
    */
   public boolean isAbsolute() {
     LOGGER.trace("isAbsolute()");
-    return isURL ? true : file.isAbsolute();
+    return isURL ? uri.isAbsolute() : file.isAbsolute();
   }
 
   /**
@@ -781,8 +904,32 @@ public class Location {
   public boolean isDirectory() {
     LOGGER.trace("isDirectory()");
     if (isURL) {
-      String[] list = list();
-      return list != null;
+      if (urlType == UrlType.S3) {
+        // TODO: This is complicated
+        //
+        // S3 doesn't have directories, but keys can contain / which we
+        // can pretend is a file path. However this "directory" doesn't
+        // actually exist, only the "contents" of the directory exist.
+        //
+        // Minio.listObjects() lists all objects in a bucket that
+        // match an optional prefix so this could be an option for checking
+        // whether to trest this as a directory.
+        //
+        // S3 buckets are the closest thing to a proper directory
+        // so for now
+        try {
+          S3Handle h = new S3Handle(uri.toString());
+          boolean isBucket = h.isBucket();
+          h.close();
+          return isBucket;
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
+      } else {
+        // TODO: this should be removed as well.
+        String[] list = list();
+        return list != null;
+      }
     }
     return file.isDirectory();
   }
@@ -829,7 +976,11 @@ public class Location {
     LOGGER.trace("lastModified()");
     if (isURL) {
       try {
-        return url.openConnection().getLastModified();
+        if (url != null) {
+          return url.openConnection().getLastModified();
+        } else {
+          return 0;
+        }
       }
       catch (IOException e) {
         LOGGER.trace("Could not determine URL's last modification time", e);
@@ -847,16 +998,13 @@ public class Location {
    * @see java.net.URLConnection#getContentLength()
    */
   public long length() {
-    LOGGER.trace("length()");
     if (isURL) {
-      try {
-        return url.openConnection().getContentLength();
-      }
-      catch (IOException e) {
-        LOGGER.trace("Could not determine URL's content length", e);
-        return 0;
-      }
+      LOGGER.trace("length(url)");
+      // Ensure cachedProperties is populated
+      exists();
+      return cachedProperties.length;
     }
+    LOGGER.trace("length(file)");
     return file.length();
   }
 
@@ -908,7 +1056,7 @@ public class Location {
    */
   @Override
   public String toString() {
-    return isURL ? url.toString() : file.toString();
+    return isURL ? uri.toString() : file.toString();
   }
 
 }

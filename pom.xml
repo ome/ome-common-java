@@ -102,6 +102,11 @@
 
   <dependencies>
     <dependency>
+     <groupId>io.minio</groupId>
+     <artifactId>minio</artifactId>
+     <version>5.0.2</version>
+    </dependency>
+    <dependency>
      <groupId>com.esotericsoftware.kryo</groupId>
      <artifactId>kryo</artifactId>
      <version>2.24.0</version>
@@ -233,6 +238,10 @@
           <suiteXmlFiles>
             <suiteXmlFile>src/test/java/loci/common/utests/testng-template.xml</suiteXmlFile>
           </suiteXmlFiles>
+          <systemPropertyVariables>
+            <testng.runHttpRemoteTests>0</testng.runHttpRemoteTests>
+            <testng.runS3RemoteTests>0</testng.runS3RemoteTests>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
 

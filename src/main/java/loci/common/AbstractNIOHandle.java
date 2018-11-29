@@ -56,6 +56,12 @@ public abstract class AbstractNIOHandle implements IRandomAccess {
 
   // -- AbstractNIOHandle methods --
 
+  /* @see IRandomAccess#exists() */
+  @Override
+  public boolean exists() throws IOException {
+    return length() >= 0;
+  }
+
   /**
    * Ensures that the file mode is either "r" or "rw".
    * @param mode Mode to validate.

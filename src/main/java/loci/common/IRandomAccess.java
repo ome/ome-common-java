@@ -62,6 +62,14 @@ public interface IRandomAccess extends DataInput, DataOutput {
   long getFilePointer() throws IOException;
 
   /**
+   * Returns whether this refers to a valid object
+   *
+   * @return true if this refers to a valid object
+   * @throws IOException if unable to determine whether the object is valid
+   */
+  boolean exists() throws IOException;
+
+  /**
    * Returns the length of this stream.
    *
    * @return the length in bytes of the stream
