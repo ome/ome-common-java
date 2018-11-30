@@ -6,7 +6,7 @@
   * Add `exists()` method to `IRandomAccess` and all implementations
   * Add unit tests and update Travis to start a S3 server and run all tests
 - NIOFileHandle: don't read from the file to fill a trash buffer ([#34](https://github.com/ome/ome-common-java/pull/34))
-- Add initial API for downsampling images ([#29](https://github.com/ome/ome-common-java/pull/29))
+- Add initial API for downsampling images ([#35](https://github.com/ome/ome-common-java/pull/35))
   * add `IImageScaler` interface
   * add `SimpleImageScaler` implementation
 - Attempt to check for incorrect length after RandomAccessFile.setLength ([#29](https://github.com/ome/ome-common-java/pull/29))
