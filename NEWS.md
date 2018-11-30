@@ -1,3 +1,40 @@
+6.0.0-m2 (2018-11-30)
+---------------------
+
+- Add  `S3Handle` ([#33](https://github.com/ome/ome-common-java/pull/33))
+  * Add `minio` as a dependency
+  * Add `exists()` method to `IRandomAccess` and all implementations
+  * Add unit tests and update Travis to start a S3 server and run all tests
+- NIOFileHandle: don't read from the file to fill a trash buffer ([#34](https://github.com/ome/ome-common-java/pull/34))
+- Add initial API for downsampling images ([#35](https://github.com/ome/ome-common-java/pull/35))
+  * add `IImageScaler` interface
+  * add `SimpleImageScaler` implementation
+- Attempt to check for incorrect length after RandomAccessFile.setLength ([#29](https://github.com/ome/ome-common-java/pull/29))
+- StreamHandle: fix subtle bug when seeking more than 1 MB backward ([#22](https://github.com/ome/ome-common-java/pull/22))
+- Add `skipBytes(long)` method to `IRandomAccess` and all implementations ([#27](https://github.com/ome/ome-common-java/pull/27))
+
+
+5.3.7 (2018-10-12)
+------------------
+
+- Reduce memory usage when reading large text files ([#24](https://github.com/ome/ome-common-java/pull/24))
+- `DataTools`: fix bug in scientific notation parsing ([#30](https://github.com/ome/ome-common-java/pull/30))
+- Deprecate `CaseInsensitiveLocation`([#31](https://github.com/ome/ome-common-java/pull/31))
+
+
+5.3.6 (2018-08-02)
+------------------
+
+- Fix Javadoc warnings ([#26](https://github.com/ome/ome-common-java/pull/26))
+- Build and Maven updates ([#25](https://github.com/ome/ome-common-java/pull/25), [#28](https://github.com/ome/ome-common-java/pull/28))
+
+
+5.3.5 (2018-03-05)
+------------------
+
+- Update Maven plugin versions ([#16](https://github.com/ome/ome-common-java/pull/16))
+
+
 5.3.4 (2018-01-04)
 ------------------
 
