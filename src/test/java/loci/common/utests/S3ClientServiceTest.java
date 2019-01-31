@@ -32,10 +32,12 @@
 
 package loci.common.utests;
 
+import loci.common.services.DependencyException;
 import loci.common.services.S3ClientService;
 import loci.common.services.S3ClientServiceException;
 import loci.common.services.S3ClientServiceImpl;
 import loci.common.services.S3ClientStat;
+import loci.common.services.ServiceFactory;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -90,6 +92,13 @@ public class S3ClientServiceTest {
   }
 
   // -- Test methods --
+
+  @Test
+  public void testServiceLookup() throws DependencyException {
+    ServiceFactory factory = new ServiceFactory();
+    S3ClientService s3client = factory.getInstance(S3ClientService.class);
+    assertTrue(S3ClientServiceImpl.class.isInstance(s3client));
+  }
 
   @Test
   public void testBucketExists() throws S3ClientServiceException, IOException {
