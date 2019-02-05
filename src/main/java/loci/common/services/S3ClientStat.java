@@ -32,13 +32,27 @@
 
 package loci.common.services;
 
+/**
+ * Object stat (attributes) information
+ */
 public class S3ClientStat {
+  /**
+   * Create stat object storing length of object
+   * @param length
+   */
   S3ClientStat(long length) {
     this.length = length;
   }
 
+  /**
+   * Length (size) of object
+   */
   private final long length;
 
+  /**
+   * Get length (size) of object
+   * @return length
+   */
   public long length() {
     return this.length;
   };

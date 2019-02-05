@@ -38,7 +38,7 @@ package loci.common.services;
 public class S3ClientServiceException extends ServiceException
 {
   /**
-   * Default constructor.
+   * Constructor.
    * @param message Error message.
    */
   public S3ClientServiceException(String message)
@@ -47,7 +47,7 @@ public class S3ClientServiceException extends ServiceException
   }
 
   /**
-   * Default constructor.
+   * Constructor.
    * @param message Error message. 
    * @param cause Upstream exception.
    */
@@ -57,7 +57,7 @@ public class S3ClientServiceException extends ServiceException
   }
 
   /**
-   * Default constructor.
+   * Constructor.
    * @param cause Upstream exception.
    */
   public S3ClientServiceException(Throwable cause)

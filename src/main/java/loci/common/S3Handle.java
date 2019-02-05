@@ -343,8 +343,8 @@ public class S3Handle extends StreamHandle {
     if (path == null) {
       throw new HandleException("Download path=null not allowed");
     }
+    Files.createDirectories(destination.getParent());
     try {
-      Files.createDirectories(destination.getParent());
       s3Client.getObject(bucket, path, destination.toString());
     }
     catch (S3ClientServiceException e) {

@@ -122,9 +122,9 @@ public class S3ClientServiceImpl extends AbstractService implements S3ClientServ
     }
     catch (
         InvalidKeyException |
-            MinioException |
-            NoSuchAlgorithmException |
-            XmlPullParserException e) {
+        MinioException |
+        NoSuchAlgorithmException |
+        XmlPullParserException e) {
       throw new S3ClientServiceException(e);
     }
   }
