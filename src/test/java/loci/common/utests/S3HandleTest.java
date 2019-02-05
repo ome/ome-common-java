@@ -34,6 +34,8 @@ package loci.common.utests;
 
 import loci.common.S3Handle;
 import loci.common.StreamHandle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -60,6 +62,8 @@ public class S3HandleTest {
   private static boolean runS3RemoteTests;
   private Path TEMPDIR;
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(S3HandleTest.class);
+
   private static final String s3public = "s3+http://localhost:31836";
   private static final String s3private = "s3+http://accesskey:secretkey@localhost:31836";
 
@@ -73,7 +77,7 @@ public class S3HandleTest {
     runS3RemoteTests = TestUtilities.getPropValueInt("testng.runS3RemoteTests") > 0;
 
     if (!runS3RemoteTests) {
-      System.err.println("WARNING: S3 tests are disabled!");
+      LOGGER.warn("S3 tests are disabled!");
     }
   }
 

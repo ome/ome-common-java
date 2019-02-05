@@ -38,6 +38,8 @@ import loci.common.services.S3ClientServiceException;
 import loci.common.services.S3ClientServiceImpl;
 import loci.common.services.S3ClientStat;
 import loci.common.services.ServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -68,6 +70,8 @@ public class S3ClientServiceTest {
   private Path TEMPDIR;
   private S3ClientService s3;
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(S3ClientServiceTest.class);
+
   // -- Setup methods --
 
   @BeforeClass
@@ -78,7 +82,7 @@ public class S3ClientServiceTest {
     runS3RemoteTests = TestUtilities.getPropValueInt("testng.runS3RemoteTests") > 0;
 
     if (!runS3RemoteTests) {
-      System.err.println("WARNING: S3 tests are disabled!");
+      LOGGER.warn("S3 tests are disabled!");
     }
   }
 
