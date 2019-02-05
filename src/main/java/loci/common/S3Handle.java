@@ -246,7 +246,7 @@ public class S3Handle extends StreamHandle {
     try {
       ServiceFactory factory = new ServiceFactory();
       s3Client = factory.getInstance(S3ClientService.class);
-      s3Client.initialise(server, port, accessKey, secretKey, appName, appVersion);
+      s3Client.initialize(server, port, accessKey, secretKey, appName, appVersion);
     }
     catch (S3ClientServiceException e) {
       throw new IOException(String.format(

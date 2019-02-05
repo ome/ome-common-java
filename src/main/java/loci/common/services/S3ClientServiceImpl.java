@@ -61,7 +61,7 @@ public class S3ClientServiceImpl extends AbstractService implements S3ClientServ
   // -- S3ClientService methods
 
   @Override
-  public void initialise(String server, int port, String accessKey, String secretKey,
+  public void initialize(String server, int port, String accessKey, String secretKey,
                          String appName, String appVersion)
       throws S3ClientServiceException {
     try {

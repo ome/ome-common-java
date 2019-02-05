@@ -49,7 +49,7 @@ public interface S3ClientService extends Service {
    * @param appName user agent application name
    * @param appVersion user agent application version
    */
-  void initialise(String server, int port, String accessKey, String secretKey,
+  void initialize(String server, int port, String accessKey, String secretKey,
                   String appName, String appVersion)
       throws S3ClientServiceException;
 

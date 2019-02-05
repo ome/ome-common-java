@@ -88,7 +88,7 @@ public class S3ClientServiceTest {
       throw new SkipException("S3 tests are disabled");
     }
     s3 = new S3ClientServiceImpl();
-    s3.initialise("http://localhost", 31836, null, null, "S3ClientServiceTest", "0.0.0");
+    s3.initialize("http://localhost", 31836, null, null, "S3ClientServiceTest", "0.0.0");
   }
 
   // -- Test methods --
