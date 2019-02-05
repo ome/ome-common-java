@@ -48,6 +48,7 @@ public interface S3ClientService extends Service {
    * @param secretKey secret key
    * @param appName user agent application name
    * @param appVersion user agent application version
+   * @throws S3ClientServiceException if an S3 error occurred
    */
   void initialize(String server, int port, String accessKey, String secretKey,
                   String appName, String appVersion)
@@ -57,6 +58,8 @@ public interface S3ClientService extends Service {
    * Check whether a bucket exists
    * @param bucket Bucket name
    * @return true if bucket exists
+   * @throws S3ClientServiceException if an S3 error occurred
+   * @throws IOException if an S3 error occurred
    */
   boolean bucketExists(String bucket) throws S3ClientServiceException, IOException;
 
@@ -65,6 +68,8 @@ public interface S3ClientService extends Service {
    * @param bucket Bucket name
    * @param object Object path
    * @return S3ClientStat object
+   * @throws S3ClientServiceException if an S3 error occurred
+   * @throws IOException if an S3 error occurred
    */
   S3ClientStat statObject(String bucket, String object) throws S3ClientServiceException, IOException;
 
@@ -74,6 +79,8 @@ public interface S3ClientService extends Service {
    * @param object Object path
    * @param offset Start reading at this offset
    * @return InputStream to the object
+   * @throws S3ClientServiceException if an S3 error occurred
+   * @throws IOException if an S3 error occurred
    */
   InputStream getObject(String bucket, String object, long offset) throws S3ClientServiceException, IOException;
 
@@ -82,6 +89,8 @@ public interface S3ClientService extends Service {
    * @param bucket Bucket name
    * @param object Object path
    * @param filename Destination file
+   * @throws S3ClientServiceException if an S3 error occurred
+   * @throws IOException if an S3 error occurred
    */
   void getObject(String bucket, String object, String filename) throws S3ClientServiceException, IOException;
 
