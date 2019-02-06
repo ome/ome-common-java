@@ -44,6 +44,8 @@ import java.util.List;
 
 import loci.common.Location;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -56,6 +58,7 @@ import org.testng.annotations.Test;
 public class LocationTest {
 
   private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+  private static final Logger LOGGER = LoggerFactory.getLogger(LocationTest.class);
 
   // -- Fields --
 
@@ -203,10 +206,10 @@ public class LocationTest {
     runS3RemoteTests = TestUtilities.getPropValueInt("testng.runS3RemoteTests") > 0;
 
     if (!runHttpRemoteTests) {
-      System.err.println("WARNING: HTTP tests are disabled!");
+      LOGGER.warn("HTTP tests are disabled!");
     }
     if (!runS3RemoteTests) {
-      System.err.println("WARNING: S3 tests are disabled!");
+      LOGGER.warn("S3 tests are disabled!");
     }
   }
 

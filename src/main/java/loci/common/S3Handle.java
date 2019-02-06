@@ -40,15 +40,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
-import io.minio.MinioClient;
-import io.minio.errors.MinioException;
-import io.minio.ObjectStat;
-import org.xmlpull.v1.XmlPullParserException;
+import loci.common.services.DependencyException;
+import loci.common.services.S3ClientService;
+import loci.common.services.S3ClientServiceException;
+import loci.common.services.S3ClientStat;
 
+import loci.common.services.ServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,11 +102,11 @@ public class S3Handle extends StreamHandle {
   /** remaining path, or key, for this accessed resource */
   private final String path;
 
-  /** Minio client */
-  private MinioClient s3Client;
+  /** S3 client */
+  private S3ClientService s3Client;
 
   /** Remote file stat */
-  private ObjectStat stat;
+  private S3ClientStat stat;
 
   /** Is this a directory (currently only buckets are considered directories */
   private boolean isBucket;
@@ -228,11 +227,7 @@ public class S3Handle extends StreamHandle {
       try {
         this.initialize();
       }
-      catch (
-        MinioException |
-        InvalidKeyException |
-        NoSuchAlgorithmException |
-        XmlPullParserException e) {
+      catch (S3ClientServiceException e) {
         this.objectNotFound = e;
         LOGGER.debug("Object not found: [{}] {}", this, e);
       }
@@ -245,14 +240,21 @@ public class S3Handle extends StreamHandle {
    * @throws IOException if there was an error connecting to the server
    */
   protected void connect() throws IOException {
+    final String appName = "Bio-Formats";
+    // TODO: Replace "dev" with a version
+    final String appVersion = "dev";
     try {
-      s3Client = new MinioClient(server, port, accessKey, secretKey);
-      // TODO: Replace "dev" with a version
-      s3Client.setAppInfo("Bio-Formats", "dev");
+      ServiceFactory factory = new ServiceFactory();
+      s3Client = factory.getInstance(S3ClientService.class);
+      s3Client.initialize(server, port, accessKey, secretKey, appName, appVersion);
     }
-    catch (MinioException e) {
+    catch (S3ClientServiceException e) {
       throw new IOException(String.format(
               "Failed to connect: %s", this), e);
+    }
+    catch (DependencyException e) {
+      throw new IOException(String.format(
+          "S3 requires additional dependencies: %s", this), e);
     }
     LOGGER.trace("connected: server:{} port:{}", server, port);
   }
@@ -260,17 +262,11 @@ public class S3Handle extends StreamHandle {
   /**
    * Check bucket or object exists
    * @throws IOException if unable to get the object
-   * @throws MinioException if unable to get the object
-   * @throws InvalidKeyException if unable to get the object
-   * @throws NoSuchAlgorithmException if unable to get the object
-   * @throws XmlPullParserException if unable to get the object
+   * @throws S3ClientServiceException if unable to get the object
    */
   protected void initialize() throws
       IOException,
-      MinioException,
-      InvalidKeyException,
-      NoSuchAlgorithmException,
-      XmlPullParserException {
+      S3ClientServiceException {
     if (path == null) {
       isBucket = s3Client.bucketExists(bucket);
     }
@@ -347,16 +343,11 @@ public class S3Handle extends StreamHandle {
     if (path == null) {
       throw new HandleException("Download path=null not allowed");
     }
+    Files.createDirectories(destination.getParent());
     try {
-      Files.createDirectories(destination.getParent());
       s3Client.getObject(bucket, path, destination.toString());
     }
-    catch (
-      IOException |
-      InvalidKeyException |
-      MinioException |
-      NoSuchAlgorithmException |
-      XmlPullParserException e) {
+    catch (S3ClientServiceException e) {
         throw new HandleException("Download failed " + toString(), e);
       }
   }
@@ -437,11 +428,7 @@ public class S3Handle extends StreamHandle {
       fp = offset;
       mark = offset;
       }
-      catch (
-        InvalidKeyException |
-        MinioException |
-        NoSuchAlgorithmException |
-        XmlPullParserException e) {
+      catch (S3ClientServiceException e) {
         throw new IOException(String.format(
               "failed to load s3: %s\n\t%s", uri, this), e);
     }
