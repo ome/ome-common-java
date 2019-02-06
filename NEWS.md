@@ -1,10 +1,13 @@
-6.0.0-m2 (2018-11-30)
----------------------
+6.0.0 (2018-02-06)
+------------------
 
-- Add  `S3Handle` ([#33](https://github.com/ome/ome-common-java/pull/33))
-  * Add `minio` as a dependency
+- Initial support for handling S3 locations ([#33](https://github.com/ome/ome-common-java/pull/33)[#39](https://github.com/ome/ome-common-java/pull/39))
+  * Add `S3Handle` class providing random access to S3 buckets
+  * Add `S3ClientService` interface along with its implementation using `minio` as a dependency
   * Add `exists()` method to `IRandomAccess` and all implementations
+  * Register S3Client service interface and implementation
   * Add unit tests and update Travis to start a S3 server and run all tests
+- Update `Location.getParentFile()` contract to match `File.getParentFile` ([#38](https://github.com/ome/ome-common-java/pull/38))
 - NIOFileHandle: don't read from the file to fill a trash buffer ([#34](https://github.com/ome/ome-common-java/pull/34))
 - Add initial API for downsampling images ([#35](https://github.com/ome/ome-common-java/pull/35))
   * add `IImageScaler` interface
