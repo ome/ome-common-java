@@ -1,3 +1,10 @@
+6.0.1 (2018-04-19)
+------------------
+
+- Exclude `io.minio:minio` transitive dependencies ([#40](https://github.com/ome/ome-common-java/pull/40))
+- Ignore Eclipse metadata files ([#41](https://github.com/ome/ome-common-java/pull/41))
+- Bump `com.google.guava:guava` to version 27.1 ([#42](https://github.com/ome/ome-common-java/pull/42))
+
 6.0.0 (2018-02-06)
 ------------------
 
