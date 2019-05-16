@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,10 +62,22 @@ public class ServiceFactory {
     constructorCache =
       new HashMap<Class<? extends Service>, Constructor<? extends Service>>();
 
-  /** Set of available services. */
-  private Map<Class<? extends Service>, Class<? extends Service>>
-    services =
-      new HashMap<Class<? extends Service>, Class<? extends Service>>();
+  /**
+   *  Set of available services.
+   *
+   *  This field is initialized on first usage since if this class has been deserialized,
+   *  the transient flag will have led to it being null again.
+   */
+  private transient AtomicReference<Map<Class<? extends Service>, Class<? extends Service>>>
+    services = null;
+
+  /**
+   * Constructor argument passed.
+   *
+   * If null, then the default constructor was used. This information is used to
+   * recreate the services instance.
+   */
+  private String path;
 
   /** Default service factory. */
   private static ServiceFactory defaultFactory;
@@ -75,12 +88,11 @@ public class ServiceFactory {
    * the default configuration location.
    */
   public ServiceFactory() throws DependencyException {
+    this.path = null;
     if (defaultFactory == null) {
       defaultFactory = new ServiceFactory(DEFAULT_PROPERTIES_FILE);
     }
-    synchronized (defaultFactory) {
-      this.services.putAll(defaultFactory.services);
-    }
+    services();
   }
 
   /**
@@ -90,7 +102,32 @@ public class ServiceFactory {
    * <code>path</code>.
    */
   public ServiceFactory(String path) throws DependencyException {
-    InputStream stream = this.getClass().getResourceAsStream(path);
+    this.path = path;
+    services();
+  }
+
+  /**
+   * Common constructor code which dispatches based on the state of
+   * the path field. This is *not* called during construction, but
+   * rather on the first call to services() since the same logic is
+   * needed in the deserialization code path. This way, it's only called
+   * once.
+   */
+  private static void init(String path,
+                           Map<Class<? extends Service>, Class<? extends Service>> services)
+      throws DependencyException {
+
+    // Matches the default constructor
+    if (path == null) {
+      synchronized (defaultFactory) {
+        services.putAll(defaultFactory.services.get());
+      }
+      return; // EARLY EXIT
+    }
+
+    // Now handle the (String path) constructor.
+
+    InputStream stream = ServiceFactory.class.getResourceAsStream(path);
     Properties properties = new Properties();
     if (stream == null) {
       throw new DependencyException(path + " not found on CLASSPATH");
@@ -115,7 +152,7 @@ public class ServiceFactory {
       String implementationName = (String) entry.getValue();
       Class<? extends Service> interfaceClass = null;
       Class<? extends Service> implementationClass = null;
-      ClassLoader loader = this.getClass().getClassLoader();
+      ClassLoader loader = ServiceFactory.class.getClassLoader();
       try {
         interfaceClass = (Class<? extends Service>)
           Class.forName(interfaceName, false, loader);
@@ -150,8 +187,8 @@ public class ServiceFactory {
   public <T extends Service> T getInstance(Class<T> type)
     throws DependencyException
   {
-    Class<T> impl = (Class<T>) services.get(type);
-    if (impl == null && services.containsKey(type)) {
+    Class<T> impl = (Class<T>) services().get(type);
+    if (impl == null && services().containsKey(type)) {
       throw new DependencyException(
           "Unable to instantiate service. Missing implementation or " +
           "implementation dependency", type);
@@ -196,4 +233,21 @@ public class ServiceFactory {
     }
   }
 
+  /**
+   * Called by all *users* of the services field in order to handle field initialization.
+   * @return never null
+   * @throws DependencyException
+   */
+  private Map<Class<? extends Service>, Class<? extends Service>> services() throws DependencyException {
+
+    Map<Class<? extends Service>, Class<? extends Service>> copy = services.get();
+    if (copy != null) {
+      return copy;
+    }
+
+    copy = new HashMap<>();
+    init(path, copy);
+    services.compareAndSet(null, copy);
+    return services.get();
+  }
 }
