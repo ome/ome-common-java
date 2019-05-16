@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class ServiceFactory {
    *  This field is initialized on first usage since if this class has been deserialized,
    *  the transient flag will have led to it being null again.
    */
-  private transient AtomicReference<Map<Class<? extends Service>, Class<? extends Service>>>
+  private transient Map<Class<? extends Service>, Class<? extends Service>>
     services = null;
 
   /**
@@ -114,13 +113,13 @@ public class ServiceFactory {
    * once.
    */
   private static void init(String path,
-                           Map<Class<? extends Service>, Class<? extends Service>> services)
+    Map<Class<? extends Service>, Class<? extends Service>> services)
       throws DependencyException {
 
     // Matches the default constructor
     if (path == null) {
       synchronized (defaultFactory) {
-        services.putAll(defaultFactory.services.get());
+        services.putAll(defaultFactory.services);
       }
       return; // EARLY EXIT
     }
@@ -240,14 +239,18 @@ public class ServiceFactory {
    */
   private Map<Class<? extends Service>, Class<? extends Service>> services() throws DependencyException {
 
-    Map<Class<? extends Service>, Class<? extends Service>> copy = services.get();
-    if (copy != null) {
-      return copy;
+    // double-locking pattern
+    Map<Class<? extends Service>, Class<? extends Service>> copy = services;
+    if (null == copy) {
+      synchronized (this) {
+        copy = services; // recheck
+        if (copy == null) {
+          copy = new HashMap<>();
+          init(path, copy);
+          services = copy;
+        }
+      }
     }
-
-    copy = new HashMap<>();
-    init(path, copy);
-    services.compareAndSet(null, copy);
-    return services.get();
+    return copy;
   }
 }
