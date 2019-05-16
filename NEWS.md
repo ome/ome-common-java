@@ -1,3 +1,13 @@
+6.0.3 (2018-05-16)
+------------------
+
+-  ServiceFactory: set `services` field to transient ([#44](https://github.com/ome/ome-common-java/pull/44))
+
+6.0.2 (2018-05-08)
+------------------
+
+-  Also exclude jsr305 dependency from minio ([#43](https://github.com/ome/ome-common-java/pull/43))
+
 6.0.1 (2018-04-19)
 ------------------
 
