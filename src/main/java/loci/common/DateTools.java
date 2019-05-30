@@ -124,7 +124,7 @@ public final class DateTools {
   /**
    * Converts the given timestamp into an ISO8601 date.
    *
-   * @param stamp the format-dependent timestamp
+   * @param stamp the format-dependent timestamp in milliseconds
    * @param format the format in which <code>stamp</code> is stored.
    *               This is used to select the epoch value used for normalizing
    *               the timestamp to milliseconds since the UNIX epoch.  Valid
@@ -143,7 +143,7 @@ public final class DateTools {
   /**
    * Converts the given timestamp into a date string with the given format.
    *
-   * @param stamp the format-dependent timestamp
+   * @param stamp the format-dependent timestamp in milliseconds
    * @param format the format in which <code>stamp</code> is stored.
    *               This is used to select the epoch value used for normalizing
    *               the timestamp to milliseconds since the UNIX epoch.  Valid
@@ -168,7 +168,7 @@ public final class DateTools {
    * If correctTimeZoneForGMT is set, then the timestamp will be interpreted
    * as being relative to GMT and not the local time zone.
    *
-   * @param stamp the format-dependent timestamp
+   * @param stamp the format-dependent timestamp in milliseconds
    * @param format the format in which <code>stamp</code> is stored.
    *               This is used to select the epoch value used for normalizing
    *               the timestamp to milliseconds since the UNIX epoch.  Valid
