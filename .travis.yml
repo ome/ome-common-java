@@ -10,9 +10,7 @@ cache:
 
 jdk:
   - openjdk11
-  - oraclejdk11
   - openjdk8
-  - oraclejdk8
 
 before_script:
   - cd location-server && ./start-location.sh && cd ..
