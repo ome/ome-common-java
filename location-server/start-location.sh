@@ -31,4 +31,4 @@ for SUFFIX in public private; do
         ./mc pipe ome-common-java-minio-test/bioformats.test.$SUFFIX/2MBfile.txt
 done
 
-./mc policy public ome-common-java-minio-test/bioformats.test.public
+./mc policy set public ome-common-java-minio-test/bioformats.test.public
