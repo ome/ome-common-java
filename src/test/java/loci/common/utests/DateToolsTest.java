@@ -32,8 +32,12 @@
 
 package loci.common.utests;
 
+import java.util.Locale;
+
 import static org.testng.AssertJUnit.assertEquals;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import loci.common.DateTools;
@@ -43,9 +47,11 @@ import loci.common.DateTools;
  */
 public class DateToolsTest {
 
+  private Locale originalLocale;
   String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
   String DATE_FORMAT_AA = "yyyy-MM-dd hh:mm:ss aa";
   String DATE_FORMAT_MS = "yyyy-MM-dd HH:mm:ss:SSS";
+  String DATE_FORMAT_MMM = "yyyy-MMM-dd HH:mm:ss Z";
   String DATE_FORMAT_MS_AA = "yyyy-MM-dd hh:mm:ss:SSS aa";
   String REFERENCE_DATE = "1970-01-01 00:00:00";
   String REFERENCE_ISO8601 = "1970-01-01T00:00:00";
@@ -125,6 +131,26 @@ public class DateToolsTest {
       {"1970-01-01 00:00:00.10", 10L, ".", "1970-01-01T00:00:00.010"},
       {"1970-01-01 00:00:00-10", 10L, "-", "1970-01-01T00:00:00.010"},
     };
+  }
+
+  @DataProvider(name = "timesLocaleDependent")
+  public Object[][] createLocaleDependentTimes() {
+    return new Object[][] {
+      {"1970-Feb-01 00:00:00 +0000", 2678400000L, "DE"},
+      {"1970-Feb-01 00:00:00 +0000", 2678400000L, "ES"},
+      {"1970-Feb-01 00:00:00 +0000", 2678400000L, "FR"},
+      {"1970-févr.-01 00:00:00 +0000", 2678400000L, "FR"},
+    };
+  }
+
+  @BeforeMethod
+  public void getLocale() {
+    originalLocale = Locale.getDefault();
+  }
+
+  @AfterMethod
+  public void setLocale() {
+    Locale.setDefault(originalLocale);
   }
 
   @Test(dataProvider = "times_no_ms")
@@ -343,5 +369,11 @@ public class DateToolsTest {
     String date2 = REFERENCE_DATE + " ";
     assertEquals(0L, DateTools.getTime(date2, DATE_FORMAT));
     assertEquals(REFERENCE_ISO8601, DateTools.formatDate(date2, DATE_FORMAT));
+  }
+
+  @Test(dataProvider = "timesLocaleDependent")
+  public void testParseDate(String date, long ms, String locale) {
+    Locale.setDefault(new Locale(locale));
+    assertEquals(ms, DateTools.getTime(date, DATE_FORMAT_MMM));
   }
 }
