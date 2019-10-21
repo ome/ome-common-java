@@ -1,21 +1,27 @@
-6.0.3 (2018-05-16)
+6.0.4 (2019-10-22)
+------------------
+
+-  DateTools: clarify expected units for timestamp passed to `convertDate` ([#45](https://github.com/ome/ome-common-java/pull/45))
+-  DateTools: attempt to parse invalid dates with Locale.US ([#48](https://github.com/ome/ome-common-java/pull/48))
+
+6.0.3 (2019-05-16)
 ------------------
 
 -  ServiceFactory: set `services` field to transient ([#44](https://github.com/ome/ome-common-java/pull/44))
 
-6.0.2 (2018-05-08)
+6.0.2 (2019-05-08)
 ------------------
 
 -  Also exclude jsr305 dependency from minio ([#43](https://github.com/ome/ome-common-java/pull/43))
 
-6.0.1 (2018-04-19)
+6.0.1 (2019-04-19)
 ------------------
 
 - Exclude `io.minio:minio` transitive dependencies ([#40](https://github.com/ome/ome-common-java/pull/40))
 - Ignore Eclipse metadata files ([#41](https://github.com/ome/ome-common-java/pull/41))
 - Bump `com.google.guava:guava` to version 27.1 ([#42](https://github.com/ome/ome-common-java/pull/42))
 
-6.0.0 (2018-02-06)
+6.0.0 (2019-02-06)
 ------------------
 
 - Initial support for handling S3 locations ([#33](https://github.com/ome/ome-common-java/pull/33)[#39](https://github.com/ome/ome-common-java/pull/39))
