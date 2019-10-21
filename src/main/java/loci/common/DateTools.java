@@ -34,6 +34,7 @@ package loci.common;
 
 import java.text.FieldPosition;
 import java.text.ParsePosition;
+import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -281,7 +282,20 @@ public final class DateTools {
         timestamp = timestamp.plus(ms);
       }
       catch (IllegalArgumentException e) {
-        LOGGER.debug("Invalid timestamp '{}'", date);
+        LOGGER.debug("Invalid timestamp '{}' for current locale", date);
+        // if the date couldn't be parsed with the current locale,
+        // try to parse with an English-language locale
+        // this is helpful for dates that use a three-letter month
+        DateTimeFormatter usParser = parser.withLocale(Locale.US);
+        try {
+          timestamp = Instant.parse(newDate, usParser);
+          timestamp = timestamp.plus(ms);
+        }
+        catch (IllegalArgumentException|UnsupportedOperationException exc) {
+          LOGGER.debug("Could not parse timestamp '{}' with EN_US locale",
+            date, exc);
+        }
+
       }
       catch (UnsupportedOperationException e) {
         LOGGER.debug("Error parsing timestamp '{}'", date, e);
