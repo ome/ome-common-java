@@ -71,10 +71,6 @@
     </mailingList>
   </mailingLists>
 
-  <prerequisites>
-    <maven>3.0.5</maven>
-  </prerequisites>
-
   <scm>
     <connection>scm:git:https://github.com/ome/ome-common-java</connection>
     <developerConnection>scm:git:git@github.com:ome/ome-common-java</developerConnection>
