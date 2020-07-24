@@ -1,3 +1,9 @@
+6.0.5 (2020-07-24)
+------------------
+
+-  Bump kryo dependency to `com.esotericsoftware:kryo:4.0.2` ([#50](https://github.com/ome/ome-common-java/pull/50))
+-  Fix minio version command in `start-location.sh` ([#51](https://github.com/ome/ome-common-java/pull/51), [#52](https://github.com/ome/ome-common-java/pull/52))
+
 6.0.4 (2019-10-22)
 ------------------
 
