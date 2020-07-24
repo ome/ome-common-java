@@ -10,7 +10,7 @@ PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
     curl -sfSo mc "https://dl.minio.io/client/mc/release/$PLATFORM-amd64/mc"
 chmod +x minio mc
 ./minio --version
-./mc version
+./mc --version
 
 export MINIO_ACCESS_KEY=accesskey MINIO_SECRET_KEY=secretkey
 ./minio server --address localhost:$PORT . &
