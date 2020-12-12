@@ -1,6 +1,6 @@
 # OME Common Java
 
-[![Build Status](https://travis-ci.org/ome/ome-common-java.png)](http://travis-ci.org/ome/ome-common-java)
+[![Actions Status](https://github.com/ome/ome-common-java/workflows/Maven/badge.svg)](https://github.com/ome/ome-common-java/actions)
 [![Maven Central](https://img.shields.io/maven-central/v/org.openmicroscopy/ome-common.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.openmicroscopy%22%20AND%20a%3A%22ome-common%22)
 [![Javadocs](http://javadoc.io/badge/org.openmicroscopy/ome-common.svg)](http://javadoc.io/doc/org.openmicroscopy/ome-common)
 
