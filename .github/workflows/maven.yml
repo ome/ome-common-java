@@ -30,9 +30,5 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Start up
-        run: |
-          cd location-server
-          ./start-location.sh
       - name: Build
         run: mvn ${{ env.maven_commands }}
