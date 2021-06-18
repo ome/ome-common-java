@@ -1,3 +1,10 @@
+6.0.7 (2021-06-18)
+------------------
+
+-  Bump guava dependency to `com.google.guava:guava:29.0-jre` ([#55](https://github.com/ome/ome-common-java/pull/55))
+-  Bump logback dependencies to `ch.qos.logback:logback-core:1.2.0` and `ch.qos.logback:logback-classic:1.2.0` ([#58](https://github.com/ome/ome-common-java/pull/58))
+-  Switch from Travis CI to GitHub actions ( [#53](https://github.com/ome/ome-common-java/pull/53))
+
 6.0.5 (2020-07-24)
 ------------------
 
