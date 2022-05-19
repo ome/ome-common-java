@@ -1,3 +1,8 @@
+6.0.9 (2022-05-19)
+------------------
+
+- No change. Release artifacts compiled using JDK 8
+
 6.0.8 (2022-05-19)
 ------------------
 
