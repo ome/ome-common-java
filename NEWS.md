@@ -1,3 +1,8 @@
+6.0.10 (2022-05-19)
+------------------
+
+- Bump logback-classic dependency to `ch.qos.logback:logback-classic:1.2.9` ([#62](https://github.com/ome/ome-common-java/pull/62))
+
 6.0.9 (2022-05-19)
 ------------------
 
@@ -6,7 +11,7 @@
 6.0.8 (2022-05-19)
 ------------------
 
--  Bump logback dependencies to `ch.qos.logback:logback-core:1.2.9` and `ch.qos.logback:logback-classic:1.2.9` ([#61](https://github.com/ome/ome-common-java/pull/61))
+-  Bump logback-core dependency to `ch.qos.logback:logback-core:1.2.9` ([#61](https://github.com/ome/ome-common-java/pull/61))
 -  Add JDK 17 to the testing matrix ( [#60](https://github.com/ome/ome-common-java/pull/60))
 
 6.0.7 (2021-06-18)
