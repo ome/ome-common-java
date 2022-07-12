@@ -1,3 +1,9 @@
+6.0.11 (2022-07-12)
+------------------
+
+- Bump jackson-databind from 2.9.8 to 2.12.6.1 ([#64](https://github.com/ome/ome-common-java/pull/64))
+- Bump jackson dependencies to 2.9.8 ([#63](https://github.com/ome/ome-common-java/pull/63))
+
 6.0.10 (2022-05-19)
 ------------------
 
