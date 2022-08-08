@@ -112,6 +112,7 @@ public class Location {
 
   // -- Fields --
 
+  private boolean isSymLink = false;
   private boolean isURL = false;
   private UrlType urlType;
   private URL url;
@@ -178,6 +179,11 @@ public class Location {
     LOGGER.trace("Location({})", file);
     isURL = false;
     this.file = file;
+    try {
+      isSymLink = isSymLink(file);
+    } catch (IOException e) {
+      isSymLink = false;
+    }
   }
 
   /**
@@ -211,6 +217,7 @@ public class Location {
           urlType = UrlType.GENERIC;
           url = uri.toURL();
         }
+        isSymLink = isSymLink(new File(parent, child));
       }
       catch (URISyntaxException | MalformedURLException e) {
         // Readers such as FilePatternReader may pass invalid URI paths
@@ -220,6 +227,8 @@ public class Location {
         urlType = null;
         url = null;
         uri = null;
+      } catch (IOException e) {
+        isSymLink = false;
       }
     }
 
@@ -809,7 +818,7 @@ public class Location {
    * @see java.io.File#getCanonicalFile()
    */
   public Location getCanonicalFile() throws IOException {
-    return isURL ? getAbsoluteFile() : new Location(file.getCanonicalFile());
+    return (isURL || isSymLink) ? getAbsoluteFile() : new Location(file.getCanonicalFile());
   }
 
   /**
@@ -822,7 +831,7 @@ public class Location {
    * @throws IOException if the path cannot be retrieved
    */
   public String getCanonicalPath() throws IOException {
-    return isURL ? getAbsolutePath() : file.getCanonicalPath();
+    return (isURL || isSymLink) ? getAbsolutePath() : file.getCanonicalPath();
   }
 
   /**
@@ -1072,4 +1081,23 @@ public class Location {
     return isURL ? uri.toString() : file.toString();
   }
 
+  /**
+   * Returns true if the provided File is a symlink
+   *
+   * @param file            The File to be checked
+   *
+   * @return                A boolean, true if the file is a symlink, false otherwise
+   */
+  public boolean isSymLink(File file) throws IOException {
+    if (file == null)
+      throw new NullPointerException("File must not be null");
+    File canon;
+    if (file.getParent() == null) {
+      canon = file;
+    } else {
+      File canonDir = file.getParentFile().getCanonicalFile();
+      canon = new File(canonDir, file.getName());
+    }
+    return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
+  }
 }
