@@ -80,9 +80,19 @@ public class URLHandle extends StreamHandle {
   @Override
   public void seek(long pos) throws IOException {
     if (pos < fp && pos >= mark) {
-      stream.reset();
-      fp = mark;
-      skip(pos - fp);
+      try {
+        // try to reset to the marked position first
+        // if it works, this is faster
+        stream.reset();
+        fp = mark;
+        skip(pos - fp);
+      }
+      catch (IOException e) {
+        // if resetting to the mark fails for whatever reason,
+        // just reset the whole stream and seek from the beginning
+        // this is slower but more likely to work
+        super.seek(pos);
+      }
     }
     else super.seek(pos);
   }
