@@ -175,7 +175,7 @@
       <!-- NB: We want this, despite warning from dependency:analyze. -->
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.3.13</version>
+      <version>1.3.14</version>
       <optional>true</optional>
     </dependency>
     <dependency>
