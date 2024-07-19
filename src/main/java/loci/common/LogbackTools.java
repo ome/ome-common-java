@@ -69,7 +69,7 @@ public final class LogbackTools {
     Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     LoggerContext loggerContext = root.getLoggerContext();
     return (ConfigurationWatchListUtil.getMainWatchURL(loggerContext) != null
-            || (loggerContext.getProperty("caller") == CALLER));
+            || (loggerContext.getProperty("caller").equals(CALLER)));
   }
 
   /**
