@@ -30,6 +30,7 @@
   #L%
   -->
 
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="IO_Tests">
     <test name="ByteArrayHandle">
         <parameter name="provider" value="ByteArrayHandle"/>
