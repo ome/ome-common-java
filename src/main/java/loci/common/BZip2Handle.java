@@ -105,7 +105,7 @@ public class BZip2Handle extends StreamHandle {
   protected void resetStream() throws IOException {
     BufferedInputStream bis = new BufferedInputStream(
       new FileInputStream(file), RandomAccessInputStream.MAX_OVERHEAD);
-    int skipped = 0;
+    long skipped = 0;
     while (skipped < 2) {
       skipped += bis.skip(2 - skipped);
     }
