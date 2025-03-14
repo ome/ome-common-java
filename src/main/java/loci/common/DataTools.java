@@ -74,11 +74,12 @@ public final class DataTools {
    * @param id name of the file to read
    *           this can be any name supported by Location,
    *           not necessarily a file on disk
+   * @param encoding the file encoding, e.g. "UTF-8"
    * @return the complete contents of the specified file
    * @throws IOException if the file cannot be read or is larger than 2GB
    * @see Location#getMappedId(String)
    */
-  public static String readFile(String id) throws IOException {
+  public static String readFile(String id, String encoding) throws IOException {
     RandomAccessInputStream in = new RandomAccessInputStream(id);
     long idLen = in.length();
     if (idLen > Integer.MAX_VALUE) {
@@ -88,9 +89,23 @@ public final class DataTools {
     byte[] b = new byte[len];
     in.readFully(b);
     in.close();
-    String data = new String(b, Constants.ENCODING);
+    String data = new String(b, encoding);
     b = null;
     return data;
+  }
+
+  /**
+   * Reads the contents of the given file into a string.
+   *
+   * @param id name of the file to read
+   *           this can be any name supported by Location,
+   *           not necessarily a file on disk
+   * @return the complete contents of the specified file
+   * @throws IOException if the file cannot be read or is larger than 2GB
+   * @see Location#getMappedId(String)
+   */
+  public static String readFile(String id) throws IOException {
+    return readFile(id, Constants.ENCODING);
   }
 
   // -- Word decoding - bytes to primitive types --
