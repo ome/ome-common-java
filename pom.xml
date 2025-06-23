@@ -75,11 +75,11 @@
     <connection>scm:git:https://github.com/ome/ome-common-java</connection>
     <developerConnection>scm:git:git@github.com:ome/ome-common-java</developerConnection>
     <tag>HEAD</tag>
-    <url>http://github.com/ome/ome-common-java</url>
+    <url>https://github.com/ome/ome-common-java</url>
   </scm>
   <issueManagement>
     <system>Trac</system>
-    <url>https://trac.openmicroscopy.org/ome</url>
+    <url>https://github.com/ome/ome-common-java/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
