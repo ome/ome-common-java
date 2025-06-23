@@ -75,26 +75,16 @@
     <connection>scm:git:https://github.com/ome/ome-common-java</connection>
     <developerConnection>scm:git:git@github.com:ome/ome-common-java</developerConnection>
     <tag>HEAD</tag>
-    <url>http://github.com/ome/ome-common-java</url>
+    <url>https://github.com/ome/ome-common-java</url>
   </scm>
   <issueManagement>
     <system>Trac</system>
-    <url>https://trac.openmicroscopy.org/ome</url>
+    <url>https://github.com/ome/ome-common-java/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
     <url>https://ci.openmicroscopy.org/</url>
   </ciManagement>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 
   <dependencies>
     <dependency>
@@ -223,11 +213,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.14.0</version>
         <!-- Require the Java 8 platform. -->
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>8</release>
+          <source>8</source>
+          <target>8</target>
         </configuration>
       </plugin>
 
@@ -434,24 +425,12 @@
       <id>release</id>
       <build>
         <plugins>
-          <!-- Stage releases with nexus -->
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.8</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>false</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
 
           <!-- gpg release signing -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>3.2.7</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -461,6 +440,17 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.8.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <tokenAuth>true</tokenAuth>
+            </configuration>
           </plugin>
         </plugins>
       </build>
