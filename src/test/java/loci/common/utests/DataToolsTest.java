@@ -32,10 +32,13 @@
 
 package loci.common.utests;
 
+import loci.common.ByteArrayHandle;
 import loci.common.DataTools;
+import loci.common.Location;
 import java.util.Locale;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.fail;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -236,4 +239,59 @@ public class DataToolsTest {
     public void testThreadSafety() {
       assertEquals(DataTools.parseDouble("1.0"), 1.0d);
     }
+
+
+  @Test
+  public void testReadFileDefaultEncoding() {
+    String src = "µ€œẞ";
+    String tmpFile = "utf-test.txt";
+    try {
+      byte[] bytes = src.getBytes("UTF-8");
+      Location.mapFile(tmpFile, new ByteArrayHandle(bytes));
+      String result = DataTools.readFile(tmpFile);
+      assertEquals(src, result);
+    }
+    catch (Exception e) {
+      fail(e.getMessage());
+    }
+    finally {
+      Location.mapFile(tmpFile, null);
+    }
+  }
+
+  @Test
+  public void testReadFileDifferentEncoding() {
+    String src = "µ€œ";
+    String tmpFile = "windows-1252-test.txt";
+    try {
+      byte[] bytes = src.getBytes("windows-1252");
+      Location.mapFile(tmpFile, new ByteArrayHandle(bytes));
+      String result = DataTools.readFile(tmpFile, "windows-1252");
+      assertEquals(src, result);
+    }
+    catch (Exception e) {
+      fail(e.getMessage());
+    }
+    finally {
+      Location.mapFile(tmpFile, null);
+    }
+  }
+
+  @Test
+  public void testReadFileWrongEncoding() {
+    String src = "µ€œ";
+    String tmpFile = "windows-1252-vs-utf8-test.txt";
+    try {
+      byte[] bytes = src.getBytes("UTF-8");
+      Location.mapFile(tmpFile, new ByteArrayHandle(bytes));
+      String result = DataTools.readFile(tmpFile, "windows-1252");
+      assertFalse(src.equals(result));
+    }
+    catch (Exception e) {
+      fail(e.getMessage());
+    }
+    finally {
+      Location.mapFile(tmpFile, null);
+    }
+  }
 }
