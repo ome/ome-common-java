@@ -43,7 +43,10 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * An S3 client
+ * @deprecated The S3 implementations and services will be removed from
+ * the ome-common library in version 7.0.0
  */
+@Deprecated
 public class S3ClientServiceImpl extends AbstractService implements S3ClientService {
 
   /**

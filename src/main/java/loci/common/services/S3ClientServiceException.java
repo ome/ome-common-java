@@ -34,7 +34,10 @@ package loci.common.services;
 
 /**
  * Exception thrown when internal error specific to the S3 client is raised
+ * @deprecated The S3 implementations and services will be removed from
+ * the ome-common library in version 7.0.0
  */
+@Deprecated
 public class S3ClientServiceException extends ServiceException
 {
   /**
