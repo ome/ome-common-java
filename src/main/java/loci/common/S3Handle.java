@@ -54,12 +54,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides random access to S3 buckets using the IRandomAccess interface.
  * Instances of S3Handle are read-only.
+ * @deprecated The S3 implementations and services will be removed from
+ * the ome-common library in version 7.0.0
  *
  * @see IRandomAccess
  * @see StreamHandle
  * @see java.net.URLConnection
  *
  */
+@Deprecated
 public class S3Handle extends StreamHandle {
 
   /**
