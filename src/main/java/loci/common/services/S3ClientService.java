@@ -37,7 +37,10 @@ import java.io.InputStream;
 
 /**
  * An S3 client
+ * @deprecated The S3 implementations and services will be removed from
+ * the ome-common library in version 7.0.0
  */
+@Deprecated
 public interface S3ClientService extends Service {
 
   /**

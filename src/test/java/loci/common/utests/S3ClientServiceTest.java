@@ -58,9 +58,12 @@ import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * Unit tests for the loci.common.service.S3ClientServiceImpl class.
+ * @deprecated The S3 implementations and services will be removed from
+ * the ome-common library in version 7.0.0
  *
  * @see loci.common.URLHandle
  */
+@Deprecated
 @Test(groups="readTests")
 public class S3ClientServiceTest {
 
