@@ -196,7 +196,7 @@ public final class XMLTools {
   }
 
   /**
-   * Parses a DOM from the given XML string.
+   * Parses a DOM from the given XML string, using UTF-8 encoding.
    *
    * @param xml XML data
    * @return a {@link Document} reflecting the XML string
@@ -207,7 +207,23 @@ public final class XMLTools {
   public static Document parseDOM(String xml)
     throws ParserConfigurationException, SAXException, IOException
   {
-    byte[] bytes = xml.getBytes(Constants.ENCODING);
+    return parseDOM(xml, Constants.ENCODING);
+  }
+
+  /**
+   * Parses a DOM from the given XML string, using the given encoding.
+   *
+   * @param xml XML data
+   * @param encoding charset name
+   * @return a {@link Document} reflecting the XML string
+   * @throws ParserConfigurationException if the XML parser cannot be created
+   * @throws SAXException if there is an error parsing the XML
+   * @throws IOException if there is an error reading from the file
+   */
+  public static Document parseDOM(String xml, String encoding)
+    throws ParserConfigurationException, SAXException, IOException
+  {
+    byte[] bytes = xml.getBytes(encoding);
     try (InputStream is = new ByteArrayInputStream(bytes)) {
       Document doc = parseDOM(is);
       return doc;
