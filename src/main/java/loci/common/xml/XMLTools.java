@@ -50,11 +50,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -118,6 +120,18 @@ public final class XMLTools {
     return factory;
   };
 
+  private static final Map<String, Boolean> FEATURES = createXMLParserFeatures();
+
+  private static Map<String, Boolean> createXMLParserFeatures() {
+    HashMap<String, Boolean> features = new HashMap<String, Boolean>();
+    features.put(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    features.put("http://apache.org/xml/features/disallow-doctype-decl", true);
+    features.put("http://xml.org/sax/features/external-general-entities", false);
+    features.put("http://xml.org/sax/features/external-parameter-entities", false);
+    features.put("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    return features;
+  };
+
   // -- Interfaces --
 
   /**
@@ -159,7 +173,17 @@ public final class XMLTools {
    */
   public static DocumentBuilder createBuilder() {
     try {
-      return DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setXIncludeAware(false);
+      for (String feature : FEATURES.keySet()) {
+        try {
+          factory.setFeature(feature, FEATURES.get(feature));
+        }
+        catch (ParserConfigurationException e) {
+          LOGGER.debug("Parser does not support feature " + feature, e);
+        }
+      }
+      return factory.newDocumentBuilder();
     }
     catch (ParserConfigurationException e) {
       LOGGER.error("Cannot create DocumentBuilder", e);
