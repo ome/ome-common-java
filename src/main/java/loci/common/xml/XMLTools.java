@@ -509,6 +509,29 @@ public final class XMLTools {
   // -- Parsing --
 
   /**
+   * Create a new SAX parser.
+   *
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   */
+  public static SAXParser createSAXParser()
+    throws ParserConfigurationException, SAXException
+  {
+    // Java XML factories are not declared to be thread safe
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setXIncludeAware(false);
+    for (String feature : FEATURES.keySet()) {
+      try {
+        factory.setFeature(feature, FEATURES.get(feature));
+      }
+      catch (ParserConfigurationException e) {
+        LOGGER.debug("Parser does not support feature " + feature, e);
+      }
+    }
+    return factory.newSAXParser();
+  }
+
+  /**
    * Parses the given XML string into a list of key/value pairs.
    *
    * @param xml the {@link InputStream} representing the XML
@@ -578,9 +601,7 @@ public final class XMLTools {
     throws IOException
   {
     try {
-      // Java XML factories are not declared to be thread safe
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      SAXParser parser = factory.newSAXParser();
+      SAXParser parser = createSAXParser();
       parser.parse(xml, handler);
     }
     catch (ParserConfigurationException exc) {
@@ -836,9 +857,7 @@ public final class XMLTools {
     LOGGER.info("Parsing schema path");
     ValidationSAXHandler saxHandler = new ValidationSAXHandler();
     try {
-      // Java XML factories are not declared to be thread safe
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      SAXParser saxParser = factory.newSAXParser();
+      SAXParser saxParser = createSAXParser();
       InputStream is =
         new ByteArrayInputStream(xml.getBytes(Constants.ENCODING));
       saxParser.parse(is, saxHandler);
