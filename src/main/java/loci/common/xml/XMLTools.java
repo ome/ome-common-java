@@ -189,12 +189,9 @@ public final class XMLTools {
   public static Document parseDOM(File file)
     throws ParserConfigurationException, SAXException, IOException
   {
-    InputStream is = new FileInputStream(file);
-    try {
+    try (InputStream is = new FileInputStream(file)) {
       Document doc = parseDOM(is);
       return doc;
-    } finally {
-      is.close();
     }
   }
 
@@ -211,12 +208,9 @@ public final class XMLTools {
     throws ParserConfigurationException, SAXException, IOException
   {
     byte[] bytes = xml.getBytes(Constants.ENCODING);
-    InputStream is = new ByteArrayInputStream(bytes);
-    try {
+    try (InputStream is = new ByteArrayInputStream(bytes)) {
       Document doc = parseDOM(is);
       return doc;
-    } finally {
-      is.close();
     }
   }
 
