@@ -247,8 +247,7 @@ public final class XMLTools {
     checkUTF8(in);
 
     // Java XML factories are not declared to be thread safe
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder db = factory.newDocumentBuilder();
+    DocumentBuilder db = createBuilder();
     db.setErrorHandler(new ParserErrorHandler());
     return db.parse(in);
   }
