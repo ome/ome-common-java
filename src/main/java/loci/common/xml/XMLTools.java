@@ -125,7 +125,6 @@ public final class XMLTools {
   private static Map<String, Boolean> createXMLParserFeatures() {
     HashMap<String, Boolean> features = new HashMap<String, Boolean>();
     features.put(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-    features.put("http://apache.org/xml/features/disallow-doctype-decl", true);
     features.put("http://xml.org/sax/features/external-general-entities", false);
     features.put("http://xml.org/sax/features/external-parameter-entities", false);
     features.put("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
@@ -175,6 +174,7 @@ public final class XMLTools {
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setXIncludeAware(false);
+      factory.setExpandEntityReferences(false);
       for (String feature : FEATURES.keySet()) {
         try {
           factory.setFeature(feature, FEATURES.get(feature));
