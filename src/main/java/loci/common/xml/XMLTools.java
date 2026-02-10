@@ -50,11 +50,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -118,6 +120,17 @@ public final class XMLTools {
     return factory;
   };
 
+  private static final Map<String, Boolean> FEATURES = createXMLParserFeatures();
+
+  private static Map<String, Boolean> createXMLParserFeatures() {
+    HashMap<String, Boolean> features = new HashMap<String, Boolean>();
+    features.put(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    features.put("http://xml.org/sax/features/external-general-entities", false);
+    features.put("http://xml.org/sax/features/external-parameter-entities", false);
+    features.put("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    return features;
+  };
+
   // -- Interfaces --
 
   /**
@@ -159,7 +172,18 @@ public final class XMLTools {
    */
   public static DocumentBuilder createBuilder() {
     try {
-      return DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setXIncludeAware(false);
+      factory.setExpandEntityReferences(false);
+      for (String feature : FEATURES.keySet()) {
+        try {
+          factory.setFeature(feature, FEATURES.get(feature));
+        }
+        catch (ParserConfigurationException e) {
+          LOGGER.debug("Parser does not support feature " + feature, e);
+        }
+      }
+      return factory.newDocumentBuilder();
     }
     catch (ParserConfigurationException e) {
       LOGGER.error("Cannot create DocumentBuilder", e);
@@ -196,7 +220,7 @@ public final class XMLTools {
   }
 
   /**
-   * Parses a DOM from the given XML string.
+   * Parses a DOM from the given XML string, using UTF-8 encoding.
    *
    * @param xml XML data
    * @return a {@link Document} reflecting the XML string
@@ -207,7 +231,23 @@ public final class XMLTools {
   public static Document parseDOM(String xml)
     throws ParserConfigurationException, SAXException, IOException
   {
-    byte[] bytes = xml.getBytes(Constants.ENCODING);
+    return parseDOM(xml, Constants.ENCODING);
+  }
+
+  /**
+   * Parses a DOM from the given XML string, using the given encoding.
+   *
+   * @param xml XML data
+   * @param encoding charset name
+   * @return a {@link Document} reflecting the XML string
+   * @throws ParserConfigurationException if the XML parser cannot be created
+   * @throws SAXException if there is an error parsing the XML
+   * @throws IOException if there is an error reading from the file
+   */
+  public static Document parseDOM(String xml, String encoding)
+    throws ParserConfigurationException, SAXException, IOException
+  {
+    byte[] bytes = xml.getBytes(encoding);
     try (InputStream is = new ByteArrayInputStream(bytes)) {
       Document doc = parseDOM(is);
       return doc;
@@ -231,8 +271,7 @@ public final class XMLTools {
     checkUTF8(in);
 
     // Java XML factories are not declared to be thread safe
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder db = factory.newDocumentBuilder();
+    DocumentBuilder db = createBuilder();
     db.setErrorHandler(new ParserErrorHandler());
     return db.parse(in);
   }
@@ -470,6 +509,29 @@ public final class XMLTools {
   // -- Parsing --
 
   /**
+   * Create a new SAX parser.
+   *
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   */
+  public static SAXParser createSAXParser()
+    throws ParserConfigurationException, SAXException
+  {
+    // Java XML factories are not declared to be thread safe
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setXIncludeAware(false);
+    for (String feature : FEATURES.keySet()) {
+      try {
+        factory.setFeature(feature, FEATURES.get(feature));
+      }
+      catch (ParserConfigurationException e) {
+        LOGGER.debug("Parser does not support feature " + feature, e);
+      }
+    }
+    return factory.newSAXParser();
+  }
+
+  /**
    * Parses the given XML string into a list of key/value pairs.
    *
    * @param xml the {@link InputStream} representing the XML
@@ -539,9 +601,7 @@ public final class XMLTools {
     throws IOException
   {
     try {
-      // Java XML factories are not declared to be thread safe
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      SAXParser parser = factory.newSAXParser();
+      SAXParser parser = createSAXParser();
       parser.parse(xml, handler);
     }
     catch (ParserConfigurationException exc) {
@@ -797,9 +857,7 @@ public final class XMLTools {
     LOGGER.info("Parsing schema path");
     ValidationSAXHandler saxHandler = new ValidationSAXHandler();
     try {
-      // Java XML factories are not declared to be thread safe
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      SAXParser saxParser = factory.newSAXParser();
+      SAXParser saxParser = createSAXParser();
       InputStream is =
         new ByteArrayInputStream(xml.getBytes(Constants.ENCODING));
       saxParser.parse(is, saxHandler);
