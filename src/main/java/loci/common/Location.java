@@ -234,8 +234,9 @@ public class Location {
       mapped = getMappedId(pathname);
     }
 
-    if (!isURL) file = new File(mapped);
-
+    if (!isURL) {
+      file = new File(mapped);
+    }
   }
 
   /**
@@ -1016,6 +1017,15 @@ public class Location {
       // Ensure cachedProperties is populated
       exists();
       return cachedProperties.length;
+    }
+    IRandomAccess handle = getMappedFile(file.getName());
+    if (handle != null && !file.exists()) {
+      try {
+        return handle.length();
+      }
+      catch (IOException e) {
+        LOGGER.warn("Could not get length", e);
+      }
     }
     LOGGER.trace("length(file)");
     return file.length();
