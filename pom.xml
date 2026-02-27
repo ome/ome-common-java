@@ -7,7 +7,7 @@
 
   <groupId>org.openmicroscopy</groupId>
   <artifactId>ome-common</artifactId>
-  <version>6.2.1</version>
+  <version>6.2.2-SNAPSHOT</version>
 
   <name>OME Common Java</name>
   <description>Contains common I/O, date parsing, and XML processing classes.</description>
