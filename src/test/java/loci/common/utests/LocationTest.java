@@ -32,16 +32,21 @@
 
 package loci.common.utests;
 
+import static org.testng.AssertJUnit.assertArrayEquals;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
+import static org.testng.AssertJUnit.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
+import loci.common.ByteArrayHandle;
+import loci.common.IRandomAccess;
 import loci.common.Location;
 
 import org.slf4j.Logger;
@@ -59,6 +64,9 @@ public class LocationTest {
 
   private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
   private static final Logger LOGGER = LoggerFactory.getLogger(LocationTest.class);
+  private static final byte[] VALID_FILE_CONTENTS = new byte[] {
+    12, 10, 15, 14
+  };
 
   // -- Fields --
 
@@ -95,6 +103,7 @@ public class LocationTest {
     invalidFile.delete();
 
     File validFile = File.createTempFile("validTest", null, tmpDirectory);
+    Files.write(validFile.toPath(), VALID_FILE_CONTENTS);
     validFile.deleteOnExit();
 
     files = new Location[] {
@@ -367,6 +376,49 @@ public class LocationTest {
   public void testToString() {
     for (Location file : files) {
       assertEquals(file.getName(), file.getAbsolutePath(), file.toString());
+    }
+  }
+
+  @Test
+  public void testMapFile() {
+    String mapId = "map-file-test";
+    try {
+      ByteArrayHandle bytes = new ByteArrayHandle(VALID_FILE_CONTENTS);
+      Location.mapFile(mapId, bytes);
+      Location mapped = new Location(mapId);
+      assertEquals(mapped.length(), VALID_FILE_CONTENTS.length);
+      IRandomAccess mappedHandle = Location.getHandle(mapId);
+      byte[] read = new byte[(int) mapped.length()];
+      int readBytes = mappedHandle.read(read);
+      assertEquals(readBytes, read.length);
+      assertArrayEquals(read, VALID_FILE_CONTENTS);
+    }
+    catch (IOException e) {
+      fail(e.getMessage());
+    }
+    finally {
+      Location.mapFile(mapId, null);
+    }
+  }
+
+  @Test
+  public void testMapId() {
+    String mapId = "map-id-test";
+    try {
+      Location.mapId(mapId, files[0].getAbsolutePath());
+      Location mapped = new Location(mapId);
+      assertEquals(mapped.length(), VALID_FILE_CONTENTS.length);
+      IRandomAccess mappedHandle = Location.getHandle(mapId);
+      byte[] read = new byte[(int) mapped.length()];
+      int readBytes = mappedHandle.read(read);
+      assertEquals(readBytes, read.length);
+      assertArrayEquals(read, VALID_FILE_CONTENTS);
+    }
+    catch (IOException e) {
+      fail(e.getMessage());
+    }
+    finally {
+      Location.mapId(mapId, null);
     }
   }
 
