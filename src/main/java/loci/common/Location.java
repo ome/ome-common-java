@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -67,12 +66,6 @@ public class Location {
   private static final Logger LOGGER = LoggerFactory.getLogger(Location.class);
   private static final boolean IS_WINDOWS =
     System.getProperty("os.name").startsWith("Windows");
-
-  // -- Enumerations --
-  protected enum UrlType {
-    GENERIC,
-    S3
-  };
 
   // -- Static fields --
 
@@ -113,7 +106,6 @@ public class Location {
   // -- Fields --
 
   private boolean isURL = false;
-  private UrlType urlType;
   private URL url;
   private URI uri;
   private File file;
@@ -203,7 +195,6 @@ public class Location {
         pathname = child;
         uri = new URI(mapped);
         isURL = true;
-        urlType = UrlType.GENERIC;
         url = uri.toURL();
       }
       catch (URISyntaxException | MalformedURLException e) {
@@ -211,7 +202,6 @@ public class Location {
         // containing <> so don't throw, instead treat as a non-URL
         LOGGER.debug("Invalid URL: {} {}", child, e);
         isURL = false;
-        urlType = null;
         url = null;
         uri = null;
       }
@@ -554,18 +544,6 @@ public class Location {
     final List<String> files = new ArrayList<String>();
     if (isURL) {
       try {
-        if (urlType == UrlType.S3) {
-          if (isDirectory()) {
-            // TODO: This is complicated, not sure what to do here
-            // See comment in isDirectory()
-            LOGGER.trace("list s3 {}: Returning []", uri);
-            return new String[0];
-          }
-          else {
-            LOGGER.trace("list s3 {}: Returning null", uri);
-            return null;
-          }
-        }
         URLConnection c = url.openConnection();
         InputStream is = c.getInputStream();
         boolean foundEnd = false;
