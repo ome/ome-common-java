@@ -36,6 +36,7 @@ import static org.testng.AssertJUnit.assertArrayEquals;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 import static org.testng.AssertJUnit.fail;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class LocationTest {
   public void setup() throws IOException {
     File tmpDirectory = new File(System.getProperty("java.io.tmpdir"),
       System.currentTimeMillis() + "-location-test");
-    boolean success = tmpDirectory.mkdirs();
+    tmpDirectory.mkdirs();
     tmpDirectory.deleteOnExit();
 
     File hiddenFile = File.createTempFile(".hiddenTest", null, tmpDirectory);

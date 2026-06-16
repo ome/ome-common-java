@@ -32,8 +32,6 @@
 
 package loci.common;
 
-import java.text.FieldPosition;
-import java.text.ParsePosition;
 import java.util.Locale;
 
 import org.joda.time.DateTime;
