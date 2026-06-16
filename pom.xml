@@ -93,11 +93,6 @@
       <version>2.14.2</version>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>2.14.2</version>
-    </dependency>
-    <dependency>
      <groupId>com.esotericsoftware</groupId>
      <artifactId>kryo</artifactId>
      <version>5.4.0</version>
@@ -225,10 +220,6 @@
           <suiteXmlFiles>
             <suiteXmlFile>src/test/java/loci/common/utests/testng-template.xml</suiteXmlFile>
           </suiteXmlFiles>
-          <systemPropertyVariables>
-            <testng.runHttpRemoteTests>0</testng.runHttpRemoteTests>
-            <testng.runS3RemoteTests>0</testng.runS3RemoteTests>
-          </systemPropertyVariables>
         </configuration>
       </plugin>
 
