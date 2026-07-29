@@ -36,11 +36,9 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 import loci.common.Constants;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**

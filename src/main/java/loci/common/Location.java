@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -67,12 +66,6 @@ public class Location {
   private static final Logger LOGGER = LoggerFactory.getLogger(Location.class);
   private static final boolean IS_WINDOWS =
     System.getProperty("os.name").startsWith("Windows");
-
-  // -- Enumerations --
-  protected enum UrlType {
-    GENERIC,
-    S3
-  };
 
   // -- Static fields --
 
@@ -113,7 +106,6 @@ public class Location {
   // -- Fields --
 
   private boolean isURL = false;
-  private UrlType urlType;
   private URL url;
   private URI uri;
   private File file;
@@ -203,21 +195,13 @@ public class Location {
         pathname = child;
         uri = new URI(mapped);
         isURL = true;
-        if (S3Handle.canHandleScheme(uri.toString())) {
-          urlType = UrlType.S3;
-          url = null;
-        }
-        else {
-          urlType = UrlType.GENERIC;
-          url = uri.toURL();
-        }
+        url = uri.toURL();
       }
       catch (URISyntaxException | MalformedURLException e) {
         // Readers such as FilePatternReader may pass invalid URI paths
         // containing <> so don't throw, instead treat as a non-URL
         LOGGER.debug("Invalid URL: {} {}", child, e);
         isURL = false;
-        urlType = null;
         url = null;
         uri = null;
       }
@@ -486,23 +470,8 @@ public class Location {
       LOGGER.trace("no handle was mapped for this ID");
       String mapId = getMappedId(id);
 
-      if (S3Handle.canHandleScheme(id)) {
-        StreamHandle.Settings ss = new StreamHandle.Settings();
-        if (ss.getRemoteCacheRootDir() != null) {
-          String cachedFile = S3Handle.cacheObject(mapId, ss);
-          if (bufferSize > 0) {
-            handle = new NIOFileHandle(
-              new File(cachedFile), "r", bufferSize);
-          }
-          else {
-            handle = new NIOFileHandle(cachedFile, "r");
-          }
-        }
-        else {
-          handle = new S3Handle(mapId);
-        }
-      }
-      else if (id.startsWith("http://") || id.startsWith("https://")) {
+      if (id.startsWith("http://") || id.startsWith("https://")
+          || id.startsWith("s3://")) {
         handle = new URLHandle(mapId);
       }
       else if (allowArchiveHandles && ZipHandle.isZipFile(mapId)) {
@@ -575,18 +544,6 @@ public class Location {
     final List<String> files = new ArrayList<String>();
     if (isURL) {
       try {
-        if (urlType == UrlType.S3) {
-          if (isDirectory()) {
-            // TODO: This is complicated, not sure what to do here
-            // See comment in isDirectory()
-            LOGGER.trace("list s3 {}: Returning []", uri);
-            return new String[0];
-          }
-          else {
-            LOGGER.trace("list s3 {}: Returning null", uri);
-            return null;
-          }
-        }
         URLConnection c = url.openConnection();
         InputStream is = c.getInputStream();
         boolean foundEnd = false;
@@ -918,32 +875,9 @@ public class Location {
   public boolean isDirectory() {
     LOGGER.trace("isDirectory()");
     if (isURL) {
-      if (urlType == UrlType.S3) {
-        // TODO: This is complicated
-        //
-        // S3 doesn't have directories, but keys can contain / which we
-        // can pretend is a file path. However this "directory" doesn't
-        // actually exist, only the "contents" of the directory exist.
-        //
-        // Minio.listObjects() lists all objects in a bucket that
-        // match an optional prefix so this could be an option for checking
-        // whether to trest this as a directory.
-        //
-        // S3 buckets are the closest thing to a proper directory
-        // so for now
-        try {
-          S3Handle h = new S3Handle(uri.toString());
-          boolean isBucket = h.isBucket();
-          h.close();
-          return isBucket;
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-      } else {
-        // TODO: this should be removed as well.
-        String[] list = list();
-        return list != null;
-      }
+      // TODO: this should be removed as well.
+      String[] list = list();
+      return list != null;
     }
     return file.isDirectory();
   }

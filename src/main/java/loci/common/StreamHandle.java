@@ -52,17 +52,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class StreamHandle implements IRandomAccess {
 
-  // TODO: Decide how to handle S3Handle and other reader settings
-  public static class Settings {
-    public String get(String key) {
-      return System.getenv(key);
-    }
-
-    public String getRemoteCacheRootDir() {
-      return get("BF_REMOTE_CACHE_ROOTDIR");
-    }
-  }
-
   private static final Logger LOGGER = LoggerFactory.getLogger(StreamHandle.class);
 
   // -- Fields --

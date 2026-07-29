@@ -36,6 +36,7 @@ import static org.testng.AssertJUnit.assertArrayEquals;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 import static org.testng.AssertJUnit.fail;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,6 @@ public class LocationTest {
   private enum LocalRemoteType {
     LOCAL,
     HTTP,
-    S3,
   };
 
   private Location[] files;
@@ -84,7 +84,6 @@ public class LocationTest {
   private String[] mode;
   private LocalRemoteType[] isRemote;
   private static boolean runHttpRemoteTests;
-  private static boolean runS3RemoteTests;
 
   // -- Setup methods --
 
@@ -92,7 +91,7 @@ public class LocationTest {
   public void setup() throws IOException {
     File tmpDirectory = new File(System.getProperty("java.io.tmpdir"),
       System.currentTimeMillis() + "-location-test");
-    boolean success = tmpDirectory.mkdirs();
+    tmpDirectory.mkdirs();
     tmpDirectory.deleteOnExit();
 
     File hiddenFile = File.createTempFile(".hiddenTest", null, tmpDirectory);
@@ -114,18 +113,11 @@ public class LocationTest {
       new Location("https://www.openmicroscopy.org/"),
       new Location("https://www.openmicroscopy.org/nonexisting"),
       new Location("https://www.openmicroscopy.org/nonexisting/:/+/symbols"),
-      new Location(hiddenFile),
-      new Location("s3+http://localhost:31836/bucket-dne"),
-      new Location("s3+http://localhost:31836/bioformats.test.public"),
-      new Location("s3+http://localhost:31836/bioformats.test.public/single-channel.ome.tiff"),
-      new Location("s3+http://localhost:31836/bioformats.test.private/single-channel.ome.tiff"),
-      new Location("s3+http://accesskey:secretkey@localhost:31836/bioformats.test.private/single-channel.ome.tiff")
-    };
+      new Location(hiddenFile),};
 
     rootFiles = new Location[] {
       new Location("/"),
       new Location("https://www.openmicroscopy.org"),
-      new Location("s3://s3.example.org"),
     };
 
     exists = new boolean[] {
@@ -201,36 +193,21 @@ public class LocationTest {
       LocalRemoteType.HTTP,
       LocalRemoteType.HTTP,
       LocalRemoteType.LOCAL,
-      LocalRemoteType.S3,
-      LocalRemoteType.S3,
-      LocalRemoteType.S3,
-      LocalRemoteType.S3,
-      LocalRemoteType.S3,
     };
   }
 
   @BeforeClass
   public void checkProperties() throws IOException {
     runHttpRemoteTests = TestUtilities.getPropValueInt("testng.runHttpRemoteTests") > 0;
-    runS3RemoteTests = TestUtilities.getPropValueInt("testng.runS3RemoteTests") > 0;
 
     if (!runHttpRemoteTests) {
       LOGGER.warn("HTTP tests are disabled!");
-    }
-    if (!runS3RemoteTests) {
-      LOGGER.warn("S3 tests are disabled!");
     }
   }
 
   private void skipIfHttpDisabled(int i) throws SkipException {
     if (isRemote[i] == LocalRemoteType.HTTP && !runHttpRemoteTests) {
       throw new SkipException("HTTP tests are disabled " + files[i].getName());
-    }
-  }
-
-  private void skipIfS3Disabled(int i) throws SkipException {
-    if (isRemote[i] == LocalRemoteType.S3 && !runS3RemoteTests) {
-      throw new SkipException("S3 tests are disabled " + files[i].getName());
     }
   }
 
@@ -241,7 +218,6 @@ public class LocationTest {
   public void testReadWriteMode() {
     for (int i=0; i<files.length; i++) {
       skipIfHttpDisabled(i);
-      skipIfS3Disabled(i);
       String msg = files[i].getName();
       assertEquals(msg, mode[i].contains("r"), files[i].canRead());
       assertEquals(msg, mode[i].contains("w"), files[i].canWrite());
@@ -259,7 +235,6 @@ public class LocationTest {
   public void testExists() {
     for (int i=0; i<files.length; i++) {
       skipIfHttpDisabled(i);
-      skipIfS3Disabled(i);
       assertEquals(files[i].getName(), exists[i], files[i].exists());
     }
   }
@@ -296,7 +271,6 @@ public class LocationTest {
   @Test
   public void testIsDirectory() {
     for (int i=0; i<files.length; i++) {
-      skipIfS3Disabled(i);
       assertEquals(files[i].getName(), isDirectory[i], files[i].isDirectory());
     }
   }
@@ -305,7 +279,6 @@ public class LocationTest {
   public void testIsFile() {
     for (int i=0; i<files.length; i++) {
       skipIfHttpDisabled(i);
-      skipIfS3Disabled(i);
       assertEquals(files[i].getName(), !isDirectory[i] && exists[i], files[i].isFile());
     }
   }
@@ -320,7 +293,6 @@ public class LocationTest {
   @Test
   public void testListFiles() {
     for (int i=0; i<files.length; i++) {
-      skipIfS3Disabled(i);
       String[] completeList = files[i].list();
       String[] unhiddenList = files[i].list(true);
       Location[] fileList = files[i].listFiles();
@@ -349,8 +321,6 @@ public class LocationTest {
   @Test
   public void testToURL() throws IOException {
     for (int i=0; i<files.length; i++) {
-      // S3 isDirectory will throw if connection fails
-      skipIfS3Disabled(i);
       Location file = files[i];
       String path = file.getAbsolutePath();
       if (!path.contains("://")) {
