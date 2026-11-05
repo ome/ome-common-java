@@ -47,12 +47,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.MapMaker;
 
 /**
  * Pseudo-extension of {@link java.io.File} that supports reading over HTTP
@@ -92,7 +91,7 @@ public class Location {
     }
   }
   private static final Map<String, ListingsResult> fileListings =
-    new MapMaker().makeMap();  // like Java's ConcurrentHashMap
+    new ConcurrentHashMap<String, ListingsResult>();
 
   /** Pattern to match child URLs */
   private static final Pattern URL_MATCHER = Pattern.compile(
