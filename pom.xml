@@ -7,7 +7,7 @@
 
   <groupId>org.openmicroscopy</groupId>
   <artifactId>ome-common</artifactId>
-  <version>6.3.1-SNAPSHOT</version>
+  <version>7.0.0-SNAPSHOT</version>
 
   <name>OME Common Java</name>
   <description>Contains common I/O, date parsing, and XML processing classes.</description>
@@ -78,12 +78,12 @@
     <url>https://github.com/ome/ome-common-java</url>
   </scm>
   <issueManagement>
-    <system>Trac</system>
-    <url>https://github.com/ome/ome-common-java/issues</url>
+    <system>GitHub</system>
+    <url>https://github.com/ome/ome-common-java/issues/</url>
   </issueManagement>
   <ciManagement>
-    <system>Jenkins</system>
-    <url>https://ci.openmicroscopy.org/</url>
+    <system>GitHub</system>
+    <url>https://github.com/ome/ome-common-java/actions/</url>
   </ciManagement>
 
   <dependencies>
@@ -377,6 +377,12 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>3.2.7</version>
+            <configuration>
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -391,11 +397,13 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.8.0</version>
+            <version>0.12.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
-              <tokenAuth>true</tokenAuth>
+              <autoPublish>true</autoPublish>
+              <waitUntil>published</waitUntil>
+              <waitMaxTime>3600</waitMaxTime>
             </configuration>
           </plugin>
         </plugins>
